@@ -1,0 +1,32 @@
+# Composer
+/vendor/
+composer.lock
+
+# Laravel
+/.env
+/.env.backup
+/storage/
+!/storage/.gitignore
+/bootstrap/cache/
+/error/
+/logs/
+/sites/
+/sxd/
+/test/
+/tmp/
+/api-main/
+/pm_new/
+# Node.js (если есть фронт-сборка)
+node_modules/
+/npm-debug.log
+/yarn-error.log
+
+# IDE и ОС
+.idea/
+/.vscode/
+/.DS_Store
+Thumbs.db
+
+# Логи и кэш
+*.log
+*.cache
