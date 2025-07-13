@@ -1,0 +1,139 @@
+<div align="center" class="zagl">Управление формой:<?php print ((!empty($form['name']) && empty($add_news)) ? 'Редактирование формы "' .$form['name'] .'"' : 'Добавления новой формы' );?></div>
+<table border="0" width="100%" cellspacing="2px" cellpadding="2px"> 
+ <tr><td >
+ <form id="form_edit_form" action="?" method="post" enctype="multipart/form-data" >
+<input type="hidden" name="form[id]" value="<?php print (!empty($form['id']) ? $form['id'] : '' );?>"/>
+<input type="hidden" name="id" value="<?php print (!empty($part_id) ? $part_id : '' );?>"/>
+  <ul class="tabs tabs1">
+        <li class="t1 tab-current"><a>Общие</a></li>
+        <li class="t2"><a>Шаблоны</a></li>
+        <li class="t3"><a>JavaScript доп обработка</a></li>
+     <!--   <li class="t4"><a>Червертая вкладка</a></li> -->
+    </ul>
+   <div class='t1'> 
+<table width="100%" cellpadding="0" cellspacing="0"  class="parts_table_edit f12">
+
+    <tr class="line1" >
+        <td align="right" width="380px">Название</td>
+        <td ><input type="text" name="form[name]" id="name_" style="width:100%;"
+             value="<?php print (!empty($form['name']) ? $form['name'] : '' );?>" /></td></tr>
+
+    <tr class="line2">
+        <td align="right" >Служебное название формы (лат.)</td>
+        <td><input type="text" name="form[form_teg]" style="color:grey;" value="<?php print (!empty($form['form_teg']) ? $form['form_teg'] : '' );?>" ></td>
+    </tr>
+   <!-- <tr class="line2">
+        <td align="right" >Название таблицы БД (лат.)</td>
+        <td><input type="text" name="form[table_name]" style="color:grey;" value="<?php print (!empty($form['table_name']) ? $form['table_name'] : '' );?>" ></td>
+    </tr>-->
+       
+         <tr class="line2">
+        <td align="right" >Тип формы:</td>
+        <td align="left">
+        <input type="radio" name="form[type_form]" value="1" <?php print (!empty($form['type_form']) && $form['type_form']==1 ? 'checked="checked"' : '' );?>> выводить на сайте и админке<br />
+     <input type="radio" name="form[type_form]" value="2" <?php print (!empty($form['type_form']) && $form['type_form']==2  ? 'checked="checked"' : '' );?>> выводить на сайте<br />
+     <input type="radio" name="form[type_form]" value="3" <?php print (!empty($form['type_form']) && $form['type_form']==3  ? 'checked="checked"' : '' );?>> выводить в админке<br />
+        
+        </td>
+    </tr>
+    
+     <tr class="line2">
+        <td align="right" >Отправлять данные c сайта на Email клиенту</td>
+        <td align="left"><input type="checkbox" name="form[is_email]" id="form[is_email]"  value="1" <?php print (!empty($form['is_email']) ? 'checked="checked"' : '' );?>></td>
+    </tr> 
+     <tr class="line2">
+        <td align="right" >Отправлять данные c сайта на Email админам</td>
+        <td align="left"><input type="checkbox" name="form[is_email_admin]" id="form[is_email_admin]"  value="1" <?php print (!empty($form['is_email_admin']) ? 'checked="checked"' : '' );?>></td>
+    </tr>
+     
+ <tr class="line2">
+        <td align="right" >Отображать ли кнопку удаления?</td>
+        <td align="left"><input type="checkbox" name="form[delete_]" id="form[delete_]"  value="1" <?php print (!empty($form['delete_']) ? 'checked="checked"' : '' );?>></td>
+    </tr>
+ <tr class="line2">
+        <td align="right" >Отображать ли кнопку удаления в списке?</td>
+        <td align="left"><input type="checkbox" name="form[delete_view]" id="form[delete_view]"  value="1" <?php print (!empty($form['delete_view']) ? 'checked="checked"' : '' );?>></td>
+    </tr>
+ <tr class="line2">
+        <td align="right" >Отображать ли колонку активностей строк</td>
+        <td align="left"><input type="checkbox" name="form[active_view]" id="form[active_view]"  value="1" <?php print (!empty($form['active_view']) ? 'checked="checked"' : '' );?>></td>
+    </tr>
+
+    <tr class="line2">
+        <td align="right" >Активность формы</td>
+        <td align="left"><input type="checkbox" name="form[active]" id="form[active]"  value="1" <?php print (!empty($form['active']) ? 'checked="checked"' : '' );?>></td>
+    </tr>
+     <tr class="line1" >
+        <td align="right" width="280px">Название формы для сайта</td>
+        <td ><input type="text" name="form[name_for_site]" id="name_for_site" style="width:100%;"
+             value="<?php print (!empty($form['name_for_site']) ? $form['name_for_site'] : '' );?>" /></td></tr>
+  <tr class="line1" >
+        <td align="right" width="280px">Название для списка форм в админке</td>
+        <td ><input type="text" name="form[name_for_list]" id="name_for_list" style="width:100%;"
+             value="<?php print (!empty($form['name_for_list']) ? $form['name_for_list'] : '' );?>" /></td></tr>
+  <tr class="line1" >
+        <td align="right" width="280px">Название для редактирование формы в админке</td>
+        <td ><input type="text" name="form[name_for_edit]" id="name_for_edit" style="width:100%;"
+             value="<?php print (!empty($form['name_for_edit']) ? $form['name_for_edit'] : '' );?>" /></td></tr>
+  <tr class="line1" >
+        <td align="right" width="280px">Название для добавление новой формы в админке</td>
+        <td ><input type="text" name="form[name_for_add]" id="name_for_add" style="width:100%;"
+             value="<?php print (!empty($form['name_for_add']) ? $form['name_for_add'] : '' );?>" /></td></tr>
+     <tr class="line2">
+        <td align="right" >Где выводить текст для сайта:</td>
+        <td align="left">
+        <input type="radio" name="form[view_text]" value="1" <?php print (!empty($form['view_text']) && $form['view_text']==1 ? 'checked="checked"' : '' );?>> перед формой<br />
+     <input type="radio" name="form[view_text]" value="2" <?php print (!empty($form['view_text']) && $form['view_text']==2  ? 'checked="checked"' : '' );?>> после формы<br />
+        
+        </td>
+    </tr>
+ <tr class="line1">
+        <td  align="center" >Внешняя таблица БД,в которой берем поля: </td>
+             <td>
+         <?=getListAdmin('table_order','table_order',$form['table_order'],'modules','spis_module')?>
+</td>
+     </tr>   
+ <tr class="line1">
+        <td  align="center" >Родительская форма: </td>
+             <td>
+         <?=getListAdmin('parent_form','parent_form',$form['parent_form'],'modules','spis_module')?>
+</td>
+     </tr> 
+    <tr class="line1">
+        <td  align="center" >Поле связи с родительской формой: </td>
+                  <td ><input type="text" name="form[field_key]" id="field_key" style="width:100%;"
+             value="<?php print (!empty($form['field_key']) ? $form['field_key'] : '' );?>" /></td>
+     </tr>   
+     <tr class="line2">
+        <td colspan="2" align="center" >Текст для сайта </td>
+     </tr>   
+     <tr> 
+        
+        <td colspan="2"><textarea id="text_" name="form[text]" rows="15" cols="80" style="width: 100%" ><?php print (!empty($form['text']) ? $form['text'] : '' );?></textarea></td></tr>
+         
+   
+   
+   
+</table>
+</div>
+<div class="t2">
+<div style="width:300px; float:left;">
+   <div align="center" >Вверх формы </div>
+        <div><textarea  name="form[shablon_up]" rows="5" cols="20"  ><?php print (!empty($form['shablon_up']) ? $form['shablon_up'] : '' );?></textarea></div>
+</div>
+<div style="width:30px; float:left;">&nbsp;</div>
+<div style="width:300px; float:left;"> 
+<div align="center" >Низ формы </div>
+        <div><textarea  name="form[shablon_down]" rows="5" cols="20"  ><?php print (!empty($form['shablon_down']) ? $form['shablon_down'] : '' );?></textarea></div>
+        
+</div>
+<br clear="all">
+<div align="center" >Строка формы </div>
+        <div><textarea  name="form[shablon_row]" rows="5" cols="20"  ><?php print (!empty($form['shablon_row']) ? $form['shablon_row'] : '' );?></textarea></div>
+</div>
+<div class="t3">
+Пока в разработке
+</div>
+ </form> 
+</td></tr>
+</table>

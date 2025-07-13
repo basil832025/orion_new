@@ -1,0 +1,323 @@
+
+.bgimg {
+    width: 1210px;
+    height: 680px;
+    background-image: url('../images/main.png');
+    position: relative;
+}
+.legak{
+    cursor: pointer;
+}
+.result_vubor{
+    background-color: whitesmoke;
+    position: absolute;
+    top: 100px;
+    left: 10px;
+    width: 400px;
+    height: 100px;
+    text-align: center;
+    font-weight: bolder;
+    font-size: 18px;
+}
+.cifra{
+    color: white;
+    font-size: 20px;
+    margin: 12px 0 0 12px;
+}
+.cifra2{
+    color: white;
+    font-size: 20px;
+    margin: 12px 0 0 6px;
+}
+.cifra2g{
+    color: white;
+    font-size: 16px;
+    margin: 5px 0 0 20px;
+}
+.selected{
+    background-color: blue;
+}
+.legv{
+    background-image: url('../images/legak.png');
+   width: 36px;
+    height: 59px;
+}
+.legvNofree{
+    background-image: url('../images/legak_b.png');
+   width: 36px;
+    height: 59px;
+}
+.legg{
+    background-image: url('../images/legak_gor.png');
+    width: 59px;
+    height: 36px;
+}
+.leggNofree{
+    background-image: url('../images/legak_gor_b.png');
+    width: 59px;
+    height: 36px;
+}
+#legak1{
+
+    position: absolute;
+    top: 400px;
+    left: 10px;
+}
+#legak2{
+
+    position: absolute;
+    top: 400px;
+    left: 60px;
+}
+#legak3{
+
+    position: absolute;
+    top: 400px;
+    left: 110px;
+}
+#legak4{
+
+    position: absolute;
+    top: 400px;
+    left: 170px;
+}
+#legak5{
+
+    position: absolute;
+    top: 400px;
+    left: 220px;
+}
+#legak6{
+
+    position: absolute;
+    top: 400px;
+    left: 270px;
+}
+#legak7{
+
+    position: absolute;
+    top: 400px;
+    left: 330px;
+}
+#legak8{
+
+    position: absolute;
+    top: 400px;
+    left: 380px;
+}
+#legak9{
+
+    position: absolute;
+    top: 400px;
+    left: 430px;
+}
+#legak10{
+
+    position: absolute;
+    top: 408px;
+    left: 660px;
+}
+#legak11{
+
+    position: absolute;
+    top: 368px;
+    left: 660px;
+}
+#legak12{
+
+    position: absolute;
+    top: 328px;
+    left: 660px;
+}
+#legak13{
+
+    position: absolute;
+    top: 288px;
+    left: 660px;
+}
+#legak14{
+
+    position: absolute;
+    top: 248px;
+    left: 660px;
+}
+#legak15{
+    position: absolute;
+    top: 35px;
+    left: 710px;
+}
+#legak16{
+    position: absolute;
+    top: 35px;
+    left: 765px;
+}
+#legak17{
+    position: absolute;
+    top: 35px;
+    left: 825px;
+}
+#legak18{
+    position: absolute;
+    top: 35px;
+    left: 880px;
+}
+#legak19{
+    position: absolute;
+    top: 35px;
+    left: 940px;
+}
+#legak20{
+    position: absolute;
+    top: 35px;
+    left: 992px;
+}
+#legak21{
+    position: absolute;
+    top: 35px;
+    left: 1048px;
+}
+#legak22{
+    position: absolute;
+    top: 35px;
+    left: 1105px;
+}
+#legak23{
+    position: absolute;
+    top: 35px;
+    left: 1155px;
+}
+/*2 ряд справа*/
+#legak24{
+    position: absolute;
+    top: 100px;
+    left: 710px;
+}
+#legak25{
+    position: absolute;
+    top: 100px;
+    left: 765px;
+}
+
+#legak26{
+    position: absolute;
+    top: 100px;
+    left: 825px;
+}
+#legak27{
+    position: absolute;
+    top: 100px;
+    left: 880px;
+}
+#legak28{
+    position: absolute;
+    top: 100px;
+    left: 940px;
+}
+#legak29{
+    position: absolute;
+    top: 100px;
+    left: 995px;
+}
+#legak30{
+    position: absolute;
+    top: 100px;
+    left: 1048px;
+}
+#legak31{
+    position: absolute;
+    top: 100px;
+    left: 1105px;
+}
+/*3 ряд справа*/
+#legak32{
+    position: absolute;
+    top: 165px;
+    left: 765px;
+}
+#legak33{
+    position: absolute;
+    top: 165px;
+    left: 825px;
+}
+#legak34{
+    position: absolute;
+    top: 165px;
+    left: 880px;
+}
+#legak35{
+    position: absolute;
+    top: 165px;
+    left: 940px;
+}
+#legak36{
+    position: absolute;
+    top: 165px;
+    left: 995px;
+}
+#legak37{
+    position: absolute;
+    top: 165px;
+    left: 1048px;
+}
+#legak38{
+    position: absolute;
+    top: 165px;
+    left: 1105px;
+}
+#legak39{
+    position: absolute;
+    top: 165px;
+    left: 1155px;
+}
+/*4 ряд справа*/
+#legak40{
+    position: absolute;
+    top: 250px;
+    left: 765px;
+}
+#legak41{
+    position: absolute;
+    top: 250px;
+    left: 825px;
+}
+#legak42{
+    position: absolute;
+    top: 250px;
+    left: 880px;
+}
+#legak43{
+    position: absolute;
+    top: 250px;
+    left: 940px;
+}
+#legak44{
+    position: absolute;
+    top: 250px;
+    left: 995px;
+}
+#legak45{
+    position: absolute;
+    top: 250px;
+    left: 1048px;
+}
+#legak46{
+    position: absolute;
+    top: 250px;
+    left: 1105px;
+}
+#legak47{
+    position: absolute;
+    top: 250px;
+    left: 1155px;
+}
+/*5 ряд справа*/
+#legak48{
+    position: absolute;
+    top: 320px;
+    left: 940px;
+}
+#legak49{
+    position: absolute;
+    top: 320px;
+    left: 995px;
+}

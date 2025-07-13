@@ -1,0 +1,67 @@
+<div align="center" class="zagl">Управление формой "<?php print $name_form?>"::Список полей </div>
+<table cellpadding="0" cellspacing="1" class="parts_table" width="100%" border="1" id="parts_table_">
+   <tr class="parts_name zagolovok" >
+      <th width="20px">
+           №
+      </th>
+      <th width="40px">
+        Редакти-<br />
+        ровать
+      </th>
+       <th >
+         Название поля формы  
+      </th>
+     <th >
+         Тип поля  
+      </th>
+      <th width="40px">
+        Удалить
+      </th>
+       <th width="60px">
+        Порядок
+      </th>
+   <th width="60px">
+        Актив-<br />ность
+      </th>
+   </tr>
+<?php
+if (!empty($form)) {
+    $n=0;
+    $font_size = 16;
+    foreach ($form as $key => $value) {
+        $n++;
+?>      
+   <tr >
+      <td align="center">
+        <?php print $n;?>
+    </td>
+      <td align="center">
+        <a href="#" post_string="'&id=<?php print $part_id;?>&form_id=<?php print $form_id;?>&field_id=<?php print $value['id'];?>" module="modules" action="modules_field_edit"  class="ajax_send"  ><img height="20px" src="img/edit.gif" border="0" ></a>
+      </td>
+      <td  style="padding-left:5px;">
+            <span style="font-size:16px;" id="news_name_id_<?php print $value['id'];?>"><a href="#" post_string="'&id=<?php print $part_id;?>&form_id=<?php print $form_id;?>&field_id=<?php print $value['id'];?>" module="modules" action="modules_field_edit" class="ajax_send"><?php print $value['name'];?></a></span> 
+      </td>
+<td  style="padding-left:5px;">
+            <span ><?php print $value['type_field_name'];?></span> 
+      </td>
+      <td align="center">
+        <a href="#" ><img height="20px" src="img/delete.gif" border="0" ></a>
+     </td>
+        <td align="center">
+        <a href="#"><?php print (!empty($value['sort']) ? $value['sort'] : '' );?></a>
+      
+      </td> 
+      <td align="center">
+        <a href="#"><img  src="img/<?php print (!empty($value['active']) ? 'active' : 'pasive' );?>.gif" border="0" ></a>
+      
+      </td>
+
+   </tr>  
+<?php 
+      } //конец цикла fekv
+} // конец if
+?>       
+</table> 
+<?php print $pagging_html;?>
+
+

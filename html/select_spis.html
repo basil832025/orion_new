@@ -1,0 +1,26 @@
+<div id="list_"> 
+<div style="color:red" align="center"><?php print (!empty($mess) ? $mess :'');?></div> 
+<ul class="pane-list" >
+<?php 
+$font_size=0; // 35
+$margin=30;
+if (!empty($first_name)){?>
+<li style="padding-left:5px;" <?php print (!empty($not_click) ? '' : 'class="simplemodal-close"');?>>
+       <span style="font-size:16;" id="spr_name_id_0"><?php print $first_name;?></span> 
+    </li>
+<?php
+}
+if (!empty($form)) {
+    $i=0;
+    foreach ($form as $key => $value) {
+        $i++;
+?>    
+   <li id="list_<?php print $value['id'];?>" style="padding-left:<?php print (!empty($value['level']) && empty($sort_type) ? ($value['level']-1)*$margin+5 : 5 );?>px;" <?php print (!empty($not_click) ? '' : 'class="simplemodal-close"');?> > 
+       <span style="font-size:16px;" id="spr_name_id_<?php print $value['id'];?>"><?php  print (!empty($sort_type) ? $i.' ' :''); print (!empty($value['name']) ?  $value['name'] : $value['name_'.LANG]);?></span> 
+    </li>  
+  <?php 
+      } //конец цикла fekv
+} // конец if
+?>       
+</ul>
+</div>

@@ -1,0 +1,277 @@
+<div align="center" class="zagl"><?php print ((!empty($form['name'])) ? 'Редактирование поля "' .$form['name'] .'"' : 'Добавления новой поля' );?></div>
+<table border="0" width="100%" cellspacing="2px" cellpadding="2px"> 
+ <tr><td >
+ <form id="form_edit_form" action="?" method="post" enctype="multipart/form-data" >
+<input type="hidden" name="form[id]" value="<?php print (!empty($form['id']) ? $form['id'] : '' );?>"/>
+<input type="hidden" name="id" value="<?php print (!empty($part_id) ? $part_id : '' );?>"/>
+<input type="hidden" name="form_id" value="<?php print (!empty($form_id) ? $form_id : '' );?>"/>
+  <table width="100%" border="0" height="100%">
+  <tr>
+    <td width="50%" valign="top">
+    <fieldset><legend>Общие настройки &nbsp;</legend>  
+    <table border="0" width="100%" class="parts_table_edit f14">
+
+  <tr>
+        <td class="nastr_" width="250px"> 
+            Тип поля:
+        </td>
+        <td  > 
+         <select name="form[type]" id="type" disabled>
+  <option value="1" <?php print ((!empty($form['type']) && $form['type']==1) ? 'selected="selected"': '')?>>Строковое поле</option>
+  <option value="2" <?php print ((!empty($form['type']) && $form['type']==2) ? 'selected="selected"': '')?>>Признак (checkbox)</option>
+  <option value="3" <?php print ((!empty($form['type']) && $form['type']==3) ? 'selected="selected"': '')?>>Малый список (radio)</option>
+  <option value="4" <?php print ((!empty($form['type']) && $form['type']==4) ? 'selected="selected"': '')?>>Список упрощенный (select обычный)</option>
+  <option value="5" <?php print ((!empty($form['type']) && $form['type']==5) ? 'selected="selected"': '')?>>Многостроковое поле (textarea без редактора)</option>
+  <option value="6" <?php print ((!empty($form['type']) && $form['type']==6) ? 'selected="selected"': '')?>>Поле для пароля</option>    
+  <option value="7" <?php print ((!empty($form['type']) && $form['type']==7) ? 'selected="selected"': '')?>>Скрытое поле</option>
+  <option value="8" <?php print ((!empty($form['type']) && $form['type']==8) ? 'selected="selected"': '')?>>Поле для даты (календарь)</option>
+  <option value="9" <?php print ((!empty($form['type']) && $form['type']==9) ? 'selected="selected"': '')?>>Список в модальном окне (продвин.)</option>
+  <option value="10" <?php print ((!empty($form['type']) && $form['type']==10) ? 'selected="selected"': '')?>>Список с удобной прокруткой (продвин.)</option>
+  <option value="11" <?php print ((!empty($form['type']) && $form['type']==11) ? 'selected="selected"': '')?>>Текстовый редактор (сокращенный)</option>
+  <option value="12" <?php print ((!empty($form['type']) && $form['type']==12) ? 'selected="selected"': '')?>>Текстовый редактор (полный)</option>
+  <option value="13" <?php print ((!empty($form['type']) && $form['type']==13) ? 'selected="selected"': '')?>>Загрузка изображений</option>
+  <option value="14" <?php print ((!empty($form['type']) && $form['type']==14) ? 'selected="selected"': '')?>>Загрузка файлов</option>
+  <option value="15" <?php print ((!empty($form['type']) && $form['type']==15) ? 'selected="selected"': '')?>>Кнопка</option>  
+  <option value="20" <?php print ((!empty($form['type']) && $form['type']==20) ? 'selected="selected"': '')?>>Связь с родителем</option>
+ 
+
+</select>
+        </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Название поля:
+        </td>
+        <td  > 
+           <input type="text" name="form[name]" id="form[name]" style="width:100%" value="<?php print ((!empty($form['name'])) ? $form['name'] : '')?>" >
+        </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Комментарий к полю:
+        </td>
+        <td  > 
+           <input type="text" name="form[comment]" id="form[comment]" style="width:100%" value="<?php print ((!empty($form['comment'])) ? $form['comment'] : '')?>" >
+        </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Название поля для формы (name лат.):
+        </td>
+        <td  > 
+           <input type="text" name="form[name_field]" id="form[name_field]" style="width:100%" value="<?php print ((!empty($form['name_field'])) ? $form['name_field'] : '')?>" >
+        </td>
+    </tr>
+<tr>
+        <td class="nastr_"> 
+            Название поля для БД (лат. если пусто, то как для формы, если стоит "-", то не сохранять в БД) :
+        </td>
+        <td  > 
+           <input type="text" name="form[name_bd]" id="form[name_bd]" style="width:100%" value="<?php print ((!empty($form['name_bd'])) ? $form['name_bd'] : '')?>" >
+        </td>
+    </tr>
+<tr>
+        <td class="nastr_"> 
+            Значение по-умолчанию :
+        </td>
+        <td  > 
+           <input type="text" name="form[value_default]" id="form[value_default]" style="width:100%" value="<?php print ((!empty($form['value_default'])) ? $form['value_default'] : '')?>" >
+        </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Варианты вывода поля :
+        </td>
+        <td  > 
+  <input type="radio" value="0"  name="form[vuvod_site_admin]" <?php print ((isset($form['vuvod_site_admin']) && $form['vuvod_site_admin']==0) ? 'checked="checked"': '')?> >На сайте и админке<br />
+  <input type="radio" value="1"  name="form[vuvod_site_admin]" <?php print ((!empty($form['vuvod_site_admin']) && $form['vuvod_site_admin']==1) ? 'checked="checked"': '')?> >Только на сайте<br />
+  <input type="radio" value="2"  name="form[vuvod_site_admin]" <?php print ((!empty($form['vuvod_site_admin']) && $form['vuvod_site_admin']==2) ? 'checked="checked"': '')?> >Только в админке
+
+           </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Порядок отображение полей (сортировка):
+        </td>
+        <td  > 
+           <input type="text" name="form[sort]" id="form[sort]" style="width:100%" value="<?php print ((!empty($form['sort'])) ? $form['sort'] : '1')?>" >
+        </td>
+    </tr>
+<tr>
+        <td class="nastr_"> 
+            Объязательное поле для заполнения:
+        </td>
+        <td  > 
+           <input type="checkbox" name="form[value_obyaz]" id="form[value_obyaz]" value="1"  <?php print ((!empty($form['value_obyaz'])) ? 'checked="checked"' : '')?>  >
+        </td>
+    </tr><tr>
+        <td class="nastr_"> 
+            Активность поля:
+        </td>
+        <td  > 
+           <input  type="checkbox" name="form[active]" id="form[active]"  value="1"  <?php print ((!empty($form['active'])) ? 'checked="checked"' : '')?> >
+        </td>
+    </tr>
+
+    </table>
+    </fieldset>
+        <fieldset><legend>Настройки для админки&nbsp;</legend>  
+    <table border="0" width="100%" class="parts_table_edit f12">
+    <tr>
+        <td class="nastr_" width="250px"> 
+            Название поля для колонки (сокращенное):
+        </td>
+        <td  > 
+           <input type="text" name="form[name_short]" id="form[name_short]" style="width:100%" value="<?php print ((!empty($form['name_short'])) ? $form['name_short'] : '')?>" >
+        </td>
+    </tr> 
+    
+    </table>
+    </fieldset>
+<fieldset><legend>Настройки для сайта&nbsp;</legend>  
+    <table border="0" width="100%" class="parts_table_edit f12">
+    <tr>
+        <td class="nastr_" width="250px"> 
+            Название поля для сайта (если пусто, то берем с name):
+        </td>
+        <td  > 
+           <input type="text" name="form[name_site]" id="form[name_site]" style="width:100%" value="<?php print ((!empty($form['name_site'])) ? $form['name_site'] : '')?>" >
+        </td>
+    </tr> 
+    
+    </table>
+    </fieldset>
+    </td>
+    <td width="50%" valign="top">
+    <fieldset><legend>Дополнительные настройки для поля по типу&nbsp;</legend>  
+    <table border="0" width="100%" class="parts_table_edit f12">
+    <?php if (!empty($form['type']) && in_array($form['type'],array(1,6)) ){?>
+    <tr>
+        <td class="nastr_" width="250px"> 
+            Максимальная длина поля в БД и в форме:
+        </td>
+        <td  > 
+           <input type="text" size="3" maxlength="3" name="form[max_value_bd_field]" id="form[max_value_bd_field]" style="width:30px" value="<?php print ((!empty($form['max_value_bd_field'])) ? $form['max_value_bd_field'] : '30')?>" >
+        </td>
+    </tr>
+    <?php if (!empty($form['type']) && $form['type']==1){?>
+    <tr>
+        <td class="nastr_"> 
+            Тип проверки :
+        </td>
+        <td  > 
+  <input type="radio" value="1"  name="form[type_filter]" id="type_filter1" <?php print ((!empty($form['type_filter']) && $form['type_filter']==1) ? 'checked="checked"': '')?> >Проверка на Email<br />
+  <input type="radio" value="2"  name="form[type_filter]" id="type_filter2" <?php print ((!empty($form['type_filter']) && $form['type_filter']==2) ? 'checked="checked"': '')?> >Проверка на URL<br />
+  <input type="radio" value="3"  name="form[type_filter]" id="type_filter3" <?php print ((!empty($form['type_filter']) && $form['type_filter']==3) ? 'checked="checked"': '')?> >Свое регулярное выражения (для программистов)<br />
+  <input type="radio" value="0"  name="form[type_filter]" id="type_filter0" <?php print ((isset($form['type_filter']) && $form['type_filter']==0) ? 'checked="checked"': '')?> >Другие проверки<br />
+
+
+           </td>
+    </tr>
+    <?php }?>
+    <tr>
+        <td class="nastr_" colspan="2"> 
+            Как проверять поле (при объяз. заполнении) :
+        </td>
+     </tr>   
+ <tr>
+        <td class="nastr_" > 
+            
+        </td>
+        <td  > 
+        <input  type="checkbox" name="form[filter1]" id="form[filter1]"  value="1"  <?php print ((!empty($form['filter1'])) ? 'checked="checked"' : '')?> >Только целые числа (0-9)<br />
+        <input  type="checkbox" name="form[filter2]" id="form[filter2]"  value="1"  <?php print ((!empty($form['filter2'])) ? 'checked="checked"' : '')?> >Только латинские буквы (a-z)<br />
+        <input  type="checkbox" name="form[filter3]" id="form[filter3]"  value="1"  <?php print ((!empty($form['filter3'])) ? 'checked="checked"' : '')?> >Только кирилица (а-я)<br />
+
+  
+           </td>
+    </tr>
+        <tr>
+        <td class="nastr_"> 
+            Регистры символов :
+        </td>
+        <td  > 
+  <input type="radio" value="1"  name="form[type_char]" <?php print ((!empty($form['type_char']) && $form['type_char']==1) ? 'checked="checked"': '')?> >Большие и маленькие буквы<br />
+  <input type="radio" value="2"  name="form[type_char]" <?php print ((!empty($form['type_char']) && $form['type_char']==2) ? 'checked="checked"': '')?> >Только маленькие буквы<br />
+  <input type="radio" value="3"  name="form[type_char]" <?php print ((!empty($form['type_char']) && $form['type_char']==3) ? 'checked="checked"': '')?> >Только большие буквы<br />
+
+
+           </td>
+    </tr>  
+   
+<tr>
+        <td class="nastr_" width="250px"> 
+            Спец. символы для доп. фильтра поля:
+        </td>
+        <td  > 
+           <input type="text"  name="form[cpez_char]" id="form[cpez_char]" style="width:100%" value="<?php print ((!empty($form['cpez_char'])) ? $form['cpez_char'] : '')?>" >
+        </td>
+    </tr> 
+     <tr>
+        <td class="nastr_" width="250px"> 
+            Минимальная длина поля в форме для объязат. заполнения:
+        </td>
+        <td  > 
+           <input type="text" size="2" maxlength="2" name="form[min_char]" id="form[min_char]" style="width:30px" value="<?php print ((!empty($form['min_char'])) ? $form['min_char'] : '0')?>" >
+        </td>
+    </tr> 
+<tr>
+        <td class="nastr_" width="250px"> 
+            Регулярное выражение:
+        </td>
+        <td  > 
+           <input type="text"  name="form[regular]" id="form[regular]" style="width:100%" value="<?php print ((!empty($form['regular'])) ? $form['regular'] : '')?>" >
+        </td>
+    </tr> 
+<tr>
+        <td class="nastr_" width="250px"> 
+            Маска: <br />Сокращ. <br />'9': «[0-9]» — вводятся только цифры.<br />
+'a': «[A-Za-z]» — вводятся латинские буквы заглавные и маленькие.<br />
+'я': «[А-Яа-я]» — вводятся буквы на кирилице заглавные и маленькие.<br />
+'*': «[^]» — вводятся любые символы.<br />
+(Пример) (999) 999-9999 - телефон, <br />
+        99-99-9999 -дата
+        </td>
+        <td  > 
+           <input type="text"  name="form[mask]" id="mask" style="width:100%" value="<?php print ((!empty($form['mask'])) ? $form['mask'] : '')?>" >
+        </td>
+    </tr> 
+ <?php } if (in_array($form['type'],array(3,4,9,10))) {?>
+   <tr>
+        <td class="nastr_"> 
+            Варианты списков :
+        </td>
+        <td  > 
+  <input type="radio" value="1" id="table_spis_type_1"  name="form[table_spis_type]" <?php print ((!empty($form['table_spis_type']) && $form['table_spis_type']==1) ? 'checked="checked"': '')?> >Простые списки (1 таблица)<br />
+  <input type="radio" value="2" id="table_spis_type_2" name="form[table_spis_type]" <?php print ((!empty($form['table_spis_type']) && $form['table_spis_type']==2) ? 'checked="checked"': '')?> >С других модулей список<br />
+           </td>
+    </tr>  
+ <tr id="spis_1">
+        <td class="nastr_" width="150px"> 
+            Cписок со значениями:
+        </td>
+        <td  > 
+        <?=getListAdmin('spis','table_spis',$spis_name,'modules','spis_light')?>
+
+        </td>
+    </tr>  
+ <tr id="spis_2">
+        <td class="nastr_" width="150px"> 
+            Cписок модулей:
+        </td>
+        <td  > 
+      
+            <input id="p_module_id" name="form[module_id]" type="hidden" value="<?php print (!empty($form['table_spis']) ? $form['table_spis'] : 0);?>" >
+             <input type="text" id="p_module_name" name="p_module_name" style="width:80%;" readonly="readonly" value="<?php print (!empty($spis_name) ? $spis_name : '');?>"/><span style="width:20px;cursor: pointer;background-color:grey;" module="modules" action="spis_module" post_string="&id_spis=module" return_content_bool='0' blok='0' class="ajax_send">&nbsp;...&nbsp;</span>
+        </td>
+    </tr> 
+ <?php }?>
+    </table>
+    </fieldset>
+
+    </td>
+    </tr>
+    </table>
+ </form> 
+</td></tr>
+</table>

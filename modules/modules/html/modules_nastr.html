@@ -1,0 +1,167 @@
+<div align="center" class="zagl">Модуль: Статья::Настройка статьи и редактора</div>
+<form id="article_edit_form" action="?" method="post" enctype="multipart/form-data" >
+<input type="hidden" name="article_id" value=""/>
+<input type="hidden" name="part_id" value="<?php print (!empty($part_id) ? $part_id : '' );?>" />    
+
+<ul class="tabs"> 
+  <li><a href="#">Общие</a></li> 
+  <li><a href="#">Редактор</a></li> 
+  <!--<li><a href="#">Настройки сайта</a></li> -->
+
+  </ul> 
+  
+  <!-- tab "panes" --> 
+  <div class="panes"> 
+  <div>
+  <table width="100%" border="0" height="100%">
+  <tr>
+    <td width="50%" valign="top">
+    <fieldset><legend>Настройки общие для модуля &nbsp;</legend>  
+    <table border="0" width="100%" class="parts_table_edit f14">
+      <tr>
+        <td class="nastr_"> 
+            Отображать "Название статьи"?
+        </td>
+        <td  width="20px"> 
+           <input type="checkbox" name="formo[name]" id="formo[name]" value="1" <?php print ((!empty($admin['name'])) ? 'checked="checked"' : '')?> class="radio">
+        </td>
+    </tr>
+  <tr>
+        <td class="nastr_"> 
+            Отображать "Дата создания"?
+        </td>
+        <td  width="20px"> 
+           <input type="checkbox" name="formo[date_create]" id="formo[date_create]" value="1" <?php print ((!empty($admin['date_create'])) ? 'checked="checked"' : '')?> class="radio">
+        </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Отображать "Дата последней модификации"?
+        </td>
+        <td  width="20px"> 
+           <input type="checkbox" name="formo[date_last_modif]" id="formo[date_last_modif]" value="1" <?php print ((!empty($admin['date_last_modif'])) ? 'checked="checked"' : '')?> class="radio">
+        </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Отображать "Дата для сайта"?
+        </td>
+        <td  width="20px"> 
+           <input type="checkbox" name="formo[date]" id="formo[date]" value="1" <?php print ((!empty($admin['date'])) ? 'checked="checked"' : '')?> class="radio">
+        </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Отображать "Автор последней модификации"?
+        </td>
+        <td  width="20px"> 
+           <input type="checkbox" name="formo[user_last_modif]" id="formo[user_last_modif]" value="1" <?php print ((!empty($admin['user_last_modif'])) ? 'checked="checked"' : '')?> class="radio">
+        </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Отображать "Автор статьи"?
+        </td>
+        <td  width="20px"> 
+           <input type="checkbox" name="formo[author]" id="formo[author]" value="1" <?php print ((!empty($admin['author'])) ? 'checked="checked"' : '')?> class="radio">
+        </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Отображать "Источник"?
+        </td>
+        <td  width="20px"> 
+           <input type="checkbox" name="formo[source]" id="formo[source]" value="1" <?php print ((!empty($admin['source'])) ? 'checked="checked"' : '')?> class="radio">
+        </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Отображать "Title"?
+        </td>
+        <td  width="20px"> 
+           <input type="checkbox" name="formo[title]" id="formo[title]" value="1" <?php print ((!empty($admin['title'])) ? 'checked="checked"' : '')?> class="radio">
+        </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Отображать "Keywords"?
+        </td>
+        <td  width="20px"> 
+           <input type="checkbox" name="formo[keywords]" id="formo[keywords]" value="1" <?php print ((!empty($admin['keywords'])) ? 'checked="checked"' : '')?> class="radio">
+        </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Отображать "Description"?
+        </td>
+        <td  width="20px"> 
+           <input type="checkbox" name="formo[description]" id="formo[description]" value="1" <?php print ((!empty($admin['description'])) ? 'checked="checked"' : '')?> class="radio">
+        </td>
+    </tr>
+ <tr>
+        <td class="nastr_"> 
+            Отображать "Загрузка доп. файла"?
+        </td>
+        <td  width="20px"> 
+           <input type="checkbox" name="formo[ufile1]" id="formo[ufile1]" value="1" <?php print ((!empty($admin['ufile1'])) ? 'checked="checked"' : '')?> class="radio">
+        </td>
+    </tr>
+   
+    </table>
+    </fieldset>
+    </td>
+    <td width="50%" valign="top">
+    <fieldset><legend>Настройки файлов&nbsp;</legend>  
+    <table border="0" width="100%" class="parts_table_edit f12">
+   <tr>
+        <td class="nastr_"> 
+            Только изображения
+        </td>
+        <td > 
+            <input type="radio" name="formo[type_file1]" id="formo[type_file1]" value="2" <?php print ((!empty($admin['type_file1']) && $admin['type_file1']==2) ? 'checked="checked"' : '')?> class="radio">
+        </td>
+    </tr>
+    <tr>
+        <td > 
+            Макс. размеры изображения (ширина, длина) (по-умолч. 100х100px)
+        </td>
+        <td >
+        <input class="inp-d" name="formo[file1_w]"  id="formo[file1_w]"  type="text"  maxlength="4" size="4" value="<?php print ((!empty($admin['file1_w'])) ? $admin['file1_w'] : '')?>" />&nbsp;Х&nbsp;<input class="inp-d" name="formo[file1_h]" id="formo[file1_h]"  type="text" maxlength="4" size="4" value="<?php print ((!empty($admin['file1_h'])) ? $admin['file1_h'] : '')?>" /> 
+        </td>
+    </tr>
+    <tr>
+        <td class="nastr_"> 
+            Макс. размеры мини (анонс) изображения (ширина, длина), той же картинки (делается копия) 
+        </td>
+        <td >
+        <input class="inp-d" name="formo[file1_mini_w]"  id="formo[file1_mini_w]"  type="text"  maxlength="4" size="4" value="<?php print ((!empty($admin['file1_mini_w'])) ? $admin['file1_mini_w'] : '')?>" />&nbsp;Х&nbsp;<input class="inp-d" name="formo[file1_mini_h]" id="formo[file1_mini_h]"  type="text" maxlength="4" size="4" value="<?php print ((!empty($admin['file1_mini_h'])) ? $admin['file1_mini_h'] : '')?>" /> 
+        </td>
+    </tr>    
+    <tr>
+        <td> 
+            Макс. размер файла в байтах (по-умолчанию 1 мб=1048576 байт), <br />пусто - без ограничения
+        </td>
+        <td >
+        <input class="inp-d" name="formo[file1_size]"  id="formo[file1_size]"  type="text"   size="15" value="<?php print ((!empty($admin['file1_size'])) ? $admin['file1_size'] : '')?>" />
+        </td>
+    </tr>
+    </table>
+    </fieldset>
+    </td>
+    </tr>
+    </table>
+  
+  
+  </div> 
+  
+  <div class="les">
+  <?php
+    include ROOT_A .'html/redaktor_nastr.html';
+?>
+ 
+  </div> 
+   
+  </div>
+</form> 
+
+

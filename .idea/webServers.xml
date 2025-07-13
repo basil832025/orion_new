@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="eee37f08-d97d-4ff0-91e4-74489794e6c2" name="bot_Brovaru" url="http://io274636.ftp.tools">
+        <fileTransfer rootFolder="/bot.greenfit.com.ua/www/telegram" host="io274636.ftp.tools" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="d8693e24-6577-45f7-8e34-df307a8052eb" name="orion_new" url="http://ve513613.ftp.tools">
+        <fileTransfer host="ve513613.ftp.tools" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="d9c23fdf-9529-4192-8ac7-958c71236603" name="orion_test" url="http://ve513613.ftp.tools">
+        <fileTransfer host="ve513613.ftp.tools" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="02745aac-00d9-408d-a409-4ef08a9dd8f3" name="rovno_Volodya_cerkv_tovs" url="http://45.151.122.168">
+        <fileTransfer host="45.151.122.168" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="767f1d13-de05-4994-99c3-ff491e7bf3c7" name="yngvarskiy" url="http://uz371910.ftp.tools">
+        <fileTransfer host="uz371910.ftp.tools" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="3eb24088-3870-4a7c-a0bd-470d284cfa64" name="casio" url="http://ficloud899.zahid.host">
+        <fileTransfer host="ficloud899.zahid.host" port="17991">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="51d43cf7-09e4-4f92-ae5b-e984c0ef3a03" name="timeshop" url="http://ficloud901.zahid.host">
+        <fileTransfer host="ficloud901.zahid.host" port="18011">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="f2dd2fdb-6e95-496e-a4a3-133904e465bb" name="interfit" url="http://interfit.ftp.tools">
+        <fileTransfer host="interfit.ftp.tools" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="471e7a12-c58a-4234-8edc-1dd265d90018" name="fit-lab" url="http://mg552283.ftp.tools">
+        <fileTransfer host="mg552283.ftp.tools" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="0e0dd679-ff84-46e8-90d4-e0bd1d2a7fdb" name="tenesse" url="http://hosting31.ukrnames.com">
+        <fileTransfer host="hosting31.ukrnames.com" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="0eb218a0-b4a5-463a-b9a8-e4f32777f6b3" name="intefit_new" url="http://arx.ftp.tools">
+        <fileTransfer host="arx.ftp.tools" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="5980280b-3873-4b3b-8b17-cb5ae5e42a66" name="red_fitness" url="http://ftp.redbarbell.com.ua">
+        <fileTransfer host="ftp.redbarbell.com.ua" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

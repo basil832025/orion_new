@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/error/error_15-12-2024.html" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/error/error_29-06-2023.html" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/func/mysql.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/logs/log_2025-05-21.log" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/logs_read.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/modules/grp_leagues/leagues/object.leagues.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/modules/grp_leagues/topplayersleague/object.topplayersleague.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/modules/grp_turnirs/etapresult/func/func.etapresult_2x_minuska8.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/modules/grp_turnirs/turnirs/action/raschet_shtraph.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/modules/grp_turnirs/turnirs/triger/after.edit_ok.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/modules/parametres/object.parametres.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/modules/players/action/statistics.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/modules/reports/action/new_users.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/modules/reports/func/func.reports_excel.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/modules/turnirsshtraph/object.turnirsshtraph.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test/index.php" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/test/js/main.js" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;02745aac-00d9-408d-a409-4ef08a9dd8f3&gt;/b52/cron.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;02745aac-00d9-408d-a409-4ef08a9dd8f3&gt;/b52/cron_action.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;02745aac-00d9-408d-a409-4ef08a9dd8f3&gt;/b52/func/refresh_func.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;02745aac-00d9-408d-a409-4ef08a9dd8f3&gt;/b52/inc/refresh_all.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;02745aac-00d9-408d-a409-4ef08a9dd8f3&gt;/b52/inc/refresh_grp.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;02745aac-00d9-408d-a409-4ef08a9dd8f3&gt;/b52/inc/refresh_tovs.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;35633f56-cfca-40c7-840a-de6a92297de0&gt;/sportstyle.od.ua/www/telegram/logs/log_23-11-2023.html" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;35633f56-cfca-40c7-840a-de6a92297de0&gt;/sportstyle.od.ua/www/telegram/logs/log_31-01-2024.html" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/action.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/first.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/form_adult.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/form_child.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/left_catalog.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/liqpay.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/liqpay_res.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/liqpay_return_status.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/liqpay_shop.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/noage.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/pay_terassa.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/price_step2.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/price_step3.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/prices.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/refresh.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/second.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/terassa.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/inc/terassa_step3.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/js/main.js" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/formreg/js/messages.ru-ru.js" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/telegram/libs/liqpay.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/telegram_test/ActionRouter.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/telegram_test/TelegramHandler.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/telegram_test/action/UnknownAction.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/telegram_test/action/startaction.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/telegram_test/autoload.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/telegram_test/class/MessageHandler.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/telegram_test/class/WebhookHandler.php" charset="UTF-8" />
+    <file url="remoteDeploymentFS://&lt;c32662ae-1bf5-42ab-ab94-3402465e9ad5&gt;/telegram_test/libs/telegram_api.php" charset="UTF-8" />
+    <file url="PROJECT" charset="windows-1251" />
+  </component>
+</project>

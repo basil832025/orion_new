@@ -1,0 +1,158 @@
+/*печать и печатать группы для рейтинга настольный теннис*/
+ tr td
+    {
+        min-height: 20px;
+        height: 20px;
+    }
+@media print {
+   
+    html,body {
+      height:297mm;
+    width:210mm;
+    background: none;
+    }
+    .noprint{
+    display: none !important;
+}
+.content_podmenu{
+    min-height: 80%;
+    margin: 0 8px;
+  border: none;
+    padding-bottom: 0;
+  box-shadow: none; /* Параметры тени 
+    background:  url(../images/bg_textures/bg_1.png);*/
+    border-radius: 0;
+}
+td.zach{ background-color: #1a4567 !important;
+        -webkit-print-color-adjust: exact;
+        }
+     .group_table    TD, TH {
+    padding: 3px; /* Поля вокруг содержимого таблицы */
+    border:1px solid black; /* Параметры рамки */
+   }
+    .group_table_etap     TD, TH {
+        padding: 3px; /* Поля вокруг содержимого таблицы */
+        border:1px solid black; /* Параметры рамки */
+    }
+    .mini_table{
+        margin-left: 20px;
+    }
+ .mini_table TD, TH {
+    padding: 3px; /* Поля вокруг содержимого таблицы */
+    border:1px solid black; /* Параметры рамки */
+    height:25px;
+
+   } 
+ 
+}
+@page Section1 {
+size:8.27in 11.69in; 
+margin:5mm  5mm 5mm 5mm; 
+mso-header-margin:.2in; 
+mso-footer-margin:.2in; 
+mso-paper-source:0;
+
+}
+/*.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+}*/
+@media (min-width: 1200px) {
+    .col-xl-3 {
+        flex: 0 0 30%;
+        max-width: 30%;
+    }
+}
+@media (min-width: 768px) {
+    .col-md-6 {
+        flex: 0 0 auto;
+        width: 40%;
+    }
+}
+ TABLE.mini_table {
+     text-align: center;
+    width: 200px; /* Ширина таблицы */
+    border-collapse: collapse; /* Убираем двойные линии между ячейками */
+     margin-left: 30px;
+   }
+.group_table_etap_container{
+   /* display: flex;*/
+
+}
+
+.group_table_etap_blok{
+    /*float: left;*/
+    margin: 0 0 20px 30px;
+
+/*
+    height: 250px;display: block;
+    min-height: 200px;*/
+
+  }
+
+  TABLE.group_table {
+
+     text-align: center;
+    width: 800px; /* Ширина таблицы */
+      margin-bottom: 20px;
+   /* border-collapse: collapse;  Убираем двойные линии между ячейками */
+   }
+TABLE.group_table_etap {
+
+    text-align: center;
+    width: 300px; /* Ширина таблицы */
+    /* border-collapse: collapse;  Убираем двойные линии между ячейками */
+    font-size: 12px;
+}
+.group_table td div.t-grid-team_table {
+    border: 1px solid red;
+    background-color: #dfc2c4;
+    width: 100%;
+    height: 100%;
+    padding-top: 6px;
+    font-size: 16px;
+    font-weight: bold;
+}
+.group_table_etap td .supper-wrapper .chosen-container{
+    font-size: 12px;
+}
+.group_table_etap td, .group_table  TD {
+    font-size: 12px;
+    
+    /*  padding: 6px; Поля вокруг содержимого таблицы */
+    height:30px;
+
+    border:1px solid black; /* Параметры рамки */
+  /*  border: 1px solid black;  Параметры рамки */
+   }
+
+ .mini_table  TH {
+    padding: 13px; /* Поля вокруг содержимого таблицы */
+    border:1px solid black; /* Параметры рамки */
+    height:15px;
+   } 
+   .mini_table TD{
+    padding: 3px; /* Поля вокруг содержимого таблицы */
+    border:1px solid black; /* Параметры рамки */
+    height:15px;
+   }
+.group_table_etap th, .group_table  TH {
+    background: #b0e0e6; /* Цвет фона */
+    padding: 6px; /* Поля вокруг содержимого таблицы */
+    height:30px;
+    border:1px solid black; /* Параметры рамки */
+   }
+   td .zach{
+       background: rgba(236, 237, 238, 1)  !important; /* Цвет фона */
+   min-width: 87px;
+       min-height: 58px;
+   }
+   .min_width_td{min-width: 86px}
+   th.fio{min-width:150px;}
+   th.num{min-width:60px;}
+div.Section1 {
+page:Section1;
+}
+

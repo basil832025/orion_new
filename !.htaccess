@@ -1,0 +1,14 @@
+AddDefaultCharset UTF-8
+DirectoryIndex index.php
+RemoveHandler .html .php
+AddType application/x-httpd-php .html .htm .pas
+RemoveHandler .ico
+AddType image/x-icon .ico
+RewriteEngine on
+ FallbackResource /index.php
+
+  
+<Files *.ini>
+  order deny,allow
+  deny from all
+</Files>

@@ -1,0 +1,1064 @@
+[2025-06-01 19:12:43] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> select count(cnt_games) as cnt_g from bs_turnirplayers t where turnir_id= and cnt_games is not null</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and cnt_games is not null' at line 1
+[2025-06-01 19:12:47] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> select player_id from bs_turnirplayers where id=</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+[2025-06-01 19:12:47] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> update bs_reiting set pl_id_1=3349 where pl_id_1= and turnir_id=1267</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and turnir_id=1267' at line 1
+[2025-06-01 19:12:47] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> update bs_reiting set pl_id_2=3349 where pl_id_2= and turnir_id=1267</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and turnir_id=1267' at line 1
+[2025-06-01 19:12:47] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> update bs_etaps_players_mesta set player_id=3349 where player_id= and turnir_id=1267</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and turnir_id=1267' at line 1
+[2025-06-01 19:12:47] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:135) $data
+[2025-06-01 19:12:47] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:136) Array
+(
+    [roles] => Array
+        (
+        )
+
+    [id] => zs1cfsq
+    [fields] => Array
+        (
+            [0] => Array
+                (
+                    [key] => name
+                    [value] => Василь
+                    [oId] => 6yzc5v
+                )
+
+            [1] => Array
+                (
+                    [key] => surname
+                    [value] => Смик
+                    [oId] => 6yzc5v
+                )
+
+            [2] => Array
+                (
+                    [key] => birthyear
+                    [value] => 1983
+                    [oId] => 6yzc5v
+                )
+
+            [3] => Array
+                (
+                    [key] => city
+                    [value] => Київ
+                    [oId] => 6yzc5v
+                )
+
+            [4] => Array
+                (
+                    [key] => country
+                    [value] => Україна
+                    [oId] => 6yzc5v
+                )
+
+            [5] => Array
+                (
+                    [key] => sex
+                    [value] => m
+                    [oId] => 6yzc5v
+                )
+
+            [6] => Array
+                (
+                    [key] => rank
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [7] => Array
+                (
+                    [key] => image
+                    [value] => https://firebasestorage.googleapis.com/v0/b/ligas-production.appspot.com/o/oTPodmH6oAdkmag1hTwL3MxMlpR2%2F719cdabc-58ec-4509-9806-8712d29b4a95?alt=media&token=ec2cacd6-a4d5-4a43-ab1e-5629f9dc37ee
+                    [oId] => 6yzc5v
+                )
+
+            [8] => Array
+                (
+                    [key] => expire
+                    [value] => 2025-12-31T00:00:00.000Z
+                    [oId] => 6yzc5v
+                )
+
+            [9] => Array
+                (
+                    [key] => region
+                    [value] => Київська область
+                    [oId] => 6yzc5v
+                )
+
+            [10] => Array
+                (
+                    [key] => state
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [11] => Array
+                (
+                    [key] => ranking
+                    [value] => 24.5
+                    [info] => men
+                    [oId] => 6yzc5v
+                )
+
+        )
+
+)
+
+[2025-06-01 19:12:55] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> select count(cnt_games) as cnt_g from bs_turnirplayers t where turnir_id= and cnt_games is not null</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and cnt_games is not null' at line 1
+[2025-06-01 19:12:59] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> select player_id from bs_turnirplayers where id=</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+[2025-06-01 19:12:59] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> update bs_reiting set pl_id_1=2190 where pl_id_1= and turnir_id=1267</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and turnir_id=1267' at line 1
+[2025-06-01 19:12:59] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> update bs_reiting set pl_id_2=2190 where pl_id_2= and turnir_id=1267</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and turnir_id=1267' at line 1
+[2025-06-01 19:12:59] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> update bs_etaps_players_mesta set player_id=2190 where player_id= and turnir_id=1267</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and turnir_id=1267' at line 1
+[2025-06-01 19:12:59] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:135) $data
+[2025-06-01 19:12:59] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:136) Array
+(
+    [roles] => Array
+        (
+        )
+
+    [id] => odmom10
+    [fields] => Array
+        (
+            [0] => Array
+                (
+                    [key] => name
+                    [value] => Ігор
+                    [oId] => 6yzc5v
+                )
+
+            [1] => Array
+                (
+                    [key] => surname
+                    [value] => Острянко
+                    [oId] => 6yzc5v
+                )
+
+            [2] => Array
+                (
+                    [key] => birthyear
+                    [value] => 1996
+                    [oId] => 6yzc5v
+                )
+
+            [3] => Array
+                (
+                    [key] => city
+                    [value] => Київ
+                    [oId] => 6yzc5v
+                )
+
+            [4] => Array
+                (
+                    [key] => country
+                    [value] => Україна
+                    [oId] => 6yzc5v
+                )
+
+            [5] => Array
+                (
+                    [key] => sex
+                    [value] => m
+                    [oId] => 6yzc5v
+                )
+
+            [6] => Array
+                (
+                    [key] => rank
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [7] => Array
+                (
+                    [key] => region
+                    [value] => Київська область
+                    [oId] => 6yzc5v
+                )
+
+            [8] => Array
+                (
+                    [key] => image
+                    [value] => https://firebasestorage.googleapis.com/v0/b/ligas-production.appspot.com/o/CKjgZuoRjYcBhMmF5aIfx8S5c402%2F2ae799c4-b31e-4ebb-8674-b306eac98443?alt=media&token=b806682b-bb87-4d84-a559-ce8acf02ec39
+                    [oId] => 6yzc5v
+                )
+
+            [9] => Array
+                (
+                    [key] => expire
+                    [value] => 2025-12-31T00:00:00.000Z
+                    [oId] => 6yzc5v
+                )
+
+            [10] => Array
+                (
+                    [key] => state
+                    [oId] => 6yzc5v
+                )
+
+            [11] => Array
+                (
+                    [key] => ranking
+                    [value] => 22.9
+                    [info] => men
+                    [oId] => 6yzc5v
+                )
+
+        )
+
+)
+
+[2025-06-01 19:13:08] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> select count(cnt_games) as cnt_g from bs_turnirplayers t where turnir_id= and cnt_games is not null</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and cnt_games is not null' at line 1
+[2025-06-01 19:13:12] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> select player_id from bs_turnirplayers where id=</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+[2025-06-01 19:13:12] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> update bs_reiting set pl_id_1=1820 where pl_id_1= and turnir_id=1267</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and turnir_id=1267' at line 1
+[2025-06-01 19:13:12] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> update bs_reiting set pl_id_2=1820 where pl_id_2= and turnir_id=1267</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and turnir_id=1267' at line 1
+[2025-06-01 19:13:12] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> update bs_etaps_players_mesta set player_id=1820 where player_id= and turnir_id=1267</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and turnir_id=1267' at line 1
+[2025-06-01 19:13:12] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:135) $data
+[2025-06-01 19:13:12] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:136) Array
+(
+    [roles] => Array
+        (
+        )
+
+    [id] => f5lmwyu
+    [fields] => Array
+        (
+            [0] => Array
+                (
+                    [key] => image
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [1] => Array
+                (
+                    [key] => surname
+                    [value] => Слуцький
+                    [oId] => 6yzc5v
+                )
+
+            [2] => Array
+                (
+                    [key] => name
+                    [value] => Артем
+                    [oId] => 6yzc5v
+                )
+
+            [3] => Array
+                (
+                    [key] => city
+                    [value] => Київ
+                    [oId] => 6yzc5v
+                )
+
+            [4] => Array
+                (
+                    [key] => region
+                    [value] => Київ
+                    [oId] => 6yzc5v
+                )
+
+            [5] => Array
+                (
+                    [key] => country
+                    [value] => Україна
+                    [oId] => 6yzc5v
+                )
+
+            [6] => Array
+                (
+                    [key] => birthyear
+                    [value] => 1980
+                    [oId] => 6yzc5v
+                )
+
+            [7] => Array
+                (
+                    [key] => sex
+                    [value] => m
+                    [oId] => 6yzc5v
+                )
+
+            [8] => Array
+                (
+                    [key] => rank
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [9] => Array
+                (
+                    [key] => state
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [10] => Array
+                (
+                    [key] => expire
+                    [value] => 2025-12-31T00:00:00.000Z
+                    [oId] => 6yzc5v
+                )
+
+            [11] => Array
+                (
+                    [key] => ranking
+                    [value] => 16.8
+                    [info] => men
+                    [oId] => 6yzc5v
+                )
+
+        )
+
+)
+
+[2025-06-01 19:13:21] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> select count(cnt_games) as cnt_g from bs_turnirplayers t where turnir_id= and cnt_games is not null</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and cnt_games is not null' at line 1
+[2025-06-01 19:13:26] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> select player_id from bs_turnirplayers where id=</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+[2025-06-01 19:13:26] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> update bs_reiting set pl_id_1=1762 where pl_id_1= and turnir_id=1267</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and turnir_id=1267' at line 1
+[2025-06-01 19:13:26] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> update bs_reiting set pl_id_2=1762 where pl_id_2= and turnir_id=1267</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and turnir_id=1267' at line 1
+[2025-06-01 19:13:26] [ERROR] (D:\Dropbox\OpenServer\domains\orion\func\mysql.php:54) Ошибочный запрос: <b> update bs_etaps_players_mesta set player_id=1762 where player_id= and turnir_id=1267</b> <br />Код:  Подробно: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and turnir_id=1267' at line 1
+[2025-06-01 19:13:26] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:135) $data
+[2025-06-01 19:13:26] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:136) Array
+(
+    [roles] => Array
+        (
+        )
+
+    [id] => s7qzbfh
+    [fields] => Array
+        (
+            [0] => Array
+                (
+                    [key] => name
+                    [value] => Павло
+                    [oId] => 6yzc5v
+                )
+
+            [1] => Array
+                (
+                    [key] => surname
+                    [value] => Кунда
+                    [oId] => 6yzc5v
+                )
+
+            [2] => Array
+                (
+                    [key] => birthyear
+                    [value] => 1974
+                    [oId] => 6yzc5v
+                )
+
+            [3] => Array
+                (
+                    [key] => city
+                    [value] => Київ
+                    [oId] => 6yzc5v
+                )
+
+            [4] => Array
+                (
+                    [key] => country
+                    [value] => Україна
+                    [oId] => 6yzc5v
+                )
+
+            [5] => Array
+                (
+                    [key] => sex
+                    [value] => m
+                    [oId] => 6yzc5v
+                )
+
+            [6] => Array
+                (
+                    [key] => rank
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [7] => Array
+                (
+                    [key] => image
+                    [oId] => 6yzc5v
+                )
+
+            [8] => Array
+                (
+                    [key] => expire
+                    [value] => 2022-12-31T00:00:00.000Z
+                    [oId] => 6yzc5v
+                )
+
+            [9] => Array
+                (
+                    [key] => region
+                    [value] => Київська область
+                    [oId] => 6yzc5v
+                )
+
+            [10] => Array
+                (
+                    [key] => state
+                    [oId] => 6yzc5v
+                )
+
+        )
+
+)
+
+[2025-06-01 19:13:52] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\etaps\func\func.etaps.php:921) Array
+(
+    [name_etap] => ГРУПИ
+    [type_etap] => 1
+    [istochnik_posev] => 0
+    [cnt_people] => 4
+    [cnt_grp] => 1
+    [mesto_from] => 1
+    [is_perenos] => 0
+)
+
+[2025-06-01 19:15:14] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:135) $data
+[2025-06-01 19:15:14] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:136) Array
+(
+    [roles] => Array
+        (
+        )
+
+    [id] => s7qzbfh
+    [fields] => Array
+        (
+            [0] => Array
+                (
+                    [key] => name
+                    [value] => Павло
+                    [oId] => 6yzc5v
+                )
+
+            [1] => Array
+                (
+                    [key] => surname
+                    [value] => Кунда
+                    [oId] => 6yzc5v
+                )
+
+            [2] => Array
+                (
+                    [key] => birthyear
+                    [value] => 1974
+                    [oId] => 6yzc5v
+                )
+
+            [3] => Array
+                (
+                    [key] => city
+                    [value] => Київ
+                    [oId] => 6yzc5v
+                )
+
+            [4] => Array
+                (
+                    [key] => country
+                    [value] => Україна
+                    [oId] => 6yzc5v
+                )
+
+            [5] => Array
+                (
+                    [key] => sex
+                    [value] => m
+                    [oId] => 6yzc5v
+                )
+
+            [6] => Array
+                (
+                    [key] => rank
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [7] => Array
+                (
+                    [key] => image
+                    [oId] => 6yzc5v
+                )
+
+            [8] => Array
+                (
+                    [key] => expire
+                    [value] => 2022-12-31T00:00:00.000Z
+                    [oId] => 6yzc5v
+                )
+
+            [9] => Array
+                (
+                    [key] => region
+                    [value] => Київська область
+                    [oId] => 6yzc5v
+                )
+
+            [10] => Array
+                (
+                    [key] => state
+                    [oId] => 6yzc5v
+                )
+
+        )
+
+)
+
+[2025-06-01 19:19:57] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:135) $data
+[2025-06-01 19:19:57] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:136) Array
+(
+    [roles] => Array
+        (
+        )
+
+    [id] => s7qzbfh
+    [fields] => Array
+        (
+            [0] => Array
+                (
+                    [key] => name
+                    [value] => Павло
+                    [oId] => 6yzc5v
+                )
+
+            [1] => Array
+                (
+                    [key] => surname
+                    [value] => Кунда
+                    [oId] => 6yzc5v
+                )
+
+            [2] => Array
+                (
+                    [key] => birthyear
+                    [value] => 1974
+                    [oId] => 6yzc5v
+                )
+
+            [3] => Array
+                (
+                    [key] => city
+                    [value] => Київ
+                    [oId] => 6yzc5v
+                )
+
+            [4] => Array
+                (
+                    [key] => country
+                    [value] => Україна
+                    [oId] => 6yzc5v
+                )
+
+            [5] => Array
+                (
+                    [key] => sex
+                    [value] => m
+                    [oId] => 6yzc5v
+                )
+
+            [6] => Array
+                (
+                    [key] => rank
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [7] => Array
+                (
+                    [key] => image
+                    [oId] => 6yzc5v
+                )
+
+            [8] => Array
+                (
+                    [key] => expire
+                    [value] => 2022-12-31T00:00:00.000Z
+                    [oId] => 6yzc5v
+                )
+
+            [9] => Array
+                (
+                    [key] => region
+                    [value] => Київська область
+                    [oId] => 6yzc5v
+                )
+
+            [10] => Array
+                (
+                    [key] => state
+                    [oId] => 6yzc5v
+                )
+
+        )
+
+)
+
+[2025-06-01 19:20:14] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:135) $data
+[2025-06-01 19:20:14] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:136) Array
+(
+    [roles] => Array
+        (
+        )
+
+    [id] => s7qzbfh
+    [fields] => Array
+        (
+            [0] => Array
+                (
+                    [key] => name
+                    [value] => Павло
+                    [oId] => 6yzc5v
+                )
+
+            [1] => Array
+                (
+                    [key] => surname
+                    [value] => Кунда
+                    [oId] => 6yzc5v
+                )
+
+            [2] => Array
+                (
+                    [key] => birthyear
+                    [value] => 1974
+                    [oId] => 6yzc5v
+                )
+
+            [3] => Array
+                (
+                    [key] => city
+                    [value] => Київ
+                    [oId] => 6yzc5v
+                )
+
+            [4] => Array
+                (
+                    [key] => country
+                    [value] => Україна
+                    [oId] => 6yzc5v
+                )
+
+            [5] => Array
+                (
+                    [key] => sex
+                    [value] => m
+                    [oId] => 6yzc5v
+                )
+
+            [6] => Array
+                (
+                    [key] => rank
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [7] => Array
+                (
+                    [key] => image
+                    [oId] => 6yzc5v
+                )
+
+            [8] => Array
+                (
+                    [key] => expire
+                    [value] => 2022-12-31T00:00:00.000Z
+                    [oId] => 6yzc5v
+                )
+
+            [9] => Array
+                (
+                    [key] => region
+                    [value] => Київська область
+                    [oId] => 6yzc5v
+                )
+
+            [10] => Array
+                (
+                    [key] => state
+                    [oId] => 6yzc5v
+                )
+
+        )
+
+)
+
+[2025-06-01 19:20:38] [NOTICE] (D:\Dropbox\OpenServer\domains\orion\func\error_func.php:29) Trying to access array offset on value of type null
+[2025-06-01 19:20:51] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:135) $data
+[2025-06-01 19:20:51] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:136) Array
+(
+    [roles] => Array
+        (
+        )
+
+    [id] => s7qzbfh
+    [fields] => Array
+        (
+            [0] => Array
+                (
+                    [key] => name
+                    [value] => Павло
+                    [oId] => 6yzc5v
+                )
+
+            [1] => Array
+                (
+                    [key] => surname
+                    [value] => Кунда
+                    [oId] => 6yzc5v
+                )
+
+            [2] => Array
+                (
+                    [key] => birthyear
+                    [value] => 1974
+                    [oId] => 6yzc5v
+                )
+
+            [3] => Array
+                (
+                    [key] => city
+                    [value] => Київ
+                    [oId] => 6yzc5v
+                )
+
+            [4] => Array
+                (
+                    [key] => country
+                    [value] => Україна
+                    [oId] => 6yzc5v
+                )
+
+            [5] => Array
+                (
+                    [key] => sex
+                    [value] => m
+                    [oId] => 6yzc5v
+                )
+
+            [6] => Array
+                (
+                    [key] => rank
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [7] => Array
+                (
+                    [key] => image
+                    [oId] => 6yzc5v
+                )
+
+            [8] => Array
+                (
+                    [key] => expire
+                    [value] => 2022-12-31T00:00:00.000Z
+                    [oId] => 6yzc5v
+                )
+
+            [9] => Array
+                (
+                    [key] => region
+                    [value] => Київська область
+                    [oId] => 6yzc5v
+                )
+
+            [10] => Array
+                (
+                    [key] => state
+                    [oId] => 6yzc5v
+                )
+
+        )
+
+)
+
+[2025-06-01 19:21:24] [NOTICE] (D:\Dropbox\OpenServer\domains\orion\func\error_func.php:29) Trying to access array offset on value of type null
+[2025-06-01 19:21:43] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\etaps\func\func.etaps.php:921) Array
+(
+    [name_etap] => ГРУПИ
+    [type_etap] => 1
+    [istochnik_posev] => 0
+    [cnt_people] => 4
+    [cnt_grp] => 1
+    [mesto_from] => 1
+    [is_perenos] => 0
+)
+
+[2025-06-01 19:21:58] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:135) $data
+[2025-06-01 19:21:58] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:136) Array
+(
+    [roles] => Array
+        (
+        )
+
+    [id] => s7qzbfh
+    [fields] => Array
+        (
+            [0] => Array
+                (
+                    [key] => name
+                    [value] => Павло
+                    [oId] => 6yzc5v
+                )
+
+            [1] => Array
+                (
+                    [key] => surname
+                    [value] => Кунда
+                    [oId] => 6yzc5v
+                )
+
+            [2] => Array
+                (
+                    [key] => birthyear
+                    [value] => 1974
+                    [oId] => 6yzc5v
+                )
+
+            [3] => Array
+                (
+                    [key] => city
+                    [value] => Київ
+                    [oId] => 6yzc5v
+                )
+
+            [4] => Array
+                (
+                    [key] => country
+                    [value] => Україна
+                    [oId] => 6yzc5v
+                )
+
+            [5] => Array
+                (
+                    [key] => sex
+                    [value] => m
+                    [oId] => 6yzc5v
+                )
+
+            [6] => Array
+                (
+                    [key] => rank
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [7] => Array
+                (
+                    [key] => image
+                    [oId] => 6yzc5v
+                )
+
+            [8] => Array
+                (
+                    [key] => expire
+                    [value] => 2022-12-31T00:00:00.000Z
+                    [oId] => 6yzc5v
+                )
+
+            [9] => Array
+                (
+                    [key] => region
+                    [value] => Київська область
+                    [oId] => 6yzc5v
+                )
+
+            [10] => Array
+                (
+                    [key] => state
+                    [oId] => 6yzc5v
+                )
+
+        )
+
+)
+
+[2025-06-01 19:22:42] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:135) $data
+[2025-06-01 19:22:42] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:136) Array
+(
+    [roles] => Array
+        (
+        )
+
+    [id] => s7qzbfh
+    [fields] => Array
+        (
+            [0] => Array
+                (
+                    [key] => name
+                    [value] => Павло
+                    [oId] => 6yzc5v
+                )
+
+            [1] => Array
+                (
+                    [key] => surname
+                    [value] => Кунда
+                    [oId] => 6yzc5v
+                )
+
+            [2] => Array
+                (
+                    [key] => birthyear
+                    [value] => 1974
+                    [oId] => 6yzc5v
+                )
+
+            [3] => Array
+                (
+                    [key] => city
+                    [value] => Київ
+                    [oId] => 6yzc5v
+                )
+
+            [4] => Array
+                (
+                    [key] => country
+                    [value] => Україна
+                    [oId] => 6yzc5v
+                )
+
+            [5] => Array
+                (
+                    [key] => sex
+                    [value] => m
+                    [oId] => 6yzc5v
+                )
+
+            [6] => Array
+                (
+                    [key] => rank
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [7] => Array
+                (
+                    [key] => image
+                    [oId] => 6yzc5v
+                )
+
+            [8] => Array
+                (
+                    [key] => expire
+                    [value] => 2022-12-31T00:00:00.000Z
+                    [oId] => 6yzc5v
+                )
+
+            [9] => Array
+                (
+                    [key] => region
+                    [value] => Київська область
+                    [oId] => 6yzc5v
+                )
+
+            [10] => Array
+                (
+                    [key] => state
+                    [oId] => 6yzc5v
+                )
+
+        )
+
+)
+
+[2025-06-01 19:22:52] [NOTICE] (D:\Dropbox\OpenServer\domains\orion\func\error_func.php:29) Trying to access array offset on value of type null
+[2025-06-01 19:23:09] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\etaps\func\func.etaps.php:921) Array
+(
+    [name_etap] => ГРУПИ
+    [type_etap] => 1
+    [istochnik_posev] => 0
+    [cnt_people] => 4
+    [cnt_grp] => 1
+    [mesto_from] => 1
+    [is_perenos] => 0
+)
+
+[2025-06-01 19:23:21] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:135) $data
+[2025-06-01 19:23:21] [INFO] (D:\Dropbox\OpenServer\domains\orion\modules\grp_turnirs\turnirsplayers\func\func.turnirsplayers.php:136) Array
+(
+    [roles] => Array
+        (
+        )
+
+    [id] => s7qzbfh
+    [fields] => Array
+        (
+            [0] => Array
+                (
+                    [key] => name
+                    [value] => Павло
+                    [oId] => 6yzc5v
+                )
+
+            [1] => Array
+                (
+                    [key] => surname
+                    [value] => Кунда
+                    [oId] => 6yzc5v
+                )
+
+            [2] => Array
+                (
+                    [key] => birthyear
+                    [value] => 1974
+                    [oId] => 6yzc5v
+                )
+
+            [3] => Array
+                (
+                    [key] => city
+                    [value] => Київ
+                    [oId] => 6yzc5v
+                )
+
+            [4] => Array
+                (
+                    [key] => country
+                    [value] => Україна
+                    [oId] => 6yzc5v
+                )
+
+            [5] => Array
+                (
+                    [key] => sex
+                    [value] => m
+                    [oId] => 6yzc5v
+                )
+
+            [6] => Array
+                (
+                    [key] => rank
+                    [value] => 
+                    [oId] => 6yzc5v
+                )
+
+            [7] => Array
+                (
+                    [key] => image
+                    [oId] => 6yzc5v
+                )
+
+            [8] => Array
+                (
+                    [key] => expire
+                    [value] => 2022-12-31T00:00:00.000Z
+                    [oId] => 6yzc5v
+                )
+
+            [9] => Array
+                (
+                    [key] => region
+                    [value] => Київська область
+                    [oId] => 6yzc5v
+                )
+
+            [10] => Array
+                (
+                    [key] => state
+                    [oId] => 6yzc5v
+                )
+
+        )
+
+)
+
