@@ -28,7 +28,7 @@ class team_rosterAction extends ActionModule
             return;
         }
 
-        $players = db_list('SELECT id, name, reiting_ukraine
+        $players = db_list('SELECT id, name, reiting, reiting_ukraine
             FROM `'.T_PLAYERS.'`
             WHERE team_id='.$team_id.' AND is_team=0 AND not_use=0
             ORDER BY name ASC');
@@ -39,6 +39,7 @@ class team_rosterAction extends ActionModule
                 $players_result[] = array(
                     'id' => (int)$player['id'],
                     'name' => !empty($player['name']) ? $player['name'] : '',
+                    'reiting' => isset($player['reiting']) ? (string)$player['reiting'] : '',
                     'reiting_ukraine' => isset($player['reiting_ukraine']) ? (string)$player['reiting_ukraine'] : ''
                 );
             }

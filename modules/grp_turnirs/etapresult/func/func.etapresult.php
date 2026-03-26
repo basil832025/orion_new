@@ -730,6 +730,11 @@ function showTeamRoster(element, event) {
         return;
     }
 
+    if (typeof window.__teamRosterRequestId === "undefined") {
+        window.__teamRosterRequestId = 0;
+    }
+    var requestId = ++window.__teamRosterRequestId;
+
     var formData = new FormData();
     formData.append("ajax_method", "1");
     formData.append("module", "etapresult");
@@ -752,6 +757,9 @@ function showTeamRoster(element, event) {
         return response.text();
     })
     .then(text => {
+        if (requestId !== window.__teamRosterRequestId) {
+            return;
+        }
         try {
             var data = JSON.parse(text);
             var rosterData = data;
@@ -776,62 +784,59 @@ function showTeamRoster(element, event) {
 }
 
 function showTeamRosterModal(data) {
-    var existingModal = document.getElementById("teamRosterModal");
-    if (existingModal) {
-        var existingBsModal = bootstrap.Modal.getInstance(existingModal);
-        if (existingBsModal) {
-            existingBsModal.hide();
-        }
-        setTimeout(function() {
-            if (existingModal && existingModal.parentNode) {
-                existingModal.remove();
-            }
-        }, 100);
-    }
-
     var playersHtml = "";
     if (data.players && data.players.length > 0) {
         data.players.forEach(function(player, index) {
             playersHtml += "<tr>" +
                 "<td class=\"text-center\" style=\"width:60px;\">" + (index + 1) + "</td>" +
                 "<td>" + player.name + "</td>" +
+                "<td class=\"text-center\" style=\"width:120px;\">" + (player.reiting || "") + "</td>" +
                 "<td class=\"text-center\" style=\"width:120px;\">" + (player.reiting_ukraine || "") + "</td>" +
                 "</tr>";
         });
     } else {
-        playersHtml = "<tr><td colspan=\"3\" class=\"text-center text-muted\" style=\"padding:18px;\">У команди поки немає активних гравців</td></tr>";
+        playersHtml = "<tr><td colspan=\"4\" class=\"text-center text-muted\" style=\"padding:18px;\">У команди поки немає активних гравців</td></tr>";
     }
 
-    var modalHtml = "<div class=\"modal fade\" id=\"teamRosterModal\" tabindex=\"-1\" aria-hidden=\"true\">" +
-        "<div class=\"modal-dialog modal-dialog-centered\" style=\"max-width:700px;\">" +
-        "<div class=\"modal-content\">" +
-        "<div class=\"modal-header\">" +
-        "<h5 class=\"modal-title\" style=\"flex:1; text-align:center;\">Склад команди: " + data.team_name + "</h5>" +
-        "<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Закрити\"></button>" +
-        "</div>" +
-        "<div class=\"modal-body\" style=\"padding:0;\">" +
-        "<table class=\"table table-sm mb-0\">" +
-        "<thead class=\"table-light\"><tr><th class=\"text-center\" style=\"width:60px;\">№</th><th>Гравець</th><th class=\"text-center\" style=\"width:120px;\">Рейт. ФНТУ</th></tr></thead>" +
-        "<tbody>" + playersHtml + "</tbody>" +
-        "</table>" +
-        "</div>" +
-        "<div class=\"modal-footer\" style=\"justify-content:center;\">" +
-        "<button type=\"button\" class=\"btn btn-primary\" data-bs-dismiss=\"modal\">ОК</button>" +
-        "</div>" +
-        "</div></div></div>";
-
-    document.body.insertAdjacentHTML("beforeend", modalHtml);
     var modalElement = document.getElementById("teamRosterModal");
-    var modal = new bootstrap.Modal(modalElement);
-    modalElement.addEventListener("hidden.bs.modal", function() {
-        setTimeout(function() {
-            if (modalElement) {
-                modal.dispose();
-                modalElement.remove();
+    if (!modalElement) {
+        var modalHtml = "<div class=\"modal fade\" id=\"teamRosterModal\" tabindex=\"-1\" aria-hidden=\"true\">" +
+            "<div class=\"modal-dialog modal-dialog-centered\" style=\"max-width:700px;\">" +
+            "<div class=\"modal-content\">" +
+            "<div class=\"modal-header\">" +
+            "<h5 class=\"modal-title team-roster-title\" style=\"flex:1; text-align:center;\"></h5>" +
+            "<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Закрити\"></button>" +
+            "</div>" +
+            "<div class=\"modal-body\" style=\"padding:0;\">" +
+            "<table class=\"table table-sm mb-0\">" +
+            "<thead class=\"table-light\"><tr><th class=\"text-center\" style=\"width:60px;\">№</th><th>Гравець</th><th class=\"text-center\" style=\"width:120px;\">Рейт. клубу</th><th class=\"text-center\" style=\"width:120px;\">Рейт. ФНТУ</th></tr></thead>" +
+            "<tbody class=\"team-roster-body\"></tbody>" +
+            "</table>" +
+            "</div>" +
+            "<div class=\"modal-footer\" style=\"justify-content:center;\">" +
+            "<button type=\"button\" class=\"btn btn-primary\" data-bs-dismiss=\"modal\">ОК</button>" +
+            "</div>" +
+            "</div></div></div>";
+        document.body.insertAdjacentHTML("beforeend", modalHtml);
+        modalElement = document.getElementById("teamRosterModal");
+        modalElement.addEventListener("hidden.bs.modal", function() {
+            var modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.dispose();
             }
-        }, 250);
-    }, { once: true });
+        });
+    }
 
+    var titleElement = modalElement.querySelector(".team-roster-title");
+    var bodyElement = modalElement.querySelector(".team-roster-body");
+    if (titleElement) {
+        titleElement.textContent = "Склад команди: " + (data.team_name || "");
+    }
+    if (bodyElement) {
+        bodyElement.innerHTML = playersHtml;
+    }
+
+    var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
     modal.show();
 }
 
@@ -1137,6 +1142,11 @@ window.showTeamRoster = function(element, event) {
         return;
     }
 
+    if (typeof window.__teamRosterRequestId === "undefined") {
+        window.__teamRosterRequestId = 0;
+    }
+    var requestId = ++window.__teamRosterRequestId;
+
     var formData = new FormData();
     formData.append("ajax_method", "1");
     formData.append("module", "etapresult");
@@ -1159,6 +1169,9 @@ window.showTeamRoster = function(element, event) {
         return response.text();
     })
     .then(text => {
+        if (requestId !== window.__teamRosterRequestId) {
+            return;
+        }
         try {
             var data = JSON.parse(text);
             var rosterData = data;
@@ -1182,62 +1195,59 @@ window.showTeamRoster = function(element, event) {
 };
 
 window.showTeamRosterModal = function(data) {
-    var existingModal = document.getElementById("teamRosterModal");
-    if (existingModal) {
-        var existingBsModal = bootstrap.Modal.getInstance(existingModal);
-        if (existingBsModal) {
-            existingBsModal.hide();
-        }
-        setTimeout(function() {
-            if (existingModal && existingModal.parentNode) {
-                existingModal.remove();
-            }
-        }, 100);
-    }
-
     var playersHtml = "";
     if (data.players && data.players.length > 0) {
         data.players.forEach(function(player, index) {
             playersHtml += "<tr>" +
                 "<td class=\"text-center\" style=\"width:60px;\">" + (index + 1) + "</td>" +
                 "<td>" + player.name + "</td>" +
+                "<td class=\"text-center\" style=\"width:120px;\">" + (player.reiting || "") + "</td>" +
                 "<td class=\"text-center\" style=\"width:120px;\">" + (player.reiting_ukraine || "") + "</td>" +
                 "</tr>";
         });
     } else {
-        playersHtml = "<tr><td colspan=\"3\" class=\"text-center text-muted\" style=\"padding:18px;\">У команди поки немає активних гравців</td></tr>";
+        playersHtml = "<tr><td colspan=\"4\" class=\"text-center text-muted\" style=\"padding:18px;\">У команди поки немає активних гравців</td></tr>";
     }
 
-    var modalHtml = "<div class=\"modal fade\" id=\"teamRosterModal\" tabindex=\"-1\" aria-hidden=\"true\">" +
-        "<div class=\"modal-dialog modal-dialog-centered\" style=\"max-width:700px;\">" +
-        "<div class=\"modal-content\">" +
-        "<div class=\"modal-header\">" +
-        "<h5 class=\"modal-title\" style=\"flex:1; text-align:center;\">Склад команди: " + data.team_name + "</h5>" +
-        "<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Закрити\"></button>" +
-        "</div>" +
-        "<div class=\"modal-body\" style=\"padding:0;\">" +
-        "<table class=\"table table-sm mb-0\">" +
-        "<thead class=\"table-light\"><tr><th class=\"text-center\" style=\"width:60px;\">№</th><th>Гравець</th><th class=\"text-center\" style=\"width:120px;\">Рейт. ФНТУ</th></tr></thead>" +
-        "<tbody>" + playersHtml + "</tbody>" +
-        "</table>" +
-        "</div>" +
-        "<div class=\"modal-footer\" style=\"justify-content:center;\">" +
-        "<button type=\"button\" class=\"btn btn-primary\" data-bs-dismiss=\"modal\">ОК</button>" +
-        "</div>" +
-        "</div></div></div>";
-
-    document.body.insertAdjacentHTML("beforeend", modalHtml);
     var modalElement = document.getElementById("teamRosterModal");
-    var modal = new bootstrap.Modal(modalElement);
-    modalElement.addEventListener("hidden.bs.modal", function() {
-        setTimeout(function() {
-            if (modalElement) {
-                modal.dispose();
-                modalElement.remove();
+    if (!modalElement) {
+        var modalHtml = "<div class=\"modal fade\" id=\"teamRosterModal\" tabindex=\"-1\" aria-hidden=\"true\">" +
+            "<div class=\"modal-dialog modal-dialog-centered\" style=\"max-width:700px;\">" +
+            "<div class=\"modal-content\">" +
+            "<div class=\"modal-header\">" +
+            "<h5 class=\"modal-title team-roster-title\" style=\"flex:1; text-align:center;\"></h5>" +
+            "<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Закрити\"></button>" +
+            "</div>" +
+            "<div class=\"modal-body\" style=\"padding:0;\">" +
+            "<table class=\"table table-sm mb-0\">" +
+            "<thead class=\"table-light\"><tr><th class=\"text-center\" style=\"width:60px;\">№</th><th>Гравець</th><th class=\"text-center\" style=\"width:120px;\">Рейт. клубу</th><th class=\"text-center\" style=\"width:120px;\">Рейт. ФНТУ</th></tr></thead>" +
+            "<tbody class=\"team-roster-body\"></tbody>" +
+            "</table>" +
+            "</div>" +
+            "<div class=\"modal-footer\" style=\"justify-content:center;\">" +
+            "<button type=\"button\" class=\"btn btn-primary\" data-bs-dismiss=\"modal\">ОК</button>" +
+            "</div>" +
+            "</div></div></div>";
+        document.body.insertAdjacentHTML("beforeend", modalHtml);
+        modalElement = document.getElementById("teamRosterModal");
+        modalElement.addEventListener("hidden.bs.modal", function() {
+            var modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.dispose();
             }
-        }, 250);
-    }, { once: true });
+        });
+    }
 
+    var titleElement = modalElement.querySelector(".team-roster-title");
+    var bodyElement = modalElement.querySelector(".team-roster-body");
+    if (titleElement) {
+        titleElement.textContent = "Склад команди: " + (data.team_name || "");
+    }
+    if (bodyElement) {
+        bodyElement.innerHTML = playersHtml;
+    }
+
+    var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
     modal.show();
 };
 }
