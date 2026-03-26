@@ -79,8 +79,29 @@
           </advancedOptions>
         </fileTransfer>
       </webServer>
-      <webServer id="5980280b-3873-4b3b-8b17-cb5ae5e42a66" name="red_fitness" url="http://ftp.redbarbell.com.ua">
-        <fileTransfer host="ftp.redbarbell.com.ua" port="21">
+      <webServer id="5980280b-3873-4b3b-8b17-cb5ae5e42a66" name="red_fitness" url="http://45.94.158.128">
+        <fileTransfer host="45.94.158.128" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="e6368da6-6fb4-475c-b11e-de82300962f3" name="3pirogu" url="http://a3piroga.ftp.tools">
+        <fileTransfer host="a3piroga.ftp.tools" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="1b924db6-1623-409e-9a64-7ce95da60503" name="RED_FITNESS_NEW" url="http://31.131.17.179">
+        <fileTransfer host="31.131.17.179" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="4ba1756b-3656-4f8b-9be5-ff9dfab706cd" name="3 стихии нов" url="http://trystyhii.com.ua">
+        <fileTransfer host="trystyhii.com.ua" port="21">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
