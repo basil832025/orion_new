@@ -16,17 +16,21 @@ composer.lock
 /tmp/
 /api-main/
 /pm_new/
-# Node.js (если есть фронт-сборка)
+# Node.js (пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅ)
 node_modules/
 /npm-debug.log
 /yarn-error.log
 
-# IDE и ОС
+# IDE пїЅ пїЅпїЅ
 .idea/
 /.vscode/
 /.DS_Store
 Thumbs.db
 
-# Логи и кэш
+# пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ
 *.log
 *.cache
+
+# Local generated media and screenshots
+/uploads/
+/screenshots/
