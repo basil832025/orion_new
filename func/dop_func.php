@@ -303,7 +303,7 @@ print '
 
 ';   
 }*/
-function upload_img($id='',$id_elem=0,$name_field='file',$type_view=1,$max_w,$max_h,$module='',$cnt_files=1)
+function upload_img($id,$id_elem,$name_field,$type_view,$max_w,$max_h,$module='',$cnt_files=1)
 {
 
 
@@ -316,7 +316,7 @@ function upload_img($id='',$id_elem=0,$name_field='file',$type_view=1,$max_w,$ma
  
 ';
 }
-function upload_iframe_($id='',$id_elem=0,$name_field='file',$type_view=1,$max_w,$max_h,$module='',$cnt_files=1){
+function upload_iframe_($id,$id_elem,$name_field,$type_view,$max_w,$max_h,$module='',$cnt_files=1){
     //$module = $module ? $module : $_SESSION['kernel']['module'];
     $module = $module ? $module : '';
    //send_error($module);
@@ -326,7 +326,7 @@ return '
 
 ';   
 }
-function upload_iframe_many($id='',$id_elem=0,$name_field='file',$type_view=1,$max_w,$max_h,$module='',$cnt_files=1){
+function upload_iframe_many($id,$id_elem,$name_field,$type_view,$max_w,$max_h,$module='',$cnt_files=1){
     //$module = $module ? $module : $_SESSION['kernel']['module'];
     $module = $module ? $module : '';
    //send_error($module);

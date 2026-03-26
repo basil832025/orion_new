@@ -7,21 +7,43 @@ class EtapsObject extends ObjectRT
   {
     $etap_id= poste('id');
       $turnir_id= poste('turnir_id');
+      $league_id = poste('league_id');
     $type_etap=0;
       $ist_type_etap=2;
       $sql = 'select * from '.T_TURNIRS.' t where t.id='.$turnir_id;
       $aTurnir= db_row($sql);
+      
+      // Определяем, является ли это командной лигой (по новому ТЗ)
+      $is_team_league = 0;
+      if (!empty($league_id)) {
+          $is_team_league = (int)db_field('SELECT is_team_league FROM `bs_leagues` WHERE id='.$league_id, 'is_team_league');
+      }
+      
+      // Старая логика для обратной совместимости
       $is_command = $aTurnir['is_command'];
       $command_name1= $_SESSION['command_name1'] = $aTurnir['command_name1'];
       $command_name2= $_SESSION['command_name2'] = $aTurnir['command_name2'];
     // если нет хоть одного названия то командный не командный
       $is_command = (!empty($is_command) && !empty($command_name1) && !empty($command_name2)) ? 1 : 0;
+      
    if (!empty($etap_id)) {
 $sql = 'select type_etap, (SELECT type_etap FROM bs_etaps_work e WHERE e.id=w.istochnik_posev) AS ist_type_etap from '.T_ETAPS. ' w where id = '.$etap_id;
 $aEtap = db_row($sql);
 $type_etap = $aEtap['type_etap'];
 $ist_type_etap = !empty($aEtap['ist_type_etap']) ?  $aEtap['ist_type_etap'] : 0;
-}
+    } else {
+    // При создании нового этапа проверяем, есть ли уже этапы с type_etap=66 в этом турнире
+    // Если есть, то это турнир "команда против команды"
+    if ($is_command) {
+        $sql = 'SELECT COUNT(*) as cnt FROM '.T_ETAPS.' WHERE turnir_id='.$turnir_id.' AND type_etap=66';
+        $cnt_team_vs_team = db_field($sql, 'cnt');
+        if ($cnt_team_vs_team > 0) {
+            $type_etap = 66; // Предполагаем, что новый этап тоже будет type_etap=66
+        }
+        // Для командных турниров по умолчанию используем формат "команда против команды"
+        $type_etap = 66;
+    }
+ }
 // описание полей таблицы модуля    
 $this->addFTL(array('name'=>'№','type'=>'number','width'=>'5')); 
 $this->addFTL(array('name'=>'Ред.','type'=>'edit','width'=>'5'));
@@ -44,7 +66,7 @@ $this->addFTL(array('name'=>'Місця по','type'=>'field','width'=>'9','name
     'table'=>T_ETAPS, 'parent_field'=>'istochnik_posev','out_result_field'=>'name_etap',
     'width'=>'200','name_field'=>'istochnik_posev'));
   $this->addFTL(array('name'=>'К-сть ігор','type'=>'get_func',
-          'function'=>'get_games',    'width'=>'100','name_field'=>'id'));
+          'function'=>'get_games',    'width'=>'100','name_field'=>'id','no_sql' => 1));
 $this->addFTL(array('name'=>'Видалити','type'=>'delete','width'=>'40','name_field'=>'name_etap'));
 //================================================================================================
 // описание полей формы модуля при редактировании или добавления
@@ -53,8 +75,9 @@ $this->addFTL(array('name'=>'Видалити','type'=>'delete','width'=>'40','n
   $this->addFF(array('name'=>'Назва етапу','required'=>'Поле обов"язкове','name_field'=>'name_etap','size'=>'20',
       'type'=>'ProstSprEdit','id_spis'=>'6'));
     //  $this->addFF(array('name'=>'Список етапів','name_field_virt'=>'spisetap','type'=>'ProstSpr', 'id_spis'=>'6'));
-   if ($is_command)
-       $this->addFF(array('name'=>'Варіанти для команд','name_field'=>'type_etap','type'=>'ProstSpr', 'id_spis'=>'5', 'bd_field'=>'type_etap'));
+    // Поле "Варіанти для команд" показываем для командных турниров
+    if ($is_command)
+        $this->addFF(array('name'=>'Варіанти для команд','name_field'=>'type_etap','type'=>'ProstSpr', 'id_spis'=>'5', 'bd_field'=>'type_etap'));
 
    else
       $this->addFF(array('name'=>'Варіанти','name_field'=>'type_etap','type'=>'ProstSpr','out_result_field'=>'name',
@@ -119,7 +142,7 @@ $this->addFTL(array('name'=>'Видалити','type'=>'delete','width'=>'40','n
                      
                     )
                     )); */
-    $this->addFF(array('name'=>'Кількість груп',  'name_field'=>'cnt_grp','size'=>'2','required_custom'=>'onlyNumber','maxlength'=>3,'field_show'=>$field_show));
+    $this->addFF(array('name'=>'Кількість груп',  'name_field'=>'cnt_grp','size'=>'2','required_custom'=>'onlyNumber','maxlength'=>3,'field_show'=>$field_show,'def'=>0));
 
   $this->addFF(array('name'=>'Місця з', 'required'=>'Поле обов"язкове', 'name_field'=>'mesto_from','size'=>'2','required_custom'=>'onlyNumber','maxlength'=>3));
  // $this->addFF(array('name'=>'Места по','required'=>'Поле объязательно','name_field'=>'mesto_to','size'=>'2','required_custom'=>'onlyNumber','maxlength'=>3));
@@ -163,10 +186,11 @@ $this->addFTL(array('name'=>'Видалити','type'=>'delete','width'=>'40','n
       $turnir_id = poste('turnir_id');
       $name_turnir =db_row('select name,dat  from `' . T_TURNIRS .
           '` where id=' . $turnir_id);
+      $turnir_name = htmlspecialchars(stripslashes((string)$name_turnir['name']), ENT_QUOTES, 'UTF-8');
       $date = new DateTimeImmutable($name_turnir['dat']);
       $tdat = $date->format('d.m.Y');
   self::$nameZ='';
- self::$nameZList='Етапи турніру "'.$name_turnir['name'].'" ('.$tdat.')';
+ self::$nameZList='Етапи турніру "'.$turnir_name.'" ('.$tdat.')';
  self::$nameZEdit='Редагування етапу';
  if ($_SESSION['gt']['user_rule']<=10)
  self::$submenu_list =array( 

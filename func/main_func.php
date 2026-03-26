@@ -483,6 +483,13 @@ function Ajax($masiv){
 	   //$masiv= $masiv+ array('ERRN_AJAX' => $_SESSION['error_predypreg']);
 		$_SESSION['error_predypreg']=false;
 	}
+   
+   // Очищаем буфер вывода перед формированием JSON, чтобы PHP notices/warnings не попали в ответ
+   // Это решает проблему с "Notice: Unknown: file created in the system's temporary directory"
+   while (ob_get_level()) {
+       ob_end_clean();
+   }
+   
    // замечен был глюк, что иногда проскакивала кодировка не utf-8, а старенькая WINDOWS-1251 потому проверям код на корректность utf8 если все впорядке то пропускаем, если проскочило то пітаемся преобразовать, конечно єто не ПАНАЦЕя от всех бед, но всеже единичній віход с положения, будем решать проблемі по мере поступления, продолбался с єтой проблемой 2 дня!!! с поиском подходящего решения 
  if (function_exists('iconv') && !empty($masiv['content']) && !utf8_compliant($masiv['content'])) {
        $masiv['content']= iconv('WINDOWS-1251','UTF-8',$masiv['content']);
@@ -546,12 +553,56 @@ function redirect_Ajax($module='',$post_href='',$status='NOT'){
 //exit;
 }
 function window_mess($mess=''){
-  Ajax(array('content' => '',
-         'message_user' => 'ERROR!',
-         'close_' => 0,
-         'java_script' => 'mess_modal("'.$mess.'");',
-        'post_return' => '',
-        )); exit;
+  // Устанавливаем сообщение через SystemClass
+  SystemClass::setMessage_user($mess);
+  
+  // Определяем текущие модуль и действие
+  // Сначала пытаемся получить из POST, затем из сессии
+  $module = poste('module');
+  if (empty($module)) {
+      $module = !empty($_SESSION['kernel']['module']) ? $_SESSION['kernel']['module'] : '';
+  }
+  
+  $action = !empty($_SESSION['kernel']['action']) ? $_SESSION['kernel']['action'] : 'list';
+  
+  // Формируем post_return для возврата на список
+  $post_return = '';
+  if (!empty($_SESSION['POST_RETURN'])) {
+      // Используем сохраненный post_return из сессии
+      $post_return = $_SESSION['POST_RETURN'];
+  } else if (!empty($module) && $module != 'home') {
+      // Формируем post_return только если модуль определен и не 'home'
+      $post_return = $module.'-list';
+      // Добавляем параметры из POST, если есть
+      if (!empty($_POST['turnir_id'])) {
+          $post_return .= '-&turnir_id='.$_POST['turnir_id'];
+      }
+      if (!empty($_POST['etap_id'])) {
+          $post_return .= '&etap_id='.$_POST['etap_id'];
+      }
+      if (!empty($_POST['league_id'])) {
+          $post_return .= '&league_id='.$_POST['league_id'];
+      }
+  }
+  // Если модуль не определен или 'home', оставляем post_return пустым,
+  // чтобы JavaScript не менял hash в адресной строке
+  
+  // ВСЕГДА устанавливаем close_ = '0' для window_mess, чтобы сообщения показывались в модальном окне
+  // и не закрывались автоматически
+  SystemClass::setClose_('0');
+  
+  // Отправляем AJAX ответ с сообщением и прерываем выполнение
+  Ajax(array(
+      'return_content_bool' => 'false',
+      'module' => $module ? $module : 'home',
+      'action' => $action,
+      'close_' => '0', // Всегда '0' для window_mess - показываем в модальном окне
+      'java_script' => '',
+      'MESS_AJAX' => $mess,
+      'message_user' => $mess,
+      'post_return' => $post_return
+  ));
+  // exit выполняется внутри Ajax()
 }
   //==================================================================================
  function array2json($arr) {
@@ -921,20 +972,33 @@ if ($html)
 			if (!empty($menuAll['Search_field']))
 				$s_return .= '<div class="search_fio_games">' . $menuAll['Search_field'] . ' </div> ';
 
-			$s_return .= $menuAll['Button_Menu'];
+			if (isset($menuAll['Button_Menu'])) {
+				$s_return .= is_string($menuAll['Button_Menu']) ? $menuAll['Button_Menu'] : '';
+			}
 
 		}
 
-		$menuAll_ = !empty($menuAll['Line_Menu']) ? $menuAll['Line_Menu'] : $menuAll;
-		$menuLineClass = !empty($menuAll['Line_Menu']) ? 'menuLine' : 'menuLineLeft';
+		$menuAll_ = !empty($menuAll['Line_Menu']) && is_array($menuAll['Line_Menu']) ? $menuAll['Line_Menu'] : array();
+		// Если Line_Menu нет, но $menuAll сам является массивом элементов меню, используем его
+		if (empty($menuAll_) && is_array($menuAll) && !empty($menuAll)) {
+			// Проверяем, является ли первый элемент массивом с ключами href и name (признак меню)
+			$firstKey = array_key_first($menuAll);
+			if (isset($menuAll[$firstKey]) && is_array($menuAll[$firstKey]) && isset($menuAll[$firstKey]['href']) && isset($menuAll[$firstKey]['name'])) {
+				$menuAll_ = $menuAll;
+			}
+		}
+		$menuLineClass = !empty($menuAll['Line_Menu']) && is_array($menuAll['Line_Menu']) ? 'menuLine' : 'menuLineLeft';
 		//	s($menuAll_);
 		$s_return .= '<div class="' . $menuLineClass . '">';
-		foreach ($menuAll_ as $key => $menu) {
-			$class = !empty($menu['class']) ? $menu['class'] : '';
-			$s_return .= '<a href="' . $menu['href'] . '" class="ajax_send ' . $class . '">' . $menu['name'] . '</a>
-				 ';
-
-		} //конец цикла fekv
+		if (is_array($menuAll_) && !empty($menuAll_)) {
+			foreach ($menuAll_ as $key => $menu) {
+				if (is_array($menu) && isset($menu['href']) && isset($menu['name'])) {
+					$class = !empty($menu['class']) ? $menu['class'] : '';
+					$s_return .= '<a href="' . htmlspecialchars($menu['href']) . '" class="ajax_send ' . htmlspecialchars($class) . '">' . htmlspecialchars($menu['name']) . '</a>
+						 ';
+				}
+			} //конец цикла fekv
+		}
 		$s_return .= '</div>';
 		if (!empty($menuAll['bigMenu'])) $s_return .= '</div>';
 
@@ -960,20 +1024,25 @@ if ($html)
 			if (!empty($menuAll['Search_field']))
 				$s_return.='<div class="search_fio_games">'.$menuAll['Search_field'].' </div> ';
 
-			$s_return.=$menuAll['Button_Menu'];
+			if (isset($menuAll['Button_Menu'])) {
+				$s_return .= is_string($menuAll['Button_Menu']) ? $menuAll['Button_Menu'] : '';
+			}
 
 		}
 
-		   $menuAll_ = !empty($menuAll['Line_Menu']) ? $menuAll['Line_Menu'] :$menuAll;
-		   $menuLineClass = !empty($menuAll['Line_Menu']) ? 'menuLine': 'menuLineLeft';
+		   $menuAll_ = !empty($menuAll['Line_Menu']) && is_array($menuAll['Line_Menu']) ? $menuAll['Line_Menu'] : array();
+		   $menuLineClass = !empty($menuAll['Line_Menu']) && is_array($menuAll['Line_Menu']) ? 'menuLine': 'menuLineLeft';
 	   //	s($menuAll_);
 		   $s_return.='<div class="'.$menuLineClass.'">';
-			foreach ($menuAll_ as $key => $menu) {
-			    $class = !empty($menu['class']) ? $menu['class'] : '';
-			    $s_return .= '<a href="'.$menu['href'].'" class="ajax_send '.$class.'">'.$menu['name'].'</a>
-				 ';
-
-         		} //конец цикла fekv
+		   if (is_array($menuAll_)) {
+				foreach ($menuAll_ as $key => $menu) {
+					if (is_array($menu) && isset($menu['href']) && isset($menu['name'])) {
+						$class = !empty($menu['class']) ? $menu['class'] : '';
+						$s_return .= '<a href="'.htmlspecialchars($menu['href']).'" class="ajax_send '.htmlspecialchars($class).'">'.htmlspecialchars($menu['name']).'</a>
+							 ';
+					}
+				} //конец цикла fekv
+		   }
 			$s_return.='</div>';
 		   if (!empty($menuAll['bigMenu'])) $s_return.='</div>';
 
@@ -1051,21 +1120,25 @@ $MenuAr = !empty($menu) ? $menu : $globMenuArr_avtor;
 else
 $MenuAr = !empty($menu) ? $menu : $globMenuArr;
 
-if (!empty($MenuAr)) {  
+if (!empty($MenuAr)) {
+	$league_id = poste('league_id');
 
-            
        //echo 'dsksdll'; 
     foreach ($MenuAr as $menu){
+	//	s($menu['module'].' $thisActiveModule='.$thisActiveModule);
        $active=''; $id_dop='';
       if ($_SESSION['gt']['user_rule']>9 && $menu['module']=='settings')  continue;
       if ($_SESSION['gt']['user_rule']!=3 && $menu['module']=='visits')  continue;
       if ($_SESSION['gt']['user_rule']!=3 && $menu['module']=='sprtov')  continue;
       if ($_SESSION['gt']['user_rule']!=3 && $menu['module']=='shop')  continue;
-       if (!empty($menu['module']) && ($thisActiveModule==$menu['module'])) $active='active';
-       if (!empty($menu['module']) && $menu['module'] == 'turnirs'
-		   && (($thisActiveModule=='etapresult') || ($thisActiveModule=='turnirsplayers') || ($thisActiveModule=='reiting') || ($thisActiveModule=='tables'))
+       if (!empty($menu['module']) && ($thisActiveModule==$menu['module']) && empty($league_id)) $active='active';
+       if (!empty($menu['module']) && $menu['module'] == 'turnirs' && empty($league_id)
+		   && (($thisActiveModule=='turnirs') ||($thisActiveModule=='etaps') ||($thisActiveModule=='etapresult') || ($thisActiveModule=='turnirsplayers') || ($thisActiveModule=='reiting') || ($thisActiveModule=='tables'))
 	   ) $active='active';
-
+       // для лиг
+		if (!empty($menu['module']) && $menu['module'] == 'leagues' && !empty($league_id)
+			&& (($thisActiveModule=='turnirs') ||($thisActiveModule=='infoleagues') ||($thisActiveModule=='topplayersleague') ||($thisActiveModule=='teamleaguetable') ||($thisActiveModule=='etapplayers')||($thisActiveModule=='etaps') ||  ($thisActiveModule=='etapresult') || ($thisActiveModule=='turnirsplayers') || ($thisActiveModule=='turnirsteams') || ($thisActiveModule=='reiting') || ($thisActiveModule=='tables'))
+		) $active='active';
       // if (!empty($menu['module']) && ('profile'==$menu['module'])) $menu['href'].='-id='.$_SESSION['gt']['id']; 
          if (!empty($menu['dop']) && ('avtoris'==$menu['dop']))
          {
@@ -1627,10 +1700,19 @@ function date_for_firebird_format($date) {
 	return substr($date,8,2).'.' .substr($date,5,2).'.'.substr($date,0,4);
 }
 function date_for_sql_format($date) {
-  //  s($date);
-  //	return $date;
-// вот  так выводит 2019-01-26
-	return substr($date,6,4).'-' .substr($date,3,2).'-' .substr($date,0,2);
+  $date = trim((string)$date);
+  if ($date === '' || $date === '--') {
+    return '';
+  }
+  // Уже в SQL-формате
+  if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+    return $date;
+  }
+  // Формат dd.mm.yyyy
+  if (preg_match('/^(\d{2})\.(\d{2})\.(\d{4})$/', $date, $m)) {
+    return $m[3].'-'.$m[2].'-'.$m[1];
+  }
+  return '';
 }
 // роздать все права указной папке и вложеным папкам и файлам рекурсивно
 function chmod_R($path, $perm) {

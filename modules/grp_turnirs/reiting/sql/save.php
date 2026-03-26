@@ -9,8 +9,10 @@ $form = is_array($form) ? $form : [];
   $no_send= !empty($form['no_send']) ? 1 : 0;
   $break_1= !empty($form['break_1']) ? 1 : 0;
   $break_2= !empty($form['break_2']) ? 1 : 0;
-  $set1 = $form['set_1']; 
-$set2 = $form['set_2']; 
+$set1 = isset($form['set_1']) ? $form['set_1'] : '';
+$set2 = isset($form['set_2']) ? $form['set_2'] : '';
+$set1_norm = ($set1 === 'W') ? 3 : (($set1 === 'L') ? 0 : ((trim((string)$set1) === '') ? 0 : (int)$set1));
+$set2_norm = ($set2 === 'W') ? 3 : (($set2 === 'L') ? 0 : ((trim((string)$set2) === '') ? 0 : (int)$set2));
 $diff1 =0 ;
 $diff2 = 0;
  // s($_POST);
@@ -47,7 +49,7 @@ $reiting2 = (!empty($reiting2)  && $reiting2>0) ? $reiting2 : $start2;
   if ($break_1==0 && $break_2==0) { 
 
 // если победил 1 игрок
-if ($set1>$set2) {
+if ($set1_norm > $set2_norm) {
     // проверяем не больше ли ретинг 100
     if ($reiting1-$reiting2<100) {
         $diff1 = (100-($reiting1-$reiting2))/WIN_KOEF;
@@ -64,7 +66,7 @@ if ($set1>$set2) {
 }
 
 // если победил 2 игрок
-if ($set2>$set1) {
+if ($set2_norm > $set1_norm) {
     // проверяем не больше ли ретинг 100
     if ($reiting2-$reiting1<100) {
         $diff2 = (100-($reiting2-$reiting1))/WIN_KOEF;
@@ -81,20 +83,41 @@ if ($set2>$set1) {
 }
 } // end если не было отмен
 
-$set1 = $set1=='' ? $set1=0 :$set1;
-$set2 = $set2=='' ? $set2=0 :$set2;
+$set1 = ($set1 === '') ? 0 : $set1;
+$set2 = ($set2 === '') ? 0 : $set2;
 $end_game = ''; $table='';
-if (($set1>0 or $set2 >0)or ($break_1>0 or $break_2>0)) 
-{
-   $end_game = date('H:i:s'); 
-   $table= ', table_game=0';
+
+// Проверяем, является ли это командной игрой
+$is_team_game = false;
+if (!empty($id) && $id > 0) {
+    $game_info = db_row('SELECT match_id, pair_number FROM '.T_REITING.' WHERE id='.$id);
+    // Командная игра: есть match_id и pair_number = 0 или NULL
+    if (!empty($game_info['match_id']) && (empty($game_info['pair_number']) || $game_info['pair_number'] == 0)) {
+        $is_team_game = true;
+    }
+}
+
+if ($is_team_game) {
+    // Для командных игр игра завершается только когда одна из команд имеет 3 победы
+    $set1_int = $set1_norm;
+    $set2_int = $set2_norm;
+    if (($set1_int == 3 || $set2_int == 3) || ($break_1>0 or $break_2>0)) {
+        $end_game = date('H:i:s'); 
+        $table= ', table_game=0';
+    }
+} else {
+    // Для обычных игр - старая логика (любой счет > 0 означает завершение)
+    if (($set1_norm > 0 or $set2_norm > 0) || ($break_1>0 or $break_2>0)) {
+        $end_game = date('H:i:s'); 
+        $table= ', table_game=0';
+    }
 }
 
 $where = 'pl_id_1='.$form['pl_id_1'].',  pl_id_2='.$form['pl_id_2'].',turnir_id='.$turnir_id.', rt_id_1_beg='.$reiting1.', 
 rt_id_2_beg='.$reiting2.',diff_1='.$diff1.', diff_2='.$diff2.',set_1="'.$set1.'",set_2="'.$set2.'",no_send='.$no_send.',
 break_1='.$break_1.', break_2='.$break_2.', end_game= "'.$end_game.'"'.$table;
 //s('Update '.T_REITING.' SET '.$where .' where id='.$id);
-$where_log = 'pl_id_1='.$form['pl_id_1'].',  pl_id_2='.$form['pl_id_2'].',turnir_id='.$turnir_id.',set_1="'.$set1.'",set_2="'.$set2.'",
+$where_log = 'pl_id_1='.$form['pl_id_1'].',  pl_id_2='.$form['pl_id_2'].',turnir_id='.$turnir_id.',set_1="'.$set1_norm.'",set_2="'.$set2_norm.'",
 break_1='.$break_1.', break_2='.$break_2.', end_game= "'.$end_game.'"'.$table;
 if (!empty($id) && $id>0)
 {
@@ -114,6 +137,11 @@ else
     write_log_reiting('reiting_save_ins',$where_log,'insert',0);
     db_query('INSERT INTO '.T_REITING.' SET '.$where);
 
+}
+
+// Запускаем триггер пересчета после сохранения (на случай, если edit_ok не был вызван)
+if (file_exists('modules/grp_turnirs/reiting/triger/after.edit_ok.php')) {
+    include_once 'modules/grp_turnirs/reiting/triger/after.edit_ok.php';
 }
 
 

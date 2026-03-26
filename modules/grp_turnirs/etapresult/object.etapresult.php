@@ -8,14 +8,15 @@ class EtapresultObject extends ObjectRT
   function init ()
   {
 
- 
+      $league_id = poste('league_id');
+      $menu_league = !empty($league_id) ? '&league_id='.$league_id : '';
   self::$nameZ='"Результаты этапов::';   
  self::$nameZList='';
       if ($_SESSION['is_mobile'] ){
 
-          SystemClass::$Java_script_module='show_zag_left("#turnirs-list");';
+          SystemClass::$Java_script_module='show_zag_left("#turnirs-list'.$menu_league.'");';
       }else{
-          $show_zag_left='show_zag_center();show_zag_left_big("#turnirs-list");';
+          $show_zag_left='show_zag_center();show_zag_left_big("#turnirs-list'.$menu_league.'");';
           SystemClass::$Java_script_module=$show_zag_left;
       }
 if ($_SESSION['gt']['user_rule']<10)
@@ -30,6 +31,8 @@ if ($_SESSION['gt']['user_rule']<10)
    // 'back' => array('module' => 'turnirs', 'action' => 'list'),
     );
  //s('ttyyy');
+
+
  $this->getSubMenu2Data();
  /*self::$subMenu2 = array('1'=>
                         array(
@@ -51,16 +54,18 @@ if ($_SESSION['gt']['user_rule']<10)
  */
       self::$nameZ='Гравці турніру ';
       self::$nameZList='(статистика гравців)';
-self::InitMainMenu();
-  // s(self::$submenu_list); 
-  self::$aParent= array('name_field'=>'turnir_id',
-                  'table'=>T_TURNIRS,
-                  'type'=>'Hidden'
-                  );
+
+      self::InitMainMenu();
+      self::$aParent[0]= array('name_field'=>'turnir_id',  'table'=>T_TURNIRS,  'type'=>'Hidden'    );
+      self::$aParent[1]= ['name_field'=>'league_id', 'type'=>'Hidden'];
+
+
   }
   function getSubMenu2Data()
   { 
     $etap_id = poste('etap_id');
+    $league_id = poste('league_id');
+    $menu_league = !empty($league_id) ? '&league_id='.$league_id : '';
     $submenu2 = array();
     $sql = 'SELECT * FROM `'.T_ETAPS.'` where turnir_id='.poste('turnir_id');
       $etapsArr = db_list($sql);
@@ -77,7 +82,7 @@ self::InitMainMenu();
            else           
              if (!empty($etap_id) && $val['id']==$etap_id)  $submenu2Temp['class'] = 'black_color_active'; else   $submenu2Temp['class'] = 'nonactive_menu';
          
-           $submenu2Temp['href'] = '#etapresult-show-etap_id='.$val['id'].'&turnir_id='.poste('turnir_id'); 
+           $submenu2Temp['href'] = '#etapresult-show-etap_id='.$val['id'].'&turnir_id='.poste('turnir_id').$menu_league;
            $submenu2[] =$submenu2Temp;
         }
       }

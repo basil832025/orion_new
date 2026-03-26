@@ -237,7 +237,27 @@ class formField
         $w_input = ($_SESSION['is_mobile'] ) ? '95' : '80';
 
         // найдем нужную картинку  в базе
-        $sql = 'select f.name,f.id from '.get_table_name($this->module).' m,'.T_FILES.' f where 
+        // Используем ObjectRT::getTableModule() если доступно, иначе get_table_name для обратной совместимости
+        $table_name = ObjectRT::getTableModule();
+        if (empty($table_name)) {
+            $table_name = get_table_name($this->module);
+        }
+        // Проверяем, что id не пустой (для новой записи не ищем картинку)
+        if (empty($this->id) || $this->id == 0) {
+            $this->javaScrArr[] = 'fileinput_init("","'.$this->thVdata['name_field'].'")';
+            $this->shablon_text .= '<tr  >
+        <td align="' . (!empty($this->thVdata['align_left_col']) ? $this->
+            thVdata['align_left_col'] : 'right') . '"
+         width="' . (!empty($this->thVdata['width_left_col']) ? $this->thVdata['width_left_col'] :
+            '280') . 'px">' . $this->thVdata['name'] . '</td>
+        <td valign="top" width="'.$w_input.'%"> ' . upload_img((!empty($this->aData[$this->
+            thVdata['name_field']]) ? $this->aData[$this->thVdata['name_field']] : ''), $this->
+            id, $this->thVdata['name_field'], 2, 180, 180,$this->module) . '
+        </td>
+        </tr>';
+            return;
+        }
+        $sql = 'select f.name,f.id from `'.$table_name.'` m,'.T_FILES.' f where 
           f.id=m.'.$this->thVdata['name_field'].' and   m.id='.$this->id;
        $aFile=db_row($sql);
        if (!empty($aFile))
@@ -430,11 +450,35 @@ $this->shablon_text .= '</div></td>
     }
     function getFieldHidden()
     {
-           $this->shablon_text .= '<input type="hidden" name="' . $this->thVdata['name_field'] .
-            '" value="' . (!empty($this->thVdata['post_field']) && !empty($this->aData[$this->
-            thVdata['post_field']]) ? $this->aData[$this->thVdata['post_field']] : (!empty($this->
-            aData[$this->thVdata['name_field']]) ? $this->aData[$this->thVdata['name_field']] :
-            '')) . '"/>';
+        // Получаем значение из aData, post_field, или из POST
+        $field_value = '';
+        if (!empty($this->thVdata['post_field']) && array_key_exists($this->thVdata['post_field'], $this->aData)) {
+            $field_value = $this->aData[$this->thVdata['post_field']];
+        } elseif (array_key_exists($this->thVdata['name_field'], $this->aData)) {
+            $field_value = $this->aData[$this->thVdata['name_field']];
+        } else {
+            // Если значения нет в aData, пытаемся получить из POST (для скрытых полей turnir_id, league_id и т.д.)
+            $field_value = poste($this->thVdata['name_field']);
+            // Если нет в POST, пытаемся получить из сессии (для teamplayers)
+            if (empty($field_value) && $this->module == 'teamplayers') {
+                if ($this->thVdata['name_field'] == 'turnir_id' && !empty($_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'])) {
+                    $field_value = $_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'];
+                } elseif ($this->thVdata['name_field'] == 'league_id' && !empty($_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'])) {
+                    $field_value = $_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'];
+                }
+            }
+        }
+
+        if (($field_value === false || $field_value === '') && isset($this->thVdata['def'])) {
+            $field_value = $this->thVdata['def'];
+        }
+
+        if ($field_value === false) {
+            $field_value = '';
+        }
+        
+        $this->shablon_text .= '<input type="hidden" name="' . $this->thVdata['name_field'] .
+            '" value="' . htmlspecialchars($field_value) . '"/>';
     }
       function getFieldSelect()
     {

@@ -8,10 +8,12 @@ class RaschetAction extends ActionModule
   protected  $is_first = 1; // первый раз на турнире для измен стартового рейтинга
   protected  $subMenu = array();
   protected  $Java_script = ''; // джаваскрипт функции для данного действия например иницлизация функции календаря, или редактора контента
-   
+
     function init ()
     {
-       // s('tyt+rr');
+        $turnir_id = poste('turnir_id');
+        $this->id = !empty($this->id) ? $this->id : $turnir_id;
+      //  s('tyt+rr'.$this->id);
       //  s(ROOT.'func/raschet_func.php');
         include_once ROOT.'func/raschet_func.php';
         if (($_SESSION['gt']['user_rule']>=10 || empty($_SESSION['gt']['user_login'])))
@@ -42,10 +44,10 @@ class RaschetAction extends ActionModule
         //   s($_SESSION['RASSCHET']);
         if (empty($_SESSION['RASSCHET']['TURNIRS'])) {
 
-            $sql = 'select id,date_create,dat,virt from ' . T_TURNIRS . ' r WHERE (r.date_raschet IS not null or id=' . $this->id . ')
+            $sql = 'select id,date_create,dat,virt,league_id,COALESCE((SELECT l.is_team_league FROM bs_leagues l WHERE id=r.league_id),0) AS is_team_league from ' . T_TURNIRS . ' r WHERE (r.date_raschet IS not null or id=' . $this->id . ')
         AND dat>=(SELECT dat FROM ' . T_TURNIRS . ' WHERE id =' . $this->id . ') 
         order by dat,id';
-             s($sql);
+           //  s($sql);
             $aTurnirs = db_list($sql);
             $_SESSION['RASSCHET']['TURNIRS'] = $aTurnirs;
          //   s($_SESSION['RASSCHET']['TURNIRS'] );
@@ -79,7 +81,9 @@ class RaschetAction extends ActionModule
                     raschet_shtraph($turnir['id']);
                 } else
                 {
-                    sql_raschet($turnir['id']);
+                    if ($turnir['is_team_league']>0) add_players_to_command_turnirs($turnir['id']);
+
+                    sql_raschet($turnir['id'],$turnir['is_team_league']);
                 }
                 // запишем дату и время когда делали расчет первый раз в date_create потом date_last_modif
                 $set = !empty($turnir['date_create']) ? 'date_last_modif' : 'date_create';
@@ -87,6 +91,9 @@ class RaschetAction extends ActionModule
                 db_query($sql);
                 // расчитать места
                 set_mesta_turnir($turnir['id']);
+                // рассчитаем очки для лиги
+                if (!empty($turnir['league_id'])) set_points_turnir($turnir['league_id'],$turnir['is_team_league']);
+
                 $nRow++;
                 $prc = round($_SESSION['RASSCHET']['nowRow'] * 100 / $all_rows); //
 
@@ -98,7 +105,7 @@ class RaschetAction extends ActionModule
         }
 //        $this->sql_raschet();
         // расчет мест для игроков
-         $sql='select * from '.T_PLAYERS.' where  ispara=0 and not_use=0 order by reiting desc';
+         $sql='select * from '.T_PLAYERS.' where  ispara=0 and not_use=0 and is_team=0 order by reiting desc';
      //   else $sql='select * from '.T_PLAYERS.' where ispara=0 order by reiting desc';
         $aMestaPlayers=db_list($sql);
         $num=1;
@@ -137,13 +144,22 @@ class RaschetAction extends ActionModule
 
       function list_show_rs()
     {   SystemClass::setAction('anyaction');
-        $sql='SELECT virt FROM ' . T_TURNIRS . ' WHERE id =' . $this->id . '';
-        $virt = db_field($sql,'virt');
+        $sql='SELECT id,date_create,dat,virt,league_id,COALESCE((SELECT l.is_team_league FROM bs_leagues l WHERE id=r.league_id),0) AS is_team_league FROM ' . T_TURNIRS . ' r WHERE id =' . $this->id . '';
+        $turnir = db_row($sql);
+      //  s($sql);
+     //   s($turnir);
+        $virt = $turnir['virt'];
+        $Command = $turnir['is_team_league'];
+      //  s('$Command='.$Command);
+        $league_id = $turnir['league_id'];
         if ($virt==1){
             SystemClass::setModule('turnirs');
             $post_return = 'turnirs-list';
-        }else
-        {
+        }else if ($Command>0) {
+            SystemClass::setModule('turnirsplayers');
+            $post_return = 'turnirsplayers-list-&turnir_id='.$this->id.'&league_id='.$league_id;
+
+        }else{
             SystemClass::setModule('turnirsplayers');
             $post_return = 'turnirsplayers-list-turnir_id='.$this->id;
         }

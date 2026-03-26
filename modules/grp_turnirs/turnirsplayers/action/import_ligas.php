@@ -32,6 +32,9 @@ protected  $ligas_session = '';
             exit;
             return;
         }
+        $turnir_id = poste('id');
+        $league_id = poste('league_id');
+        $this->id = !empty($this->id) ? $this->id : $turnir_id;
         $sql='select * from '.T_TURNIRS.' where id='.$this->id;
         $aTurnir = db_row($sql);
         if (!empty($aTurnir['is_no_send_ligas'])){
@@ -51,7 +54,7 @@ protected  $ligas_session = '';
     }
     function put_no_reiting(){
         // получим игроков без рейтинга и загоним их в массив
-        $sql = 'SELECT player_id FROM bs_turnirplayers t, bs_players p WHERE p.id=t.player_id AND p.reiting_ukraine=0 AND t.turnir_id='.$this->id;
+        $sql = 'SELECT player_id FROM bs_turnirplayers t, bs_players p WHERE p.id=t.player_id and p.is_team=0  AND p.reiting_ukraine=0 AND t.turnir_id='.$this->id;
         $aNoReiting_ = db_list($sql);
         $aNoReiting = [];
         if (!empty($aNoReiting_)){
@@ -62,7 +65,7 @@ protected  $ligas_session = '';
         }
         s($aNoReiting);
         // ищем игроков с 0, которые выиграли у чуваков с рейтингом
-        $sql = 'SELECT player_id FROM bs_turnirplayers t, bs_players p WHERE p.id=t.player_id AND p.reiting_ukraine=0 
+        $sql = 'SELECT player_id FROM bs_turnirplayers t, bs_players p WHERE p.id=t.player_id and p.is_team=0 AND p.reiting_ukraine=0 
 AND exists(SELECT * FROM bs_turnirplayers t1, bs_players p1, bs_reiting r WHERE p1.id=t1.player_id 
 AND p1.reiting_ukraine>0 AND t1.turnir_id=t.turnir_id AND r.turnir_id=t1.turnir_id AND r.lose_player=t1.player_id 
 AND r.win_player=t.player_id AND (r.set_1<>"W" and r.set_1<>"L"))
@@ -103,7 +106,7 @@ AND t.turnir_id='.$this->id;
     function addNoReitPlayers($player){
         $this->aWinReit[$player]=1;
     //    s($this->aWinReit);
-        $sql = 'SELECT player_id FROM bs_turnirplayers t, bs_players p WHERE p.id=t.player_id AND p.reiting_ukraine=0 
+        $sql = 'SELECT player_id FROM bs_turnirplayers t, bs_players p WHERE p.id=t.player_id and p.is_team=0 AND p.reiting_ukraine=0 
 AND exists(SELECT * FROM bs_turnirplayers t1, bs_players p1, bs_reiting r WHERE p1.id=t1.player_id 
 AND p1.reiting_ukraine=0 AND t1.turnir_id=t.turnir_id AND r.turnir_id=t1.turnir_id AND r.win_player=t.player_id 
 AND r.lose_player='.$player.' AND (r.set_1<>"W" and r.set_1<>"L"))
@@ -139,7 +142,7 @@ AND t.turnir_id='.$this->id ;
         $aTurn=db_row($sql);
         if (!empty($aTurn['turnir_id_ligas']) )
         { //&& !empty($aTurn['ligas_session'])
-            $sql = 'SELECT p.* FROM '.T_PLAYERS.' p, '.T_TURNIR_PLAYERS.' t where t.player_id=p.id and new_player=0 and t.turnir_id='.$this->id;
+            $sql = 'SELECT p.* FROM '.T_PLAYERS.' p, '.T_TURNIR_PLAYERS.' t where t.player_id=p.id and p.is_team=0 and new_player=0 and t.turnir_id='.$this->id;
       //s($sql);
           $aPlayers = db_list($sql);
             foreach($aPlayers as $aPlay)
@@ -211,7 +214,7 @@ curl_close($ch);
     }
     function import_ligas()
     {
-         $sql = 'SELECT p.* FROM '.T_PLAYERS.' p, '.T_TURNIR_PLAYERS.' t where t.player_id=p.id and new_player=0 and t.turnir_id='.$this->id;
+         $sql = 'SELECT p.* FROM '.T_PLAYERS.' p, '.T_TURNIR_PLAYERS.' t where t.player_id=p.id and p.is_team=0 and new_player=0 and t.turnir_id='.$this->id;
        // s($sql);//exit;      
        $aPlayers = db_list($sql);
          foreach($aPlayers as $Player)
@@ -266,7 +269,7 @@ $aPlayer['sex'] = isset($aPlayer['sex'])? $aPlayer['sex'] : 'm';
         SystemClass::setModule('turnirsplayers');
      //  $this->Java_script='reload_page_();';
        parent::list_show();
-          $post_return = 'turnirsplayers-list-turnir_id='.$this->id;
+          $post_return = 'turnirsplayers-list-turnir_id='.$this->id.'&league_id='.poste('league_id');
         SystemClass::setPost_return($post_return);
       
         // SystemClass::setJava_script($this->Java_script);

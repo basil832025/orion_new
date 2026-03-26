@@ -48,13 +48,22 @@ class SqlSelect
  function workFields($aCols=array())
  {
     $this->fields_sql .= ObjectRT::getTableModuleSynon().'.id';
+    
+    // Для модуля reiting добавляем match_id и pair_number, если их нет в полях
+    if ($this->module == 'reiting' && $this->table_module == T_REITING) {
+        $this->fields_sql .= ', '.ObjectRT::getTableModuleSynon().'.match_id';
+        $this->fields_sql .= ', '.ObjectRT::getTableModuleSynon().'.pair_number';
+    }
+    
             if ($aCols) {
                   // пройдемся по заголовкам таблицы
                 foreach ($aCols as $val) {
                     $this->type_field = !empty($val['type']) ? strtolower($val['type']) : 'text';
                     
- if ($this->type_field=='number' or $this->type_field=='edit' or $this->type_field=='vibor'
- or $this->type_field=='delete' or $this->type_field == 'addsub' or $this->type_field == 'sort' or $this->type_field == 'anyaction' or $this->type_field == 'math_oper') continue;
+if ($this->type_field=='number' or $this->type_field=='edit' or $this->type_field=='vibor'
+or $this->type_field=='delete' or $this->type_field == 'addsub' or $this->type_field == 'sort' or $this->type_field == 'anyaction' or $this->type_field == 'math_oper' or $this->type_field == 'add_players' or $this->type_field == 'expand_collapse' or $this->type_field == 'expand_match') continue;
+ // Пропускаем поля, которые не должны попадать в SQL
+ if (!empty($val['no_sql'])) continue;
  //s($this->type_field);
                     $this->BDfield = !empty($val['bd_field']) ? $val['bd_field'] :'';
                     $this->field = !empty($val['bd_field']) ? $val['bd_field'] :(!empty($val['name_field']) ? ObjectRT::getTableModuleSynon().'.'.$val['name_field'] : '');
@@ -206,14 +215,74 @@ class SqlSelect
    }else
    {
     if ($this->sql=='')  $this->getSql();
-   $this->workLimitOrCntElem(); // получаем общее количество элементов и количество страниц вывода
-  // s($this->sql);
-   return db_list(
-    $this->sql 
-   .($this->order ? ' ORDER BY '.$this->order : '')
-   .($this->group ? ' GROUP BY '.$this->group : '')
-   .($this->limit ? ' '.$this->limit : '')
-   );
+
+    $is_team_league = !empty($_SESSION['reiting']['is_team_league']) ? (int)$_SESSION['reiting']['is_team_league'] : 0;
+    if ($this->module == 'reiting' && $this->table_module == T_REITING && $is_team_league) {
+        $synon = ObjectRT::getTableModuleSynon();
+        $team_filter = ' AND ('.$synon.'.pair_number IS NULL OR '.$synon.'.pair_number=0)';
+
+        $cnt_sql = 'SELECT COUNT(*) as cnt FROM ('.$this->sql.$team_filter.') as cnt_table';
+        $this->cntElem = db_field($cnt_sql,'cnt');
+
+        if(intval($this->cntElem/$this->page_items) == $this->cntElem/$this->page_items)
+            $this->page_count = $this->cntElem/$this->page_items;
+        else 
+            $this->page_count = intval($this->cntElem/$this->page_items)+1;
+
+        $this->page_number = $this->page_number<=$this->page_count?$this->page_number:1;
+        $this->limit = " LIMIT ".($this->page_number-1)*$this->page_items.",".$this->page_items;
+
+        $teams_sql = $this->sql
+            .$team_filter
+            .($this->order ? ' ORDER BY '.$this->order : '')
+            .($this->group ? ' GROUP BY '.$this->group : '')
+            .($this->limit ? ' '.$this->limit : '');
+        $teams = db_list($teams_sql);
+        if (empty($teams)) {
+            return array();
+        }
+
+        $team_ids = array();
+        $match_ids = array();
+        foreach ($teams as $team_row) {
+            if (!empty($team_row['id'])) {
+                $team_ids[] = (int)$team_row['id'];
+            }
+            if (!empty($team_row['match_id'])) {
+                $match_ids[] = $team_row['match_id'];
+            }
+        }
+        $team_ids = array_values(array_unique($team_ids));
+        $match_ids = array_values(array_unique($match_ids));
+
+        $team_ids_sql = !empty($team_ids) ? implode(',', $team_ids) : '0';
+        $match_ids_sql = '';
+        if (!empty($match_ids)) {
+            $match_ids_escaped = array_map(function($val){ return '"'.addslashes($val).'"'; }, $match_ids);
+            $match_ids_sql = implode(',', $match_ids_escaped);
+        }
+
+        $page_filter = ' AND ('.$synon.'.id IN ('.$team_ids_sql.')';
+        if (!empty($match_ids_sql)) {
+            $page_filter .= ' OR ('.$synon.'.pair_number > 0 AND '.$synon.'.match_id IN ('.$match_ids_sql.'))';
+        }
+        $page_filter .= ')';
+
+        $final_sql = $this->sql
+            .$page_filter
+            .($this->order ? ' ORDER BY '.$this->order : '')
+            .($this->group ? ' GROUP BY '.$this->group : '');
+
+        return db_list($final_sql);
+    }
+
+    $this->workLimitOrCntElem(); // получаем общее количество элементов и количество страниц вывода
+   // s($this->sql);
+    $final_sql = $this->sql 
+    .($this->order ? ' ORDER BY '.$this->order : '')
+    .($this->group ? ' GROUP BY '.$this->group : '')
+    .($this->limit ? ' '.$this->limit : '');
+    return db_list($final_sql);
    }
   } 
   function resultRow()
@@ -226,10 +295,17 @@ class SqlSelect
   }
   function workLimitOrCntElem()
   {
-    
-     $sql = explode('FROM',$this->sql);
-      $sql = "SELECT COUNT(*) as cnt  FROM ".$sql[1];
-      $this->cntElem = db_field($sql,'cnt');
+      // Для списка турниров считаем количество через упрощенный COUNT без
+      // тяжелых вычисляемых полей из SELECT (ускоряет пагинацию).
+      if ($this->module == 'turnirs' && $this->table_module == T_TURNIRS) {
+          $sql = 'select count(*) as cnt FROM  `'.$this->table_module.'` '.ObjectRT::getTableModuleSynon().' '
+              .$this->getTableUnions()
+              .' where 1=1 ' .($this->where ?  '  '.$this->where : '').$this->fieldLinksUnion;
+          $this->cntElem = db_field($sql,'cnt');
+      } else {
+          $sql = "SELECT COUNT(*) as cnt FROM (".$this->sql.") as cnt_table";
+          $this->cntElem = db_field($sql,'cnt');
+      }
   // s('$this->cntElem='.$this->cntElem);
   /*    
      $this->cntElem = db_field(
@@ -254,9 +330,16 @@ class SqlSelect
    }
   function setOrder($field,$sort = 'asc',$sort_default='')
   {
-      $sort_default=$sort_default ? ','.$sort_default :'';
-    if ($field)
-    $this->order .= ' '.$field.' '.$sort.$sort_default;
+      // Для модуля reiting с командными турнирами используем специальную сортировку
+      if ($this->module == 'reiting' && $this->table_module == T_REITING && !empty($sort_default)) {
+          // Используем только sort_default для правильной группировки командных игр
+          // Игнорируем поле сортировки для командных турниров
+          $this->order = $sort_default;
+      } else {
+          $sort_default=$sort_default ? ','.$sort_default :'';
+          if ($field)
+              $this->order .= ' '.$field.' '.$sort.$sort_default;
+      }
   } 
   function setFields($Fields)
   {

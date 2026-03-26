@@ -47,6 +47,7 @@ class SetGameToTableAction extends ActionModule
         $turnir_id = poste('turnir_id');  
         $table_id = poste('table_id');  
       //  $etap_id = poste('etap_id');  
+        $is_team_league = (int)db_field('SELECT l.is_team_league FROM `bs_turnirs` t LEFT JOIN `bs_leagues` l ON l.id=t.league_id WHERE t.id='.(int)$turnir_id.' LIMIT 1', 'is_team_league');
      
      /*
      and not exists(select * 
@@ -54,20 +55,59 @@ class SetGameToTableAction extends ActionModule
 and r2.table_game>0 and (r.pl_id_1=r2.pl_id_1 or r.pl_id_1=r2.pl_id_2 or r.pl_id_2=r2.pl_id_2 or 
 r.pl_id_2=r2.pl_id_1) )
      */   
+        // Исключаем командные игры (где оба игрока имеют is_team = 1)
+        // Для столов должны показываться только игры между отдельными игроками
         $sql='
         select id,(select  p.name from  bs_players p where p.id=r.pl_id_1) as name1,
         (select  p.name from  bs_players p where p.id=r.pl_id_2) as name2,
-  group_num, type_game, olimp16_num, etap_prim,
+  group_num, type_game, olimp16_num, etap_prim, r.match_id, r.etap_id, r.pl_id_1, r.pl_id_2,
   (select count(*) 
   from '.T_REITING.' r2  where  r2.turnir_id='.$turnir_id.' and r2.pl_id_1>0 and r2.pl_id_2>0 and r2.set_1=0 and r2.set_2=0
 and r2.table_game>0 and (r.pl_id_1=r2.pl_id_1 or r.pl_id_1=r2.pl_id_2 or r.pl_id_2=r2.pl_id_2 or 
-r.pl_id_2=r2.pl_id_1) ) as ogid,
+ r.pl_id_2=r2.pl_id_1) ) as ogid,
 (select w.name_etap from bs_etaps_work w where w.id=r.etap_id ) as name_etap,table_game      
-  from '.T_REITING.' r  where  r.turnir_id='.$turnir_id.' and pl_id_1>0 and pl_id_2>0 and set_1=0 and set_2=0 and break_1=0 and break_2=0
-and r.table_game=0 
- 
+  from '.T_REITING.' r  
+  WHERE r.turnir_id='.$turnir_id.' 
+  AND r.pl_id_1>0 
+  AND r.pl_id_2>0 
+  AND r.set_1=0 
+  AND r.set_2=0 
+  AND r.break_1=0 
+  AND r.break_2=0
+  AND r.table_game=0
+  AND NOT EXISTS (
+    -- Исключаем командные игры: где оба игрока имеют is_team = 1
+    SELECT 1 FROM bs_players p1, bs_players p2
+    WHERE p1.id = r.pl_id_1 AND p2.id = r.pl_id_2
+    AND p1.is_team = 1 AND p2.is_team = 1
+  )
 order by r.id';
  $aGames =  db_list($sql);
+  if (!empty($aGames) && $is_team_league) {
+      foreach ($aGames as $idx => $game) {
+          $team_id_1 = !empty($game['match_id']) && !empty($game['etap_id']) ? db_field('SELECT team_id FROM `bs_team_lineups` WHERE match_id="'.addslashes($game['match_id']).'" AND etap_id='.(int)$game['etap_id'].' AND player_id='.(int)$game['pl_id_1'].' LIMIT 1', 'team_id') : 0;
+          if (empty($team_id_1)) {
+              $team_id_1 = db_field('SELECT team_id FROM `'.T_PLAYERS.'` WHERE id='.(int)$game['pl_id_1'].' LIMIT 1', 'team_id');
+          }
+         if (!empty($team_id_1)) {
+             $team_name_1 = db_field('SELECT name FROM `'.T_PLAYERS.'` WHERE id='.(int)$team_id_1, 'name');
+             if (!empty($team_name_1)) {
+                 $aGames[$idx]['name1'] = $game['name1'].' (<span style="color:#1e6bd6;">'.$team_name_1.'</span>)';
+             }
+         }
+
+         $team_id_2 = !empty($game['match_id']) && !empty($game['etap_id']) ? db_field('SELECT team_id FROM `bs_team_lineups` WHERE match_id="'.addslashes($game['match_id']).'" AND etap_id='.(int)$game['etap_id'].' AND player_id='.(int)$game['pl_id_2'].' LIMIT 1', 'team_id') : 0;
+         if (empty($team_id_2)) {
+             $team_id_2 = db_field('SELECT team_id FROM `'.T_PLAYERS.'` WHERE id='.(int)$game['pl_id_2'].' LIMIT 1', 'team_id');
+         }
+          if (!empty($team_id_2)) {
+              $team_name_2 = db_field('SELECT name FROM `'.T_PLAYERS.'` WHERE id='.(int)$team_id_2, 'name');
+              if (!empty($team_name_2)) {
+                  $aGames[$idx]['name2'] = $game['name2'].' (<span style="color:#1e6bd6;">'.$team_name_2.'</span>)';
+              }
+          }
+      }
+  }
  //s($sql);
     $content='<table cellpadding="0" cellspacing="1" class="table table-condensed bordered3 viborPlayerTable table-hover table-bordered    border-light-subtle" width="95%" border="0" id="parts_table_">
          

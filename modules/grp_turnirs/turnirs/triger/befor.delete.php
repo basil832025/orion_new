@@ -7,7 +7,10 @@ $aTurnir=db_row($sql);
 $sql ='select count(*) as cn from '.T_ETAPS.'  where  turnir_id='.$turnir_id;
 $cn_results=db_field($sql,'cn');
 if ($cn_results>0 && empty($aTurnir['group_id'])) {
- window_mess('В цьому турнірі є етапи. Видалять спочатку всі етапи!!!=' . $cn_results);
+    // window_mess() прерывает выполнение через Ajax() и показывает модальное окно
+    // Не нужно вызывать list_show() или exit - window_mess() сам прервет выполнение
+    window_mess('В цьому турнірі є етапи. Видалять спочатку всі етапи!!!=' . $cn_results);
+    // window_mess() вызывает Ajax() который делает exit, поэтому код ниже не выполнится
 }else {
  if (!empty($aTurnir['group_id'])) {
   $sql = 'delete from ' . T_ETAPS_PLAYER_MESTA . '  where turnir_id=' . $turnir_id;

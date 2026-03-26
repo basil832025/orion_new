@@ -137,9 +137,9 @@ ORDER BY reiting_ukraine desc, beg_reit desc';
 (select  reiting_ukraine from  '.T_PLAYERS.' p where p.id=tp.player_id) as reiting_ukraine,
 (select  name from '.T_PLAYERS.' p where p.id=tp.player_id) as name,
 tp.id as turn_id,
-tp.groups,tp.grp_num,grp_win_set, grp_lose_set,grp_ochki,grp_mesto,groups_pred,grp_num_pred,player_id   
+tp.`groups` as `groups`,tp.grp_num,grp_win_set, grp_lose_set,grp_ochki,grp_mesto,groups_pred,grp_num_pred,player_id   
  FROM `'.T_ETAPS_PLAYER_MESTA.'` tp  where  turnir_id='.$turnir_id.' and etap_id='.$etap_id.'
-ORDER BY tp.groups,tp.grp_num';
+ORDER BY tp.`groups`,tp.grp_num';
     $aPlayers = db_list($sql);
 //s($aPlayers);
 // поищем несеяных игроокрв
@@ -207,9 +207,9 @@ ORDER BY reiting_ukraine desc, beg_reit desc';
 (select  reiting_ukraine from  '.T_PLAYERS.' p where p.id=tp.player_id) as reiting_ukraine,
 (select  name from '.T_PLAYERS.' p where p.id=tp.player_id) as name,
 tp.id as turn_id,
-tp.groups,tp.grp_num,grp_win_set, grp_lose_set,grp_ochki,grp_mesto,groups_pred,grp_num_pred,player_id   
+tp.`groups` as `groups`,tp.grp_num,grp_win_set, grp_lose_set,grp_ochki,grp_mesto,groups_pred,grp_num_pred,player_id   
  FROM `'.T_ETAPS_PLAYER_MESTA.'` tp  where  turnir_id='.$turnir_id.' and etap_id='.$etap_id.'
-ORDER BY tp.groups,tp.grp_num';
+ORDER BY tp.`groups`,tp.grp_num';
     $aPlayers = db_list($sql);
 //s($aPlayers);
 // поищем несеяных игроокрв

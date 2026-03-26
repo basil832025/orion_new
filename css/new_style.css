@@ -11,11 +11,16 @@ body, html, #content {
     --bs-gutter-x: 10px;
 }*/
 
-/*меню-------------------------------*/
+/*пїЅпїЅпїЅпїЅ-------------------------------*/
 img {
     max-width: 100%;
     vertical-align: middle;
     display: inline-block;
+}
+.table_mob_turn td a img[src$="edit.gif"] {
+    width: 25px;
+    height: 20px;
+    max-width: none;
 }
 .bg-dark {
     background-color: #333333!important;
@@ -31,7 +36,7 @@ img {
     margin: 0 56px 0 36px;
 }
 .nav-link,.d-flex a{
-    /* Турніри */
+    /* пїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
     font-family: 'Lato';
     font-style: normal;
     font-weight: 500;
@@ -106,11 +111,11 @@ input.form-control{
     letter-spacing: 0em;
     text-align: left;
 color: #7A7A7A;
-    outline: none; /*убираем стандартную обводку браузера*/
-    -moz-border-radius: 10px; /*закругляем углы для Mozilla*/
-    -webkit-border-radius: 10px; /*закругляем углы для Chrome, Safari*/
-    border-radius: 10px; /*закругляем углы для остальных браузеров*/
-    padding-left: 30px; /*отступ слева от ввода, чтобы текст не был на картинке(выбирать по размеру картинки)*/
+    outline: none; /*пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ*/
+    -moz-border-radius: 10px; /*пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ Mozilla*/
+    -webkit-border-radius: 10px; /*пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ Chrome, Safari*/
+    border-radius: 10px; /*пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ*/
+    padding-left: 30px; /*пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ(пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)*/
     height: 40px;
  }
 /*.bordered th {
@@ -135,7 +140,7 @@ color: #7A7A7A;
 .chosen-container-single .chosen-single{
     border: 1px solid #D3D3D3 !important;
 }
- .bordered2  {
+.bordered2  {
     margin: 16px 16px 2px 2px;
     text-align: center;
 
@@ -146,6 +151,12 @@ color: #7A7A7A;
     -moz-box-shadow: 0 1px 1px #ccc;
     box-shadow: 0 0 1px #ccc;
 
+}
+.big-table .table.table-bordered {
+    border-collapse: collapse;
+}
+.big-table .table.table-bordered > :not(caption) > * > * {
+    border: 1px solid rgba(230, 230, 230, 1);
 }
  td.t-grid-team_table {
 
@@ -190,7 +201,7 @@ table td.text-start{
     -moz-box-shadow:0 1px 0 rgba(255,255,255,.8) inset;
     box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;
 }
-/*сортировка колонок таблиц */
+/*пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ */
 .bordered th span.asc{
 
     background: url("../img/sort_up.png") no-repeat ;
@@ -256,7 +267,7 @@ table td.text-start{
 }
 
 
-/*страницы*/
+/*пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ*/
 .padding_main{
   /*  float: left;*/
     display: grid;
@@ -554,11 +565,11 @@ gap: 12px;
 }
 .lin2 {
     width: 100%;
-    /* position: absolute;        /*   выделяется в новый поток непривязаный к родителю.     */
+    /* position: absolute;        /*   пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.     */
     position: relative;
-    /* РЕШЕНИЕ: Меняем на relative чтобы остаться в потоке родителя */
+    /* пїЅпїЅпїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ relative пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
     height: 100%;
-    /* Растягивает блок по высоте первого родителя у которого position отличное от fixed - себя, потому что родитель потока */
+    /* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ position пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ fixed - пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ */
     display: table;
     white-space: normal;
 }
@@ -1025,12 +1036,12 @@ color: rgba(80, 182, 39, 1);
 }
 .form-signin input.form-control{
     background-image: none;
-    background-position: 10px; /*Позиционируем*/
-    outline: none; /*убираем стандартную обводку браузера*/
-    -moz-border-radius: 10px; /*закругляем углы для Mozilla*/
-    -webkit-border-radius: 10px; /*закругляем углы для Chrome, Safari*/
-    border-radius: 10px; /*закругляем углы для остальных браузеров*/
-    padding-left: 40px; /*отступ слева от ввода, чтобы текст не был на картинке(выбирать по размеру картинки)*/
+    background-position: 10px; /*пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ*/
+    outline: none; /*пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ*/
+    -moz-border-radius: 10px; /*пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ Mozilla*/
+    -webkit-border-radius: 10px; /*пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ Chrome, Safari*/
+    border-radius: 10px; /*пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ*/
+    padding-left: 40px; /*пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ(пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)*/
     margin-bottom: 10px;
 }
 .hide, .hide_bigscreen
@@ -1041,7 +1052,7 @@ color: rgba(80, 182, 39, 1);
     --bs-gutter-x:8px !important;
 }
 td.zach{
-    background: rgba(236, 237, 238, 1)  !important; /* Цвет фона */
+    background: rgba(236, 237, 238, 1)  !important; /* пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ */
     min-width: 87px;
     min-height: 58px;
 }
@@ -1164,7 +1175,7 @@ color: #7A7A7A;
 .chosen-container .chosen-drop{
     border: 1px solid #D3D3D3 !important;
 }
-/* дополнение */
+/* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
 
 .f8{
     font-size: 8px;
@@ -1190,21 +1201,21 @@ color: #7A7A7A;
 .f16{
     font-size: 16px;
 }
-/* Фон выбранных "таблеток" в Select2 */
+/* пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ" пїЅ Select2 */
 .select2-selection__choice {
-    background-color: #e6f4ff !important; /* нежно-голубой */
+    background-color: #e6f4ff !important; /* пїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
     border-color: #91d5ff !important;
     color: #000;
     font-weight: 500;
 }
-/* 1. Снимаем серый фон с dropdown */
+/* 1. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ dropdown */
 .select2-dropdown {
-    background-color: #f9fbfd !important;  /* нежный светлый фон */
+    background-color: #f9fbfd !important;  /* пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ */
     border: 1px solid #d0e7f9 !important;
     border-radius: 6px;
 }
 
-/* 2. Сами пункты — прозрачный фон, читаемый текст */
+/* 2. пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ */
 .select2-results__option {
     background-color: transparent !important;
     color: #333 !important;
@@ -1212,7 +1223,7 @@ color: #7A7A7A;
     font-size: 15px;
 }
 
-/* 3. Подсветка при наведении */
+/* 3. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
 .select2-results__option--highlighted {
     background-color: #e6f4ff !important;
     color: #000 !important;
@@ -1234,4 +1245,31 @@ color: #7A7A7A;
     background-color: #e6f4ff !important;
     border-color: #91d5ff !important;
     color: #000;
+}
+
+/* РЎС‚РёР»Рё РґР»СЏ РІР»РѕР¶РµРЅРЅС‹С… РёРіСЂ РёРіСЂРѕРєРѕРІ РІ РєРѕРјР°РЅРґРЅС‹С… С‚СѓСЂРЅРёСЂР°С… */
+.player-game-row {
+    background-color: #f0f8ff !important;
+    border-left: 4px solid #007bff !important;
+    padding-left: 30px !important;
+}
+
+.player-game-row td {
+    padding-left: 30px !important;
+}
+
+.team-match-row {
+    font-weight: 500;
+}
+
+.match-expand-btn {
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    color: #007bff;
+    user-select: none;
+}
+
+.match-expand-btn:hover {
+    color: #0056b3;
 }

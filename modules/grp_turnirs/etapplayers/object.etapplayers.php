@@ -42,7 +42,7 @@ $this->addFTL(array('name'=>'ПІБ гравця','type'=>'out_key',
       $this->addFTL(array('name'=>'Стать','type'=>'out_key',
     'table'=>T_PLAYERS, 'parent_field'=>'player_id','out_result_field'=>'sex',
     'width'=>'20','name_field'=>'sex'));      
-$this->addFTL(array('name'=>'Група','type'=>'field','width'=>'9','name_field'=>'groups'));
+$this->addFTL(array('name'=>'Група','type'=>'field','width'=>'9','name_field'=>'groups','bd_field'=>'`groups`','out_result_field'=>'`groups`'));
 $this->addFTL(array('name'=>'Номер <br />в групі','type'=>'field','width'=>'9','name_field'=>'grp_num'));
 $this->addFTL(array('name'=>'Очки','type'=>'field','width'=>'9','name_field'=>'grp_ochki'));
 $this->addFTL(array('name'=>'Місце','type'=>'field','width'=>'9','name_field'=>'grp_mesto'));
@@ -59,8 +59,12 @@ if  (empty($_SESSION['etapplayers']['sort']))  $_SESSION['etapplayers']['sort']=
 if  (empty($_SESSION['etapplayers']['sort_type']))  $_SESSION['etapplayers']['sort_type']='asc';
 }else
 {
-if  (empty($_SESSION['etapplayers']['sort']))  $_SESSION['etapplayers']['sort']='groups,grp_mesto,grp_num';
+if  (empty($_SESSION['etapplayers']['sort']))  $_SESSION['etapplayers']['sort']='`groups`,grp_mesto,grp_num';
 if  (empty($_SESSION['etapplayers']['sort_type']))  $_SESSION['etapplayers']['sort_type']='asc';
+if (!empty($_SESSION['etapplayers']['sort'])) {
+    $_SESSION['etapplayers']['sort'] = preg_replace('/`+groups`+/', '`groups`', $_SESSION['etapplayers']['sort']);
+    $_SESSION['etapplayers']['sort'] = preg_replace('/(?<!`)\bgroups\b(?!`)/', '`groups`', $_SESSION['etapplayers']['sort']);
+}
     
 } 
 //================================================================================================
@@ -140,7 +144,7 @@ $this->addFF(array('name'=>'Гравець','width'=>'250',
                        'module'=>'players',
                      )); 
                                          
-$this->addFF(array('name'=>'Група','name_field'=>'groups','required_custom'=>'onlyNumber','size'=>'1','maxlength'=>1));
+$this->addFF(array('name'=>'Група','name_field'=>'groups','bd_field'=>'`groups`','required_custom'=>'onlyNumber','size'=>'1','maxlength'=>1));
 $this->addFF(array('name'=>'Номер в групі','name_field'=>'grp_num','required_custom'=>'onlyNumber','size'=>'1','maxlength'=>1));
 $this->addFF(array('name'=>'Очки','name_field'=>'grp_ochki','required_custom'=>'onlyNumber','size'=>'1','maxlength'=>2));
                     

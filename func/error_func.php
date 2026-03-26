@@ -25,7 +25,7 @@ set_error_handler(function ($errno, $errstr, $errfile, $errline) {
     ];
 
     $level = $levels[$errno] ?? 'error';
-    $msg = "$errstr";
+    $msg = "$errstr in $errfile on line $errline";
     wLog($msg, $level, 'error');
 
     // Вывести в браузер (опционально при разработке)

@@ -54,11 +54,11 @@ class SetResultWinAction extends ActionModule
         //  $etap_id = poste('etap_id');
         $sql='select id,(select  p.name from  bs_players p where p.id=r.pl_id_1) as name1,pl_id_1,
         (select  p.name from  bs_players p where p.id=r.pl_id_2) as name2,pl_id_2,
-  group_num, type_game, olimp16_num, etap_prim, start_game,r.table_game,no_send,break_1,break_2,
+  group_num, type_game, olimp16_num, etap_prim, start_game,r.table_game,no_send,break_1,break_2, r.match_id, r.etap_id,
 (select w.name_etap from bs_etaps_work w where w.id=r.etap_id ) as name_etap      
   from '.T_REITING.' r  where  r.turnir_id='.$turnir_id.' and pl_id_1>0 and pl_id_2>0  and id='.$newgame;
  //s($sql); and set_1=0 and   set_2=0 and r.table_game >0
-   $aResults = db_row($sql);
+    $aResults = db_row($sql);
    // отоброжать шаблон до 3з побед по умолчанию если не вібран не один шаблон віводим до3х побед
     //if (!empty($aOptionTurnir['is_shablon3']))
         $shablon =' <table class="big-table"><tr><td> </td><td><div class="variants_res vibres" rahun="30">3 : 0</div></td><td></td></tr>

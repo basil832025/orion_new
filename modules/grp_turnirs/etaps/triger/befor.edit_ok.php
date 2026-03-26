@@ -7,6 +7,9 @@ $aTurnir= db_row($sql);
 $is_command = $aTurnir['is_command'];
     $is_reiting_zmeyka =  isset($form['is_reiting_zmeyka']) ? 1 :0 ;
     $istochnik_posev=!empty($form['istochnik_posev']) ? $form['istochnik_posev'] : 0;  
+    $form['cnt_grp'] = (isset($form['cnt_grp']) && $form['cnt_grp'] !== '') ? (int)$form['cnt_grp'] : 0;
+    $_POST['form']['cnt_grp'] = $form['cnt_grp'];
+    $_POST['cnt_grp'] = $form['cnt_grp'];
     $form['group_id'] = !empty($form['group_id']) ? $form['group_id'] : 0;
     $form['is_perenos'] = !empty($form['is_perenos']) ? 1 : 0;
     //s($istochnik_posev);
@@ -20,9 +23,25 @@ if ($is_command)
         $sql = 'SELECT COUNT(*) AS cn,is_command_num FROM bs_turnirplayers WHERE turnir_id='.$turnir_id.' GROUP BY is_command_num ORDER BY is_command_num';
         $aComPeople=db_list($sql);
       //  s($aComPeople);
-       $cnt_etap = $aComPeople[0]['cn']+$aComPeople[1]['cn'];
-       if ($cnt_etap<>$form['cnt_people']) window_mess('Кількість на етапі '.$form['cnt_people'].' не свіпадає по кількості по учасниках '.$cnt_etap);
-        if (!empty($aComPeople) && $aComPeople[0]['cn']!=$aComPeople[1]['cn'])window_mess('Не рівна кількість спортсменів по командах');
+      
+      // Проверяем, что массив существует и содержит минимум 2 элемента (2 команды)
+      if (empty($aComPeople) || !is_array($aComPeople) || count($aComPeople) < 2) {
+          $cnt_teams = !empty($aComPeople) ? count($aComPeople) : 0;
+          window_mess('Не знайдено достатньо команд для турніру. Знайдено команд: '.$cnt_teams.', потрібно мінімум 2 команди з гравцями.');
+      } else {
+          // Проверяем, что элементы массива существуют и содержат поле 'cn'
+          if (!isset($aComPeople[0]) || !isset($aComPeople[1]) || !isset($aComPeople[0]['cn']) || !isset($aComPeople[1]['cn'])) {
+              window_mess('Помилка при підрахунку кількості гравців по командах. Перевірте дані в таблиці bs_turnirplayers.');
+          } else {
+              $cnt_etap = (int)$aComPeople[0]['cn'] + (int)$aComPeople[1]['cn'];
+              if ($cnt_etap != $form['cnt_people']) {
+                  window_mess('Кількість на етапі '.$form['cnt_people'].' не свіпадає по кількості по учасниках '.$cnt_etap);
+              }
+              if ((int)$aComPeople[0]['cn'] != (int)$aComPeople[1]['cn']) {
+                  window_mess('Не рівна кількість спортсменів по командах (Команда 1: '.$aComPeople[0]['cn'].', Команда 2: '.$aComPeople[1]['cn'].')');
+              }
+          }
+      }
     }
     if (empty($form['type_etap']))  window_mess('Заповніть поле Варіанти!');
     // проверка при тип этапа групп выбор типа групп 

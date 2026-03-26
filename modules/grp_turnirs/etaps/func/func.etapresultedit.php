@@ -77,9 +77,9 @@ $sql ='SELECT
 (select  reiting_ukraine from  '.T_PLAYERS.' p where p.id=tp.player_id) as reiting_ukraine,
 (select  name from '.T_PLAYERS.' p where p.id=tp.player_id) as name,
 tp.id as turn_id,
-tp.groups,tp.grp_num,grp_win_set, grp_lose_set,grp_ochki,grp_mesto,groups_pred,grp_num_pred,player_id   
+tp.`groups` as `groups`,tp.grp_num,grp_win_set, grp_lose_set,grp_ochki,grp_mesto,groups_pred,grp_num_pred,player_id   
  FROM `'.T_ETAPS_PLAYER_MESTA.'` tp  where  turnir_id='.$turnir_id.' and etap_id='.$etap_id.'
-ORDER BY tp.groups,tp.grp_num';
+ORDER BY tp.`groups`,tp.grp_num';
 $aPlayers = db_list($sql);
 //s($aPlayers);
 // поищем несеяных игроокрв
@@ -100,7 +100,15 @@ $a=1;
 $aTemp=array();
 foreach ($aPlayers  as $k=> $player) 
 {
-   $player['name'] = $player['grp_mesto']==0 && $player['player_id']==0 ? 'Група '.$player['groups_pred']. ' місце '.$player['grp_num_pred'] : $player['name'];
+    $group_label = 'Група';
+    if (function_exists('is_team_league_no_qual')) {
+        $turnir_id_label = poste('turnir_id');
+        $league_id_label = poste('league_id');
+        if (is_team_league_no_qual($turnir_id_label, $league_id_label)) {
+            $group_label = 'Ліга';
+        }
+    }
+    $player['name'] = $player['grp_mesto']==0 && $player['player_id']==0 ? $group_label.' '.$player['groups_pred']. ' місце '.$player['grp_num_pred'] : $player['name'];
    $player['beg_reit'] = $player['grp_mesto']==0 && $player['player_id']==0 ? '' : $player['beg_reit'];
    $player['reiting_ukraine'] = $player['grp_mesto']==0 && $player['player_id']==0 ? '' : $player['reiting_ukraine'];
  //  s($player['groups']);
@@ -128,13 +136,21 @@ foreach ($aPlayers  as $k=> $player)
     $str_add_player='';
   $sql ='SELECT 
 count(*) as cnt  
- FROM `'.T_ETAPS_PLAYER_MESTA.'` tp  where  groups=0 and etap_id='.$etap_id.' and turnir_id='.$turnir_id;
+ FROM `'.T_ETAPS_PLAYER_MESTA.'` tp  where  tp.`groups`=0 and etap_id='.$etap_id.' and turnir_id='.$turnir_id;
 
 $Cnt_new = db_field($sql,'cnt');
 $minGrp=0;
  // здесь определимся какие группы меньше всего
+  $group_label = 'Група';
+  if (function_exists('is_team_league_no_qual')) {
+      $turnir_id_label = poste('turnir_id');
+      $league_id_label = poste('league_id');
+      if (is_team_league_no_qual($turnir_id_label, $league_id_label)) {
+          $group_label = 'Ліга';
+      }
+  }
   foreach ($aGroups as $grp => $aPlay)
- {
+  {
     $cnGrp =count($aPlay);
     if ($minGrp==0 || $cnGrp<$minGrp) $minGrp=$cnGrp;
  }  
@@ -153,9 +169,9 @@ $minGrp=0;
     }
    $Tables_content .=' 
  
- <div class="col-md-6 col-lg-4 col-xl-3 ng-star-inserted  group_table_etap_blok">
-  <span class="zagolovokGrp"> Група '.$grp.'</span> '.$str_add_player .$ConTable .'
-  </div>';
+  <div class="col-md-6 col-lg-4 col-xl-3 ng-star-inserted  group_table_etap_blok">
+   <span class="zagolovokGrp"> '.$group_label.' '.$grp.'</span> '.$str_add_player .$ConTable .'
+   </div>';
  } 
  $Tables_content .='
  
@@ -214,7 +230,7 @@ $minGrp=0;
  function getSpisPlayerEdit($aPlayers, $idPlayer,$ANoPlayerSeyan,$id_select)
  {
 //s($aPlayers);
-     $sSpisPlayer = '<select class="chosen-select " tabindex="5" name="player" id="'.$id_select.'">';
+     $sSpisPlayer = '<select class="chosen-select " style="width:100%;max-width:100%;" tabindex="5" name="player" id="'.$id_select.'">';
    if (!empty($ANoPlayerSeyan))
    {
        $sSpisPlayer.='<optgroup label="Не сіяні гравці">';

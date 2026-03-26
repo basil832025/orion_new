@@ -1,5 +1,5 @@
 <?php
-// определяем временную директорию, куда грузятся файлы на сервер
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 $tmp_dir = '';
 $file_path_='';
 $file_path_f='';
@@ -11,18 +11,18 @@ if (!isset($_SESSION['upload_tmp_dir'])){
 
     $tmp_dir_ok = true;
 
-    // если директива upload_tmp_dir не задана в php.ini, то
+    // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ upload_tmp_dir пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ php.ini, пїЅпїЅ
     if (!is_dir($tmp_dir) || $tmp_dir==''){
-        // искуссвенным путем определяем временную директорию в системе
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         $tmp_dir = dirname(tempnam('127631782631827', 'foo'));
         s('tyt111='.$tmp_dir);
         if (!is_dir($tmp_dir)){
-         //  send_error('Не удается определить временную директорию системы.');
+         //  send_error('пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.');
             $tmp_dir_ok = false;
         }
     }
 
-    // сохраняем значение временной директории в сессии
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     if ($tmp_dir_ok){
          $_SESSION['upload_tmp_dir'] = $tmp_dir;
     }
@@ -35,7 +35,7 @@ if (!is_dir(DIR_FILES_SITE)){
 }if (!is_dir(DIR_FILES_SITE_MINI)){
     create_dir(DIR_FILES_SITE_MINI);
 }
- // класс загрузки файлов
+ // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
  class UploadHandler
 {
     private $upload_dir;
@@ -50,6 +50,7 @@ if (!is_dir(DIR_FILES_SITE)){
     private $type_view;
     public $set_result=1;
 
+    private $table_module;
     function __construct($options_uploads_class) {
         $this->upload_dir = $options_uploads_class['upload_dir'];
         $this->upload_url = $options_uploads_class['upload_url'];
@@ -67,6 +68,7 @@ if (!is_dir(DIR_FILES_SITE)){
         $this->mini_max_height = $options_uploads_class['mini_max_height'];
         $this->module_id = $options_uploads_class['id_elem'];
         $this->module = $options_uploads_class['module'];
+        $this->table_module = !empty($options_uploads_class['table_module']) ? $options_uploads_class['table_module'] : '';
         $this->file_size = $options_uploads_class['file_size'];
         $this->name_file = $options_uploads_class['name_file'];
         $this->file_type = $options_uploads_class['file_type'];
@@ -77,7 +79,7 @@ if (!is_dir(DIR_FILES_SITE)){
     public function post() {
 
 
-// Получаем расширение файла
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 //$getMime = explode('.', $options_uploads_class['name_file']);
 //$mime = end($getMime);
 
@@ -87,6 +89,14 @@ if (!is_dir(DIR_FILES_SITE)){
    //list($name_file_, $size, $type_file, $error_uplod)=upload_file($this->field_name,$this->upload_dir,$this->type_view);
    list($name_file_, $error_uplod)=upload_file_new($this->file_data,$this->name_file,$this->file_size,$this->file_type,$this->upload_dir, $this->type_view);
    
+        // DEBUG: Р»РѕРіРёСЂСѓРµРј СЂРµР·СѓР»СЊС‚Р°С‚ Р·Р°РіСЂСѓР·РєРё С„Р°Р№Р»Р°
+        if (function_exists('wLog')) {
+            wLog('UPLOAD_DEBUG module='.$this->module.' id='.$this->module_id.
+                ' field='.$this->name_field.' error="'.$error_uplod.
+                '" tmp="'.$this->file_data.'" name="'.$this->name_file.'"',
+                'debug','upload');
+        }
+
         $info['error']=$error_uplod;  //
 
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
@@ -96,15 +106,15 @@ if (!is_dir(DIR_FILES_SITE)){
           //      header('Content-type: text/plain');
         }
         if (empty($error_uplod)){
-       // это графичиские файлы и нужно выводить миниатюру
+       // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
          if (strpos($type_file,"image/")!==false) {
            $is_img=1;
            if (file_exists($this->upload_dir.$name_file_)){
            list($bfile, $error_f)=upload_image_size($this->upload_dir.$name_file_,$this->upload_url.$name_file_, $this->thumbnails_dir, $this->thumbnail_max_width, $this->thumbnail_max_height) ;
-           // для сайта размер изображения
+           // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
            list($bfile_, $error_f_)=upload_image_size($this->upload_dir.$name_file_,$this->upload_url.$name_file_, $this->mini_dir, $this->mini_max_width, $this->mini_max_height) ;
                }else{
-                    send_error('Не передался файл при загрузке!!!');               } 
+                    send_error('пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!!!');               } 
                 if (!$bfile){
                     $info['error']=$error_f;
                     send_error($error_f);
@@ -121,7 +131,7 @@ if (!is_dir(DIR_FILES_SITE)){
             $info['type']=$type_file;
             $info['url']= $this->upload_url.rawurlencode($name_file_);
 
-   // запись в БД
+   // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ
    
         db_query('insert into `' .T_FILES. '` set name="'.$name_file_.'",
                     type="'.$type_file.'",
@@ -131,7 +141,12 @@ if (!is_dir(DIR_FILES_SITE)){
                     field="'.$this->name_field.'",
                     is_img='.$is_img);
             $info['id']= db_insert_id();
-         db_query('update `'.get_table_name($this->module).'` set '.$this->name_field.'='.$info['id'].' where id='.$this->module_id);
+         // РСЃРїРѕР»СЊР·СѓРµРј table_module РµСЃР»Рё РїРµСЂРµРґР°РЅ, РёРЅР°С‡Рµ get_table_name РґР»СЏ РѕР±СЂР°С‚РЅРѕР№ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё
+         $table_name = !empty($this->table_module) ? $this->table_module : get_table_name($this->module);
+         // РћР±РЅРѕРІР»СЏРµРј Р·Р°РїРёСЃСЊ С‚РѕР»СЊРєРѕ РµСЃР»Рё module_id РЅРµ РїСѓСЃС‚РѕР№ (РґР»СЏ РЅРѕРІРѕР№ Р·Р°РїРёСЃРё id=0, РѕР±РЅРѕРІРёРј РїРѕР·Р¶Рµ)
+         if (!empty($this->module_id) && $this->module_id > 0) {
+             db_query('update `'.$table_name.'` set '.$this->name_field.'='.$info['id'].' where id='.$this->module_id);
+         }
  
         }else{
            // s($error_uplod.'!!!');
@@ -153,7 +168,9 @@ if (!is_dir(DIR_FILES_SITE)){
         $mini_path = $this->mini_dir.$file_name;
          $success = is_file($file_path) && $file_name[0] !== '.' && delete_file($file_path);
          db_query('delete from `'.T_FILES.'` where id='.$_REQUEST['id'],'name');
-         db_query('update `'.get_table_name($this->module).' set '.$this->name_field.'="" where id='.$this->module_id);
+         // РСЃРїРѕР»СЊР·СѓРµРј table_module РµСЃР»Рё РїРµСЂРµРґР°РЅ, РёРЅР°С‡Рµ get_table_name РґР»СЏ РѕР±СЂР°С‚РЅРѕР№ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё
+         $table_name = !empty($this->table_module) ? $this->table_module : get_table_name($this->module);
+         db_query('update `'.$table_name.'` set '.$this->name_field.'="" where id='.$this->module_id);
     if ($success && is_file($thumbnail_path)) {
             delete_file($thumbnail_path);
             delete_file($mini_path);

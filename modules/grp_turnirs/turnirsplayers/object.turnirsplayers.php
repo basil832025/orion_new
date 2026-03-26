@@ -5,12 +5,27 @@ class TurnirsPlayersObject extends ObjectRT
   //$this-> = 'tree'; 
   function init ()
   {
+// Очищаем фильтры списка турниров (місто/клуб), чтобы они не "висели" на страницах турнира
+$_SESSION['MESSAGE_AJAX'] = '';
 //s('tyt');
 // узнаем парный ли этот турнир
 //s($_POST);  
 $ispara=0;
-$turnir_id = poste('turnir_id');
-
+$turnir_id = (int)poste('turnir_id');
+if ($turnir_id <= 0) {
+    $turnir_player_id = (int)poste('id');
+    if ($turnir_player_id > 0) {
+        $turnir_id = (int)db_field('SELECT turnir_id FROM `'.T_TURNIR_PLAYERS.'` WHERE id='.$turnir_player_id, 'turnir_id');
+    }
+}
+$league_id = poste('league_id');
+if ($turnir_id <= 0) {
+    $turnir_id = (int)get('turnir_id');
+}
+if (empty($league_id)) {
+    $league_id = get('league_id');
+}
+$menu_league = !empty($league_id) ? '&league_id='.$league_id : '';
 $virt = poste('virt');
 //s('$virt='.$virt);
       self::$table_class='table_mob_turn';
@@ -25,9 +40,13 @@ if (!empty($turnir_id))
     // если нет хоть одного названия то командный не командный
     $is_command = (!empty($is_command) && !empty($command_name1) && !empty($command_name2)) ? 1 : 0;
     }
-      $sql='select count(cnt_games) as cnt_g from '.T_TURNIR_PLAYERS.' t where turnir_id='.$turnir_id.' and cnt_games is not null';
-      $cnt_g = db_field($sql,'cnt_g');
-        $url_back = !empty($virt) ? 'turnirsshtraph-list' : 'turnirs-list';
+      if ($turnir_id > 0) {
+          $sql='select count(cnt_games) as cnt_g from '.T_TURNIR_PLAYERS.' t where turnir_id='.$turnir_id.' and cnt_games is not null';
+          $cnt_g = db_field($sql,'cnt_g');
+      } else {
+          $cnt_g = 0;
+      }
+        $url_back = !empty($virt) ? 'turnirsshtraph-list' : 'turnirs-list'.$menu_league;
       if ($_SESSION['is_mobile'] ){
 
           SystemClass::$Java_script_module='show_zag_left("#'.$url_back.'");';
@@ -73,6 +92,8 @@ if (empty($virt)) {
     $this->addFTL(array('name' => 'К-ть виграних<br /> ігор', 'name_mob' => 'К-ть<br /> перемог', 'type' => 'field', 'width' => '9', 'name_field' => 'cnt_wins'));
     $this->addFTL(array('name' => 'К-ть поразок', 'name_mob' => 'К-ть<br />  поразок', 'type' => 'field', 'width' => '9', 'name_field' => 'cnt_lose'));
     $this->addFTL(array('name' => 'Місце', 'type' => 'field', 'width' => '9', 'name_field' => 'mesto'));
+    if (!empty($league_id))
+    $this->addFTL(array('name' => 'Балів', 'type' => 'field', 'width' => '9', 'name_field' => 'points'));
 }
  /*     $this->addFTL(array('name'=>'Поточний рейтинг<br /> клубу','name_mob'=>'Поточ<br />ний р-нг<br /> клубу','type'=>'out_key',
           'table'=>T_PLAYERS, 'parent_field'=>'player_id','out_result_field'=>'reiting',
@@ -285,12 +306,20 @@ $this->addFF(array('name'=>'Забрати розрахунок рейтингу
 }  
                                                                                      
 // описание полей формы модуля при редактировании или добавления
+      $sWhere =  ' AND EXISTS(SELECT * from  bs_players pl where pl.id=p.player_id AND pl.is_team=0) ';
 
+      $_SESSION['turnirsplayers']['where'] =$sWhere;
+      $_SESSION['turnirsplayers']['sort_default'] = ' p.id asc';
+      if (empty($_SESSION['turnirsplayers']['sort'])) {
+          $_SESSION['turnirsplayers']['sort'] = 'p.id';
+          $_SESSION['turnirsplayers']['sort_type'] = 'asc';
+      }
   $this->setTableModule(T_TURNIR_PLAYERS);
   //$this->setTypeModule('tree');
       if (!empty($turnir_id)) {
           $name_turnir = db_row('select name,dat  from `' . T_TURNIRS .
               '` where id=' . $turnir_id);
+          $turnir_name = htmlspecialchars(stripslashes((string)$name_turnir['name']), ENT_QUOTES, 'UTF-8');
           $date = new DateTimeImmutable($name_turnir['dat']);
           $tdat = $date->format('d.m.Y');
         //  self::$nameZ = ' '
@@ -308,29 +337,30 @@ $this->addFF(array('name'=>'Забрати розрахунок рейтингу
               $title=' - не розпочато';
           }
           if ($_SESSION['is_mobile'] )
-              $nameZ='<div class="compare_zagl">Статистика гравців "'.$name_turnir['name'].' ('.$tdat.$title. ')"</div>';
+              $nameZ='<div class="compare_zagl">Статистика гравців "'.$turnir_name.' ('.$tdat.$title. ')"</div>';
           else
-              $nameZ='<div class="poriv_zag">Статистика гравців  "'.$name_turnir['name'].'" ('.$tdat.$title. ')</div>';
+              $nameZ='<div class="poriv_zag">Статистика гравців  "'.$turnir_name.'" ('.$tdat.$title. ')</div>';
 
           self::$nameZList=$nameZ;
 
 
 
           $nameZList = '';
-          self::$nameZEdit = 'Редагування гравця турніру "' . $name_turnir['name'] . '" (' . $tdat . ')';
+          self::$nameZEdit = 'Редагування гравця турніру "' . $turnir_name . '" (' . $tdat . ')';
       //    SystemClass::setZaglModule($nameZList);
       }
+      $league_id_param = !empty($league_id) ? '&league_id='.$league_id : '';
 if ($_SESSION['gt']['user_rule']<10 && empty($virt))
- self::$submenu_list =array( 
+      self::$submenu_list =array(
    // 'filter' => array('module' => 'tovs'),
   //  'back' => array('module' => 'turnirs', 'action' => 'list'),
   
   // 'filter' => array('menu_name'=>'Экспорт в Excel новых игроков', 'module' => 'turnirsplayers', 'action' => 'toexcel', 'post' => 'id='.poste('turnir_id')),
-   'truck' => array('menu_name'=>'Отримати данні по гравцям з Ligas','module' => 'turnirsplayers', 'action' => 'import_ligas', 'post' => 'id='.poste('turnir_id')),
+   'truck' => array('menu_name'=>'Отримати данні по гравцям з Ligas','module' => 'turnirsplayers', 'action' => 'import_ligas', 'post' => 'id='.poste('turnir_id').$league_id_param),
    'filter' => array('menu_name'=>'Експорт в Excel нових гравців', 'http' => 'modules/turnirsplayers/action/toexcel.php?id='.poste('turnir_id')),
   // 'prava_user' => array('menu_name'=>'Группы данного турнира', 'module' => 'groups', 'action' => 'show', 'post' => 'id='.poste('turnir_id')),
-    
-   'report_ok' => array('menu_name'=>'Перерахувати рейтинг по даному турніру','module' => 'turnirsplayers', 'action' => 'raschet', 'post' => 'id='.poste('turnir_id')),
+
+   'report_ok' => array('menu_name'=>'Перерахувати рейтинг по даному турніру','module' => 'turnirsplayers', 'action' => 'raschet', 'post' => 'id='.poste('turnir_id').$league_id_param),
  //    'add' => array('menu_name'=>'Добавить участников турнира','wintype'=>1, 'module' => 'turnirsplayers', 'action' => 'addm', 'post' => 'wintype=1&actionmany=addm&id='.poste('turnir_id').'&'),
   
     );
@@ -638,9 +668,6 @@ $this->addFF(array('name'=>'ПІБ нового гравця 2','name_field'=>'n
 }
 function get_comm_name($field,$id,$data)
 {
-    s($data);
-    s($field);
-    s($id);
     $class='';
     $comm_name = $data['is_command_num'];
     if ($comm_name==1) { $class='command1'; $n=$_SESSION['command_name1'];}

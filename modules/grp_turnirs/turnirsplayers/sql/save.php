@@ -1,7 +1,16 @@
 <?php
- $turnir_id = poste('turnir_id');
- $league_id = poste('league_id');
-  $id = poste('id');
+ $turnir_id = (int)poste('turnir_id');
+ if ($turnir_id <= 0) {
+     $turnir_id = (int)get('turnir_id');
+ }
+ $league_id = (int)poste('league_id');
+ if ($league_id <= 0) {
+     $league_id = (int)get('league_id');
+ }
+ $id = (int)poste('id');
+ if ($turnir_id <= 0 && $id > 0) {
+     $turnir_id = (int)db_field('SELECT turnir_id FROM `'.T_TURNIR_PLAYERS.'` WHERE id='.$id, 'turnir_id');
+ }
   $form = SystemClass::getAFormPost();
   // проверим парній ли это турнир
     $sql = 'select ispara from '.T_TURNIRS.' t where t.id='.$turnir_id;
@@ -12,14 +21,19 @@ $is_command_num= !empty($form['is_command_num']) ? $form['is_command_num'] : 0;
 $is_opl_reiting= !empty($form['is_opl_reiting']) ? 1 : 0;
 $break= !empty($form['break']) ? 1 : 0;
 $new_player= !empty($form['new_player']) ? 1 : 0;
+$mesto = (isset($form['mesto']) && $form['mesto'] !== '') ? (int)$form['mesto'] : 0;
+$grn = (isset($form['grn']) && $form['grn'] !== '') ? $form['grn'] : 0;
 //s($form);
 
 // замена игрока если не правильно вставили на правильного
-// узнаем id старого игрока
-$sql = 'select player_id from '.T_TURNIR_PLAYERS.' where id='.$id;
-$old_player = db_field($sql,'player_id');
+// узнаем id старого игрока только при редактировании существующей записи
+$old_player = 0;
+if (!empty($id) && $id > 0) {
+    $sql = 'select player_id from '.T_TURNIR_PLAYERS.' where id='.$id;
+    $old_player = (int)db_field($sql,'player_id');
+}
 //s('$old_player='.$old_player);
-if ($old_player!=$form['player_id']){
+if (!empty($id) && $id > 0 && $old_player!=$form['player_id']){
     //Поменяем по всем играм
     $sql = 'update '.T_REITING .' set pl_id_1='.$form['player_id']. ' where pl_id_1='.$old_player.' and turnir_id='.$turnir_id;
     db_query($sql);
@@ -53,7 +67,7 @@ if ($break>0 && !empty($form['player_id']) && $form['player_id']>0 )
   }  
 }
 //'player_id='.$form['player_id'].
-$where = 'turnir_id='.$turnir_id.', grn="'.$form['grn'].'", mesto="'.$form['mesto'].'", 
+$where = 'turnir_id='.$turnir_id.', cnt_sets=0, cnt_sets_win=0, cnt_sets_lose=0, grn="'.$grn.'", mesto="'.$mesto.'", 
 is_opl_this="'.$is_opl_this.'",is_command_num="'.$is_command_num.'",
 break='.$break.',new_player='.$new_player.', league_id="'.$league_id.'"';
 
@@ -101,8 +115,8 @@ else
 
     $player_id  =  setPlayerInsorUpd($turnir_id,$form);
 
- $where .= ' , player_id='.$player_id;
- }
+ $where .= ' , ispara=0, player_id='.$player_id.', player_id_1=0, player_id_2=0';
+  }
 //если это изминения
 if (!empty($id) && $id>0) 
 {

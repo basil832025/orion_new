@@ -401,6 +401,10 @@ $(document).on('click','.tableBig',function(event){
   newgame=$(this).attr('newgame');
   post_string=$(this).attr('post_string');
   
+  // Проверяем, является ли это командным матчем
+  var is_team_game = $(this).hasClass('team-game');
+  var data_action = $(this).attr('data-action');
+  var data_module = $(this).attr('data-module');
   
   obj = this;
     //tableID = $(obj).attr('tableBig');
@@ -417,15 +421,23 @@ $(document).on('click','.tableBig',function(event){
  
   }else
   {
-
-      if (is_mobile) width = 380; else width=740;
-      if (width_body<359) width = 318;
-      post_string = post_string + '&newgame='+newgame+'&width_body='+width_body;
-   // alert('setresultwin=='+post_string)
-     content =  ajax_content('setresultwin','tables',post_string);
-   if (content)
-  window_modal(content,width,'330', '', 'Внесіть результат гри','','',name_table,'text-align: left;');
- 
+      // Если это командный матч, вызываем start_team_game из модуля reiting
+      if (is_team_game && data_action && data_module) {
+          // Для командных матчей вызываем start_team_game через send_ajax
+          // Это создаст игры для всех пар и обновит список
+          post_string = post_string + '&id='+newgame;
+          send_ajax('', data_action, data_module, post_string);
+          return; // Прерываем выполнение, так как send_ajax сам обработает ответ
+      } else {
+          // Обычный матч - стандартная логика
+          if (is_mobile) width = 380; else width=740;
+          if (width_body<359) width = 318;
+          post_string = post_string + '&newgame='+newgame+'&width_body='+width_body;
+       // alert('setresultwin=='+post_string)
+         content =  ajax_content('setresultwin','tables',post_string);
+       if (content)
+      window_modal(content,width,'330', '', 'Внесіть результат гри','','',name_table,'text-align: left;');
+      }
   }
 
   $(obj).off('click'); // удаляем повтоное срабатывание
@@ -932,9 +944,35 @@ $(document).on('click','.page_grp',function(){
     }
 });
  //редактирования элемента на лету
- $(document).on('dblclick','.bordered td.editTd',function(){
+  $(document).on('dblclick','.bordered td.editTd',function(){
             $(this).TableFieldUpdate();   
     });
+  // изменение лиги команды в списке турнира
+  $(document).on('change','.team-league-select',function(){
+     var $sel = $(this);
+     var val = $sel.val();
+     if (val === null || val === '') return;
+     var prev = $sel.data('prev');
+     if (String(prev) === String(val)) return;
+     var teamId = $sel.data('team-id');
+     var leagueId = $sel.data('league-id');
+     var turnirId = $sel.data('turnir-id');
+     if (!teamId || !leagueId || !turnirId) {
+         $sel.val(prev);
+         return;
+     }
+     var post_string = 'team_id=' + teamId + '&league_id=' + leagueId + '&turnir_id=' + turnirId + '&group_num=' + val;
+     var content = ajax_content('set_team_league_group','turnirsteams',post_string);
+     if (content == 'OK') {
+         $sel.data('prev', val);
+         $sel.css('border','1px solid #28a745');
+         setTimeout(function(){ $sel.css('border',''); }, 1200);
+     } else {
+         $sel.val(prev);
+         $sel.css('border','1px solid #dc3545');
+         setTimeout(function(){ $sel.css('border',''); }, 1200);
+     }
+  });
  //поиск по первых буквах
 //$(document).SpeedSearchElemens();
 // $(document).on('keyup','input[speedsearch]',function(){$(this).SpeedSearchElemens();});

@@ -25,6 +25,7 @@ if (!$ERROR_BASE_DATA && !mysqli_select_db($dsn,$db_name)){
 //echo $ERROR_BASE_DATA;exit;
 function db_query($sql_query){
     global $dsn;
+ //   s($sql_query);
     if(is_array($sql_query)){    //Выполним запросы
         mysqli_query($dsn,"BEGIN");    //Начнём транзакцию
         for($i=0;$i<count($sql_query);$i++)    //Цикл по всем запросам
@@ -110,7 +111,8 @@ function db_field($sql_query, $field)
 }
 
 function db_affected_rows()
-{        return mysqli_affected_rows();
+{   global $dsn;
+    return mysqli_affected_rows($dsn);
 }
 function db_insert_id()
 {   global $dsn;

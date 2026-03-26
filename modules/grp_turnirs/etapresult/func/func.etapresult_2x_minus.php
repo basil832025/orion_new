@@ -1,4 +1,29 @@
 <?php
+function split_pair_name($name)
+{
+    if (empty($name)) {
+        return array('', '');
+    }
+    $parts = preg_split('/\s*-\s*/', $name, 2);
+    if (count($parts) < 2) {
+        return array(trim($name), '');
+    }
+    return array(trim($parts[0]), trim($parts[1]));
+}
+
+function format_pair_name($name, $short_limit = 17)
+{
+    list($firstFIO, $secondFIO) = split_pair_name($name);
+    if ($secondFIO === '') {
+        return $name;
+    }
+    if (!empty($short_limit)) {
+        $firstFIO = mb_strlen($firstFIO) > $short_limit ? full_name_to_short($firstFIO, 'A b.') : $firstFIO;
+        $secondFIO = mb_strlen($secondFIO) > $short_limit ? full_name_to_short($secondFIO, 'A b.') : $secondFIO;
+    }
+    return $firstFIO.'-<br>'.$secondFIO;
+}
+
 function GamePara($numGame,$num1,$num2,$aResults_,$show_mesto=0,$noGame=0,$class='t-grid-match')
 {
     $ispara = !empty($_SESSION['is_para_minus_olimp']) ? 1 : 0;
@@ -7,9 +32,19 @@ function GamePara($numGame,$num1,$num2,$aResults_,$show_mesto=0,$noGame=0,$class
     $connent='<div class="'.$ispara_class_match.' t-grid-match_noMatch _with-additional" data-match-label="A03">
 
 </div>';
- //   if (!empty($aResults_[$numGame]))
     {
-        $aResults=$aResults_[$numGame];
+        $aResults = (isset($aResults_[$numGame]) && is_array($aResults_[$numGame])) ? $aResults_[$numGame] : array();
+        $aResults = array_merge(array(
+            'mesto_all_1' => 0,
+            'mesto_all_2' => 0,
+            'name1' => '',
+            'name2' => '',
+            'table_game' => 0,
+            'set_1' => 0,
+            'set_2' => 0,
+            'pl_id_1' => 0,
+            'pl_id_2' => 0,
+        ), $aResults);
         $mesto1Show=true;
         $mesto2Show=true;
 
@@ -31,17 +66,10 @@ if (!empty($aResults['mesto_all_1']) && !empty($aResults['mesto_all_2']))
 }
     if ($ispara){
         if (!empty($aResults['name1'])){
-            list($firstFIO,$secondFIO) = explode('-',$aResults['name1']);
-            $firstFIO = mb_strlen ($firstFIO)>17 ? full_name_to_short($firstFIO, 'A b.') : $firstFIO;
-            $secondFIO = mb_strlen ($secondFIO)>17 ? full_name_to_short($secondFIO, 'A b.') : $secondFIO;
-            $aResults['name1'] = $firstFIO.'-<br>'.$secondFIO;
+            $aResults['name1'] = format_pair_name($aResults['name1']);
         }
         if (!empty($aResults['name2'])){
-            list($firstFIO,$secondFIO) = explode('-',$aResults['name2']);
-
-            $firstFIO = mb_strlen ($firstFIO)>17 ? full_name_to_short($firstFIO, 'A b.') : $firstFIO;
-            $secondFIO = mb_strlen ($secondFIO)>17 ? full_name_to_short($secondFIO, 'A b.') : $secondFIO;
-            $aResults['name2'] = $firstFIO.'-<br>'.$secondFIO;
+            $aResults['name2'] = format_pair_name($aResults['name2']);
         }
     }
     $class_first = 'none_res'; $class_sec = '';$t_grid_team='';$class_noreult='';$t_grid_team_noreult =' t-grid-team_noreult ';
@@ -54,7 +82,7 @@ if (!empty($aResults['mesto_all_1']) && !empty($aResults['mesto_all_2']))
     $html_num1 = !empty($num1) ?  '<div class="t-grid-team__logo">'.$num1.'</div>' : '';
     $html_num2 = !empty($num2) ? '<div class="t-grid-team__logo">'.$num2.'</div>': '';
         $second_div = ($noGame==0) ? '<div class="t-grid-team__game">'.$numGame.'</div>' : '';
-        if ( $aResults['table_game']>0)
+        if ((int)$aResults['table_game']>0)
         {
             $first_div =    '<div  class="t-grid-team_table">'.$aResults['table_game'].'</div>';
             $second_div = ($noGame==0) ? '<div class="t-grid-team__game">0 : 0</div>' : '';
@@ -63,14 +91,17 @@ if (!empty($aResults['mesto_all_1']) && !empty($aResults['mesto_all_2']))
             $first_div = !empty($aResults['name1']) && !empty($aResults['name2']) ? '<div class="t-grid-team__score">'.$aResults['set_1'].' : '.$aResults['set_2'].'</div>' : '';
 
 */
-    if ($aResults['set_1']>$aResults['set_2']) 
+    $set_1_cmp = strtoupper((string)$aResults['set_1']) === 'W' ? 3 : (strtoupper((string)$aResults['set_1']) === 'L' ? 0 : (int)$aResults['set_1']);
+    $set_2_cmp = strtoupper((string)$aResults['set_2']) === 'W' ? 3 : (strtoupper((string)$aResults['set_2']) === 'L' ? 0 : (int)$aResults['set_2']);
+
+    if ($set_1_cmp > $set_2_cmp)
     { $class_first = '_highlighted up'; $class_sec = '_lose down';$class_no_result='';$t_grid_team_noreult ='';
     //    $first_div = '<div class="t-grid-team__score">'.$aResults['set_1'].' : '.$aResults['set_2'].'</div>';
         $first_div = '<div class="t-grid-team__score">'.$aResults['set_1'].'</div>';
         $second_div = '<div class="t-grid-team__score">'.$aResults['set_2'].'</div>';
         $html_num1='';$html_num2='';
     }
-    elseif  ($aResults['set_1']<$aResults['set_2']) {
+    elseif ($set_1_cmp < $set_2_cmp) {
         $class_first = '_lose up'; $class_sec = '_highlighted down';$class_no_result='';$t_grid_team_noreult ='';
        //  $second_div = '<div class="t-grid-team__score">'.$aResults['set_1'].' : '.$aResults['set_2'].'</div>';
         $first_div = '<div class="t-grid-team__score">'.$aResults['set_1'].'</div>';
@@ -117,8 +148,12 @@ function get_mesta2xminuska16($aMesta)
       $height = $_SESSION['is_mobile']  ? 24 : 32 ;
         foreach ($aMesta as $Mesto)
         { 
-         $color=' class="mestoPar" ';
+          $color=' class="mestoPar" ';
             $img_medal='';
+            $display_name = $Mesto['name'];
+            if (!empty($_SESSION['is_para_minus_olimp'])) {
+                $display_name = format_pair_name($display_name);
+            }
              switch ($Mesto['mesto_all']) {
 case 1:
  $color =  ' class="mesto1" ';
@@ -145,11 +180,11 @@ break;
 }    
  if ( $Mesto['mesto_all']>3) {
          $color =  ' class="mestoNoPar" ';
-     $content.='<li '.$color.'>'.$Mesto['mesto_all'].'<span class="ml10"></span>-<span class="ml10"></span>'.$Mesto['name'].'</li>';
+     $content.='<li '.$color.'>'.$Mesto['mesto_all'].'<span class="ml10"></span>-<span class="ml10"></span>'.$display_name.'</li>';
 
  } else
-$content.='<li >'.$img_medal.'<div '.$color.'><span class="ml10"></span>-<span class="ml10"></span>'.$Mesto['name'].'</div></li>';
-   }
+ $content.='<li >'.$img_medal.'<div '.$color.'><span class="ml10"></span>-<span class="ml10"></span>'.$display_name.'</div></li>';
+    }
         $content.='</ul>
         </div>';
 }

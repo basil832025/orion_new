@@ -7,51 +7,74 @@ class TurnirsObject extends ObjectRT
   {
        $sql_leag='';
       $league_id = poste('league_id');
+      $menu_league = !empty($league_id) ? '&league_id='.$league_id : '';
+      $name_ligs='';
+      $_SESSION['JAVA_SCRIPT']='';
+      $action =  rtrim((string)SystemClass::getAction(), '-');
       if (!empty($league_id)){
-         // $post_return = 'league_id='.$league_id;
-        //  SystemClass::setPost_return($post_return);
-         // $_SESSION['POST_RETURN'] =$post_return;
-          $sql_leag =   ' and league_id='.$league_id.' ';
+          $name_ligs = db_field('select name  from `bs_leagues` where id=' . $league_id,'name');
+          $name_ligs= 'Ліга: '.$name_ligs;
+           $sql_leag =   ' and league_id='.$league_id.' ';
           self::$aParent[0]= ['name_field'=>'league_id', 'table'=>T_TURNIRS, 'type'=>'Hidden'];
       }
 
-      $sWhere = ' AND virt=0 '.$sql_leag;
+      // Исключаем командные турниры, которые относятся к командным лигам (is_team_league=1)
+      // Такие турниры должны отображаться только в разделе лиг, а не в общем списке турниров
+      $sql_exclude_team_leagues = '';
+      if (empty($league_id)) { // Только если не просматриваем конкретную лигу
+          // Используем подзапрос для проверки, является ли лига командной
+          $sql_exclude_team_leagues = ' AND (p.league_id IS NULL OR p.league_id = 0 OR NOT EXISTS (
+              SELECT 1 FROM `bs_leagues` l WHERE l.id = p.league_id AND l.is_team_league = 1
+          ))';
+      }
+
+      $sWhere = ' AND virt=0 '.$sql_leag.$sql_exclude_team_leagues;
       self::$theed_tr_class='th_players_mob';
       self::$table_class='table_mob_turn';
-      if ( empty($_SESSION['gt']['club'])) {
+      if ($action=='list') {
           $city = poste('city');
           $club = poste('club');
+          $league_id = poste('league_id'); // Определяем league_id из POST
           $_SESSION['turnit']['filter']['city'] = isset($city) ? $city : (!empty($_SESSION['turnit']['filter']['city']) ? $_SESSION['turnit']['filter']['city'] : '');
           $_SESSION['turnit']['filter']['club'] = isset($club) ? $club : (!empty($_SESSION['turnit']['filter']['club']) ? $_SESSION['turnit']['filter']['club'] : '');
-          $id_spis = 4; // міста
-          $name_vibor = 'Виберіть місто';
-          $name_all = 'Всі міста';
-          $id = 'city-chosen-select';
-          $name_field = 'city';
-          $data_id = $_SESSION['turnit']['filter']['city'];
-          //  SystemClass::setJava_script($this->Java_script);
+          
+          // Показываем фильтры только на странице списка турниров, а не на странице турниров конкретной лиги
+          if ($action=='list' && empty($league_id)){
+              $id_spis = 4; // міста
+              $name_vibor = 'Виберіть місто';
+              $name_all = 'Всі міста';
+              $id = 'city-chosen-select';
+              $name_field = 'city';
+              $data_id = $_SESSION['turnit']['filter']['city'];
+              //  SystemClass::setJava_script($this->Java_script);
 
-          $txtCity = get_select($id_spis, $name_vibor, $id, $name_field, $data_id,$name_all);
-          $id_spis = 3; // клуби
-          $name_vibor = 'Виберіть клуб';
-          $id = 'club-chosen-select';
-          $name_field = 'club';
-          $name_all = 'Всі клуби';
-          $data_id = $_SESSION['turnit']['filter']['club'];
-          $txtClub = get_select($id_spis, $name_vibor, $id, $name_field, $data_id,$name_all);
+              $txtCity = get_select($id_spis, $name_vibor, $id, $name_field, $data_id,$name_all);
+              $id_spis = 3; // клуби
+              $name_vibor = 'Виберіть клуб';
+              $id = 'club-chosen-select';
+              $name_field = 'club';
+              $name_all = 'Всі клуби';
+              $data_id = $_SESSION['turnit']['filter']['club'];
+              $txtClub = get_select($id_spis, $name_vibor, $id, $name_field, $data_id,$name_all);
+              
+              $_SESSION['JAVA_SCRIPT'] = ' chosen_vibor_filter_turnir(200);';
+              $_SESSION['MESSAGE_AJAX'] = '<div class="ms-5 w-100" style="text-shadow:none">' . $txtCity . $txtClub . '</div>';
+          } else if ($action=='list' && !empty($league_id)){
+              // Если есть league_id, явно очищаем фильтры, чтобы они не отображались
+              unset($_SESSION['MESSAGE_AJAX']);
+              if (empty($_SESSION['JAVA_SCRIPT']) || strpos($_SESSION['JAVA_SCRIPT'], 'chosen_vibor_filter_turnir') !== false) {
+                  $_SESSION['JAVA_SCRIPT'] = '';
+              }
+          }
+          
           if (!empty($_SESSION['turnit']['filter']['city'])) $sWhere .= ' and city=' . $_SESSION['turnit']['filter']['city'];
           if (!empty($_SESSION['turnit']['filter']['club'])) $sWhere .= ' and club=' . $_SESSION['turnit']['filter']['club'];
-          $action =  SystemClass::getAction();
+
 
             $post_return=!empty($city) || !empty($club) ?  '&club='.$club.'&city='.$city : '';
 
           $_SESSION['POST_RETURN'] = $post_return;
        //   SystemClass::setPost_return($post_return);
-          if ($action=='list'){
-              $_SESSION['JAVA_SCRIPT'] = ' chosen_vibor_filter_turnir(200);';
-              $_SESSION['MESSAGE_AJAX'] = '<div class="ms-5 w-100" style="text-shadow:none">' . $txtCity . $txtClub . '</div>';
-
-          }
           }
       if ($_SESSION['is_mobile']) {
           self::$table_class='table_mob_player';
@@ -68,7 +91,6 @@ class TurnirsObject extends ObjectRT
               'name_field' => 'club', 'bd_field' => 'club', 'width' => '80', 'width_mob' => '74',
               'type' => 'get_func'));
             $this->addFTL(array('type'=>'onlybd_ProstSpr', 'name_field'=>'city','bd_field'=>'city'));
-            $this->addFTL(array('type'=>'onlybd_ProstSpr', 'name_field'=>'club','bd_field'=>'club'));
 
 
 
@@ -98,12 +120,13 @@ class TurnirsObject extends ObjectRT
 
           $this->addFTL(array('name' => 'Видалити', 'type' => 'delete', 'width' => '40', 'name_field' => 'name'));
       }
+
 //================================================================================================
 // описание полей формы модуля при редактировании или добавления
       // 'pattern'=>'[0-9]{1,}' -- в данноим случае только цифры и минимум 1 символ
       // 'pattern'=>'[0-9]{1,2}' -- в данноим случае только цифры и минимум 1 символ и максимум 2
       // 'pattern'=>'.{1,2}' -- в данноим случае  минимум 1 символ и максимум 2
- $this->addFF(array('name'=>'Лига','name_field'=>'league_id','type'=>'hidden'));
+
  $this->addFF(array('name'=>'Назва турніру','name_field'=>'name','required'=>'Назва турніру обов"язкова (мінімум 3 символа)', 'pattern'=>'.{3,}' ));
  $this->addFF(array('name'=>'Дата турніру','name_field'=>'dat','type'=>'date','required'=>'Дата турнира объязательна'));
  //$this->addFF(array(  'name'=>'К-во участников','name_field'=>'cnt_players','required'=>'К-во игроков объязательно','required_custom'=>'noSpecialCaracters'));
@@ -133,14 +156,52 @@ else
   $this->addFF(array('name'=>'Шаблон до 3х перемог','type'=>'Checkbox','name_field'=>'is_shablon3','bd_field'=>'is_shablon3'));
   $this->addFF(array('name'=>'Шаблон до 2х перемог','type'=>'Checkbox','name_field'=>'is_shablon2','bd_field'=>'is_shablon2'));
   $this->addFF(array('name'=>'Тестовий турнір','type'=>'Checkbox','name_field'=>'group_id','bd_field'=>'group_id'));
-  $this->addFF(array('name'=>'Командний турнір','type'=>'Checkbox','name_field'=>'is_command','bd_field'=>'is_command'));
+      $this->addFF(array('name'=>'Ліга','name_field'=>'league_id','table'=>'bs_leagues',
+          'out_result_field'=>'name',
+          'type'=>'ProstSpr', 'id_spis'=>'3', 'bd_field'=>'league_id'));
+  
+  // Проверяем, является ли лига командной - если да, скрываем поле "Командный турнир"
+  $is_team_league = 0;
+  $current_league_id = poste('league_id');
+  $turnir_id = poste('id');
+  
+  // Если редактируем существующий турнир, получаем league_id из базы
+  if (!empty($turnir_id) && empty($current_league_id)) {
+      $current_league_id = db_field('SELECT league_id FROM `'.T_TURNIRS.'` WHERE id='.$turnir_id, 'league_id');
+  }
+  
+  // Если есть league_id, проверяем, является ли лига командной
+  if (!empty($current_league_id)) {
+      $is_team_league = (int)db_field('SELECT is_team_league FROM `bs_leagues` WHERE id='.$current_league_id, 'is_team_league');
+  }
+  
+  // Скрываем поле "Командный турнир" только если лига командная
+  if ($is_team_league != 1) {
+      $this->addFF(array('name'=>'Командний турнір','type'=>'Checkbox','name_field'=>'is_command','bd_field'=>'is_command'));
+  } else {
+      // Если лига командная, добавляем скрытое поле, чтобы значение сохранялось
+      $this->addFF(array('name'=>'is_command','name_field'=>'is_command','bd_field'=>'is_command','type'=>'hidden'));
+  }
+
+  if ($is_team_league == 1) {
+      $this->addFF(array('name'=>'Відбірковий тур (командні ліги)','type'=>'Checkbox','name_field'=>'is_team_qual','bd_field'=>'is_team_qual'));
+      $this->addFF(array('name'=>'К-ть ліг після відбору','name_field'=>'team_leagues_count','size'=>'2','maxlength'=>2,'pattern'=>'[0-9]{1,2}'));
+      $this->addFF(array('name'=>'Турнір не додавати в статистику ліги','type'=>'Checkbox','name_field'=>'is_no_league_stat','bd_field'=>'is_no_league_stat'));
+  } else {
+      $this->addFF(array('name'=>'is_team_qual','name_field'=>'is_team_qual','bd_field'=>'is_team_qual','type'=>'hidden','def'=>0));
+      $this->addFF(array('name'=>'team_leagues_count','name_field'=>'team_leagues_count','bd_field'=>'team_leagues_count','type'=>'hidden','def'=>0));
+      $this->addFF(array('name'=>'is_no_league_stat','name_field'=>'is_no_league_stat','bd_field'=>'is_no_league_stat','type'=>'hidden','def'=>0));
+  }
+
   $this->addFF(array('name'=>'Домашня команда','name_field'=>'command_name1' ));
   $this->addFF(array('name'=>'Гостьова команда','name_field'=>'command_name2' ));
+
 
       $this->setTableModule(T_TURNIRS);
   if  (empty($_SESSION['turnirs']['sort']))  $_SESSION['turnirs']['sort']='dat';
 if  (empty($_SESSION['turnirs']['sort_type']))  $_SESSION['turnirs']['sort_type']='desc';
- $_SESSION['turnirs']['sort_default']='id desc';
+  if ($action=='list' && !poste('page_items'))  $_SESSION['turnirs']['page_items']=50;
+  $_SESSION['turnirs']['sort_default']='id desc';
       if ($_SESSION['gt']['user_rule']<10 && !empty($_SESSION['gt']['club']))
       {
           $sWhere .=  ' and club= '. $_SESSION['gt']['club'];
@@ -150,21 +211,37 @@ if  (empty($_SESSION['turnirs']['sort_type']))  $_SESSION['turnirs']['sort_type'
    //   $_SESSION['JAVA_SCRIPT'] ='set_popover();';
   self::$nameZ='';
  self::$nameZList='';
+      if ($_SESSION['is_mobile'] )
+                $nameZ='<div class="compare_zagl">'.$name_ligs.'</div>';
+            else
+                $nameZ='<div class="poriv_zag">'.$name_ligs.' </div>';
      // self::$nameZList='<span class="zzagl">Турніри</span>';
-      self::$nameZList='Турніри';
+      self::$nameZList= $name_ligs ? $nameZ : 'Турніри';
  self::$nameZEdit='::Редагування турніру';
+    $men_back =  (!empty($league_id)) ? array('module' => 'leagues', 'action' => 'list') : array('module' => 'turnirs', 'action' => 'list');
       if ($_SESSION['gt']['user_rule']<10)
       self::$submenu_list =array(
    // 'help' => array('menu_name'=>'Перерахувати штраф рейтингу','module' => 'turnirs', 'class' =>'mess_shtraph', 'mess' =>'Ви дійсно хочите розрахувати систему штрафів за минулий місяць?', 'action' => 'raschet_shtraph'),
-     'back' => array('module' => 'turnirs', 'action' => 'list'),
+     'back' => $men_back,
     );
     self::$submenu_edit = array(
     'back' => array('module' => 'turnirs', 'action' => 'list'),
     'save' => array('module' => 'turnirs', 'action' => 'edit_ok'),
   //  'report_ok' => array('module' => 'turnirs', 'action' => 'raschet')
     );
-//      if (!empty($league_id))
+  //  s('$action='.$action);
+      if  ($action=='list' && !empty($league_id)){
+          $url_back = 'leagues-list';
+          if ($_SESSION['is_mobile'] ){
+
+              SystemClass::$Java_script_module='show_zag_left("#'.$url_back.'");';
+          }else{
+              $show_zag_left='show_zag_center();show_zag_left_big("#'.$url_back.'");';
+              SystemClass::$Java_script_module=$show_zag_left;
+       }
           self::InitLeaguesMenu();
+      }
+      if  (!empty($league_id))      self::InitLeaguesMenu();
  self::$aFilters=array(
     'name'=>'По имени',
     'articul'=>'По артикулам',
@@ -193,35 +270,54 @@ function get_dat_turnir($field,$id)
 '. $date->format('d.m.Y').'</span>';
     return $tdat;
 }
-function get_name_turnir($field,$id)
+function get_name_turnir($field,$id,$data=array())
 {
-    $league_id = poste('league_id');
+    static $turnir_cache = array();
+    static $league_team_cache = array();
+    $league_id = (int)poste('league_id');
     $name='';
-    $sql='select dat,date_raschet, (select count(end_reiting) from '.T_TURNIR_PLAYERS.' t where r.id=t.turnir_id and end_reiting<>0)  as cnt_g   
-  from '.T_TURNIRS.' r  where  r.id='.$id;
-    $vData = db_row($sql);
-    $Work_turnir=db_field('SELECT COUNT(*) AS cn FROM bs_reiting r WHERE turnir_id='.$id.' AND (r.table_game>0 OR COALESCE(r.win_player,0)>0)','cn');
-   // $date = new DateTimeImmutable($vData[$field]);
-    if ($vData['cnt_g']>0 && !empty($vData['date_raschet']) ){
+    if (!isset($turnir_cache[$id])) {
+        $sql = 'SELECT r.name, r.date_raschet,
+        (SELECT COUNT(*) FROM '.T_TURNIR_PLAYERS.' t WHERE r.id=t.turnir_id AND t.end_reiting<>0) as cnt_g,
+        (SELECT COUNT(*) FROM '.T_REITING.' rr WHERE rr.turnir_id=r.id AND (rr.table_game>0 OR COALESCE(rr.win_player,0)>0)) as cnt_started,
+        (SELECT COUNT(*) FROM '.T_REITING.' rr2 WHERE rr2.turnir_id=r.id) as cnt_games
+        FROM '.T_TURNIRS.' r WHERE r.id='.(int)$id;
+        $turnir_cache[$id] = db_row($sql);
+    }
+
+    $vData = !empty($turnir_cache[$id]) ? $turnir_cache[$id] : array();
+    if (empty($vData)) {
+        return '';
+    }
+
+    if (!empty($vData['cnt_g']) && !empty($vData['date_raschet'])){
         $class='blac_color';
         $title='Турнір порахований';
-    }elseif($Work_turnir>0){
+    }elseif(!empty($vData['cnt_started'])){
         $class='coral_color';
         $title='Турнір розпочато';
     }else{
         $class= 'green_color';
         $title='Турнір ще не порахований';
     }
-    if ($_SESSION['is_mobile']) {$class.=' f12 fw700 nopodch';};
+    if ($_SESSION['is_mobile']) {$class.=' f12 fw700 nopodch';}
 
-    $Work_turnir=db_field('SELECT COUNT(*) AS cn FROM bs_reiting r WHERE turnir_id='.$id,'cn');
-    $turnirName=db_field('SELECT name  FROM '.T_TURNIRS.' r WHERE id='.$id,'name');
-    $hrefLeague= !empty($league_id) ? '&league_id='.$league_id : '';
-if ($Work_turnir>0){
+    $is_team_league = 0;
+    if ($league_id > 0) {
+        if (!isset($league_team_cache[$league_id])) {
+            $league_team_cache[$league_id] = (int)db_field('SELECT is_team_league FROM `bs_leagues` WHERE id='.$league_id, 'is_team_league');
+        }
+        $is_team_league = $league_team_cache[$league_id];
+    }
+
+    $module_players = $is_team_league ? 'turnirsteams' : 'turnirsplayers';
+    $hrefLeague= $league_id > 0 ? '&league_id='.$league_id : '';
+    $turnirName = htmlspecialchars(stripslashes((string)$vData['name']), ENT_QUOTES, 'UTF-8');
+
+    if (!empty($vData['cnt_games'])){
         $name ='<span  id="catalog_name_id_29" data-bs-toggle="tooltip" title="'.$title.'"><a href="#etapresult-show-turnir_id='.$id.$hrefLeague.'" class="'.$class.' ajax_send ">'.$turnirName.'</a> </span>';
-    }else
-    {
-        $name ='<span  id="catalog_name_id_29" data-bs-toggle="tooltip" title="'.$title.'"><a href="#turnirsplayers-list-turnir_id='.$id.$hrefLeague.'" class="'.$class.' ajax_send">'.$turnirName.'</a></span> ';
+    } else {
+        $name ='<span  id="catalog_name_id_29" data-bs-toggle="tooltip" title="'.$title.'"><a href="#'.$module_players.'-list-turnir_id='.$id.$hrefLeague.'" class="'.$class.' ajax_send">'.$turnirName.'</a></span> ';
     }
     return $name;
 }
@@ -229,7 +325,18 @@ function get_name_club($field,$id,$data)
 {
     $class='f14';
     $name='';
-   $name ='<div class="txt_coral f12">'.$data['club_name'].'</div><div class="f12">'.$data['city_name'].'</div>';
+    $club_name = !empty($data['club_name']) ? $data['club_name'] : '';
+    $city_name = !empty($data['city_name']) ? $data['city_name'] : '';
+
+    if ($club_name === '' && !empty($data['club'])) {
+        $club_name = db_field('SELECT value as name FROM `bs_spr-spis-values` WHERE id='.(int)$data['club'], 'name');
+    }
+
+    if ($city_name === '' && !empty($data['city'])) {
+        $city_name = db_field('SELECT value as name FROM `bs_spr-spis-values` WHERE id='.(int)$data['city'], 'name');
+    }
+
+   $name ='<div class="txt_coral f12">'.$club_name.'</div><div class="f12">'.$city_name.'</div>';
 
     return $name;
 }

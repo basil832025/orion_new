@@ -8,11 +8,29 @@ class PlayersObject extends ObjectRT
   {//$_SESSION['gt']['user_rule']s($_SESSION['gt']['user_rule']);
   //    s($_POST);
     //  s($_FILES);
-      $fio_search = poste('fio_search');
+      $fio_search = trim((string)poste('fio_search'));
+      $fio_search_id = ctype_digit($fio_search) ? (int)$fio_search : 0;
+      $fio_search_text = $fio_search_id > 0 ? '' : $fio_search;
       $action=SystemClass::getAction();
       self::$theed_tr_class='th_players_mob';
-      if (empty($fio_search) && $action=='list')
-      $_SESSION['MESSAGE_AJAX']='<div class="input__wrapper"><svg class="input__icon_player"><use xlink:href="#poisk"></use></svg><input type="text" class="form-control" placeholder="Пошук гравця" id="search_field_players" style="margin-left: 20px; width:425px;" speeds="0"    value="'.$fio_search.'"></div>';
+      if ($action=='list') {
+          SystemClass::$Java_script_module = 'chosen_vibor_filter_turnir(240);';
+          $players_where = ' WHERE ispara=0 AND (is_team IS NULL OR is_team=0) ';
+          if ($_SESSION['gt']['user_rule']<>1) {
+              $players_where .= ' AND num_reiting>0 AND not_use=0 ';
+          }
+          $aPlayersFilter = db_list('SELECT id,name FROM `'.T_PLAYERS.'` '.$players_where.' ORDER BY name');
+          $players_options = '';
+          if (!empty($aPlayersFilter)) {
+              foreach ($aPlayersFilter as $pl) {
+                  $selected = ($fio_search_id > 0 && (int)$pl['id'] == $fio_search_id) ? ' selected="selected"' : '';
+                  $players_options .= '<option value="'.(int)$pl['id'].'"'.$selected.'>'.htmlspecialchars($pl['name']).'</option>';
+              }
+          }
+          // Старий пошук по перших літерах тимчасово вимкнено:
+          // <input id="search_field_players" ...>
+          $_SESSION['MESSAGE_AJAX']='<div class="col_flo_left" style="margin-left:10px;"><select class="form-select w-auto" tabindex="5" id="search_field_games_select" data-placeholder="Всі гравці"><option value="">Всі гравці</option>'.$players_options.'</select></div>';
+      }
    // $this->addFTL(array('name'=>'№ заказа','type'=>'text','oper'=>'edit','width'=>'25','name_field'=>'player_id','bd_field'=>'player_id')); 
       if ($_SESSION['is_mobile'])
         $this->addFTL(array('name'=>'<span class="f14 fw700 line14">№</span><br><span class="f12 fw400"> в р-нгу</span>','type'=>'number','class'=>'colelemPlayernum', 'width_mob'=>'54', 'width'=>'5'));
@@ -120,6 +138,7 @@ $this->addFF(array('name'=>'Примітка','name_field'=>'prim','bd_field'=>'
           'name_field'=>'player_id',
           'out_result_field'=>'name',
           'bd_field'=>'player_id',
+          'no_sql'=>1,
           'mess'=>'Виберіть гравця',
           'where'=>' and ispara=0 ',
           'table'=>T_PLAYERS,
@@ -149,16 +168,19 @@ $this->addFF(array('name'=>'Примітка','name_field'=>'prim','bd_field'=>'
       $strSearch='';
       if (!empty($fio_search))
       {
-          //s($fio_search);
-          $strSearch = ' AND name LIKE "%'.$fio_search.'%"';
-         // $dop_where = $strSearch;
+          if ($fio_search_id > 0) {
+              $strSearch = ' AND p.id='.(int)$fio_search_id;
+          } else {
+              $strSearch = ' AND name LIKE "%'.$fio_search_text.'%"';
+          }
+          // $dop_where = $strSearch;
       }
 //unset($_SESSION['players']['where']);
 if  (empty($_SESSION['players']['sort']))  $_SESSION['players']['sort']='reiting';
 if  (empty($_SESSION['players']['sort_type']))  $_SESSION['players']['sort_type']='desc';
 //if ($_SESSION['gt']['user_rule']<>1)   $_SESSION['players']['where']=' and ispara=0 and not_use=0 and exists(select * from bs_turnirplayers where player_id=p.id)';
-if ($_SESSION['gt']['user_rule']<>1)   $_SESSION['players']['where']=' and num_reiting>0 and ispara=0 and not_use=0 '.$strSearch;
-else $_SESSION['players']['where']=' and ispara=0 '.$strSearch;
+if ($_SESSION['gt']['user_rule']<>1)   $_SESSION['players']['where']=' and num_reiting>0 and ispara=0 and not_use=0 and (is_team IS NULL OR is_team=0) '.$strSearch;
+else $_SESSION['players']['where']=' and ispara=0 and (is_team IS NULL OR is_team=0) '.$strSearch;
 $_SESSION['players']['sort_default']=' num_reiting asc';
 
   $this->setTableModule(T_PLAYERS);

@@ -35,6 +35,9 @@ class FormSave extends ActionModule
   $this->aEditField = array_merge($this->aSpecField, $this->aEditField);
   foreach ($this->aEditField as $fieldName => $v) {
     //s($v);
+     if (!empty($v['no_sql'])) {
+         continue;
+     }
      $type_f = !empty($v['type']) ? strtolower($v['type']) : 'text';
     switch ($type_f) {
     case 'checkbox':

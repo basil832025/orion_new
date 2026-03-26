@@ -60,7 +60,7 @@ function getMonUKR($mon)
         case 12 : return 'грудень'; break;
     }
 }
-function getNominationHeader($name='',$text='',$minYear='2023',$maxYear='2023',$aMonthsThisYear,$selectedMon=0,$selectedYear=0)
+function getNominationHeader($name='',$text='',$minYear='2023',$maxYear='2023',$aMonthsThisYear=array(),$selectedMon=0,$selectedYear=0)
 {
     $content= '
 <div class="container">

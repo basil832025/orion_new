@@ -73,10 +73,10 @@ class SetResultWinAction extends ActionModule
         
         $sql='select id,(select  p.name from  bs_players p where p.id=r.pl_id_1) as name1,
         (select  p.name from  bs_players p where p.id=r.pl_id_2) as name2,
-  group_num, type_game, olimp16_num, etap_prim,
+  group_num, type_game, olimp16_num, etap_prim, r.match_id, r.etap_id, r.pl_id_1, r.pl_id_2,
 (select w.name_etap from bs_etaps_work w where w.id=r.etap_id ) as name_etap      
   from '.T_REITING.' r  where  r.turnir_id='.$turnir_id.' and pl_id_1>0 and pl_id_2>0 and set_1=0 and set_2=0';
- $aGames =  db_list($sql);
+  $aGames =  db_list($sql);
     $content='<table cellpadding="0" cellspacing="1" class="bordered" width="100%" border="0" id="parts_table_">
          <tbody>
     <tr>      

@@ -169,16 +169,333 @@ class ActionModule
         if (SystemClass::getIsAjax()!=2)
         {
          $RedirectUrl = ObjectRT::getRedirectUrl();
+         $post_return_custom = '';
          if (!empty($RedirectUrl))
          {
            SystemClass::setAction($RedirectUrl['action']);
         SystemClass::setModule($RedirectUrl['module']);
         //   parent::list_show();
-          $post_return = !empty($RedirectUrl['post_return']) ?  $RedirectUrl['post_return'] :'';
-        SystemClass::setPost_return($post_return);
+          $post_return_custom = !empty($RedirectUrl['post_return']) ?  $RedirectUrl['post_return'] :'';
+          // Очищаем post_return_noMA, чтобы list_show() не формировал неправильный post_return
+          // из aParent, так как мы хотим использовать кастомный post_return
+          if (!empty($post_return_custom)) {
+              SystemClass::setPost_return_noMA('');
+          }
           //  self::setJava_script('redirect_url("'.URL.$RedirectUrl.'");');
-         }//else
+         }else{
+            // Если нет RedirectUrl, явно устанавливаем action='edit_ok' для корректного редиректа
+            SystemClass::setAction('edit_ok');
+         }
+            
+            // Если есть RedirectUrl, сохраняем team_id до вызова list_show()
+            $team_id_for_return = '';
+            if (!empty($RedirectUrl) && !empty($post_return_custom)) {
+                // Извлекаем team_id из post_return или из POST или из сессии (для teamplayers)
+                if (preg_match('/team_id=(\d+)/', $post_return_custom, $matches)) {
+                    $team_id_for_return = $matches[1];
+                } else {
+                    // Пытаемся получить из POST
+                    $team_id_for_return = poste('team_id');
+                    // Если нет в POST, проверяем сессию (для модуля teamplayers)
+                    if (empty($team_id_for_return) && !empty($_SESSION['TEAMPLAYERS_SAVE_TEAM_ID'])) {
+                        $team_id_for_return = $_SESSION['TEAMPLAYERS_SAVE_TEAM_ID'];
+                    }
+                }
+            } elseif ($this->module == 'teamplayers') {
+                // Если нет RedirectUrl, но это модуль teamplayers, пытаемся получить team_id
+                $team_id_for_return = poste('team_id');
+                if (empty($team_id_for_return) && !empty($_SESSION['TEAMPLAYERS_SAVE_TEAM_ID'])) {
+                    $team_id_for_return = $_SESSION['TEAMPLAYERS_SAVE_TEAM_ID'];
+                }
+            }
+            
+            // Сохраняем параметры турнира и лиги до list_show(), чтобы они были доступны после
+            $turnir_id_before_list = poste('turnir_id');
+            $league_id_before_list = poste('league_id');
+            if (empty($league_id_before_list)) {
+                $form_post_before_list = poste('form');
+                if (is_array($form_post_before_list) && !empty($form_post_before_list['league_id'])) {
+                    $league_id_before_list = $form_post_before_list['league_id'];
+                }
+            }
+
+            // Для модуля turnirsteams сохраняем параметры в post_return_noMA ДО list_show()
+            // чтобы кнопка "+" оставалась с параметрами турнира
+            if ($this->module == 'turnirsteams' && (!empty($turnir_id_before_list) || !empty($league_id_before_list))) {
+                $post_noMA_updated = SystemClass::getPost_return_noMA();
+                if (empty($post_noMA_updated)) {
+                    $post_noMA_updated = '';
+                }
+                if (strpos($post_noMA_updated, 'turnir_id=') === false && !empty($turnir_id_before_list)) {
+                    $post_noMA_updated .= '&turnir_id='.$turnir_id_before_list;
+                }
+                if (strpos($post_noMA_updated, 'league_id=') === false && !empty($league_id_before_list)) {
+                    $post_noMA_updated .= '&league_id='.$league_id_before_list;
+                }
+                SystemClass::setPost_return_noMA($post_noMA_updated);
+                $_SESSION['TURNIRSTEAMS_SAVE_TURNIR_ID'] = $turnir_id_before_list;
+                $_SESSION['TURNIRSTEAMS_SAVE_LEAGUE_ID'] = $league_id_before_list;
+            }
+            
             $this->list_show();
+
+            // Для модуля turnirs после сохранения в рамках ліги
+            // возвращаемся в список этой же лиги.
+            if ($this->module == 'turnirs' && !empty($league_id_before_list)) {
+                SystemClass::setPost_return_noMA('&league_id='.(int)$league_id_before_list);
+                SystemClass::setPost_return('turnirs-list-&league_id='.(int)$league_id_before_list);
+            }
+            
+            // Для модуля teamplayers после list_show() сохраняем параметры турнира в post_return_noMA
+            // чтобы они были доступны для ссылок добавления/редактирования
+            if ($this->module == 'teamplayers' && (!empty($turnir_id_before_list) || !empty($league_id_before_list))) {
+                $team_id_post = poste('team_id');
+                $current_post_noMA = SystemClass::getPost_return_noMA();
+                // Если в post_return_noMA еще нет параметров турнира, добавляем их
+                if (!empty($team_id_post)) {
+                    // Проверяем, есть ли уже team_id в current_post_noMA
+                    $has_team_id = strpos($current_post_noMA, 'team_id=') !== false;
+                    
+                    // Формируем обновленный post_return_noMA
+                    if (empty($current_post_noMA) || !$has_team_id) {
+                        // Если post_return_noMA пустой или нет team_id, создаем новый
+                        $post_noMA_updated = '&team_id='.$team_id_post;
+                        if (!empty($turnir_id_before_list)) {
+                            $post_noMA_updated .= '&turnir_id='.$turnir_id_before_list;
+                        }
+                        if (!empty($league_id_before_list)) {
+                            $post_noMA_updated .= '&league_id='.$league_id_before_list;
+                        }
+                    } else {
+                        // Если team_id уже есть, добавляем только недостающие параметры
+                        $post_noMA_updated = $current_post_noMA;
+                        if (strpos($post_noMA_updated, 'turnir_id=') === false && !empty($turnir_id_before_list)) {
+                            $post_noMA_updated .= '&turnir_id='.$turnir_id_before_list;
+                        }
+                        if (strpos($post_noMA_updated, 'league_id=') === false && !empty($league_id_before_list)) {
+                            $post_noMA_updated .= '&league_id='.$league_id_before_list;
+                        }
+                    }
+                    SystemClass::setPost_return_noMA($post_noMA_updated);
+                }
+            }
+            
+            // После list_show() ОБЯЗАТЕЛЬНО переопределяем post_return, если был установлен RedirectUrl
+            // Это нужно, так как list_show() перезаписывает post_return из aParent или postButton
+            if (!empty($RedirectUrl) && !empty($team_id_for_return)) {
+                // Формируем правильный post_return в формате: module-action-param=value
+                $post_return_final = 'teamplayers-list-team_id='.$team_id_for_return;
+                
+                // Добавляем параметры турнира и лиги, если они есть
+                $turnir_id_return = poste('turnir_id');
+                if (empty($turnir_id_return) && !empty($_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'])) {
+                    $turnir_id_return = $_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'];
+                }
+                if (!empty($turnir_id_return)) {
+                    $post_return_final .= '&turnir_id='.$turnir_id_return;
+                }
+                
+                $league_id_return = poste('league_id');
+                if (empty($league_id_return) && !empty($_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'])) {
+                    $league_id_return = $_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'];
+                }
+                if (!empty($league_id_return)) {
+                    $post_return_final .= '&league_id='.$league_id_return;
+                }
+                
+                // Очищаем все старые значения, чтобы избежать дублирования
+                SystemClass::setPost_return('');
+                // НЕ устанавливаем $_SESSION['POST_RETURN'] здесь, так как $Post_return__ уже был взят в returnResultAjax()
+                // и это может привести к дублированию. Используем только SystemClass::setPost_return()
+                
+                // Формируем post_return_noMA с параметрами для использования в ссылках (add, edit)
+                $post_return_noMA = '&team_id='.$team_id_for_return;
+                if (!empty($turnir_id_return)) {
+                    $post_return_noMA .= '&turnir_id='.$turnir_id_return;
+                } elseif (!empty($turnir_id_before_list)) {
+                    $post_return_noMA .= '&turnir_id='.$turnir_id_before_list;
+                }
+                if (!empty($league_id_return)) {
+                    $post_return_noMA .= '&league_id='.$league_id_return;
+                } elseif (!empty($league_id_before_list)) {
+                    $post_return_noMA .= '&league_id='.$league_id_before_list;
+                }
+                // Устанавливаем post_return_noMA для использования в ссылках добавления/редактирования
+                SystemClass::setPost_return_noMA($post_return_noMA);
+                
+                // Обновляем subMenu['add']['post'] с правильными параметрами для кнопки "+"
+                if (!empty($this->subMenu['add']['post'])) {
+                    // Извлекаем старые параметры из post (если есть)
+                    $old_post = $this->subMenu['add']['post'];
+                    // Формируем новый post с параметрами турнира
+                    if (strpos($old_post, 'team_id=') !== false && strpos($old_post, 'turnir_id=') === false) {
+                        // Если есть team_id, но нет turnir_id, добавляем параметры турнира
+                        $this->subMenu['add']['post'] = $old_post;
+                        if (!empty($turnir_id_return)) {
+                            $this->subMenu['add']['post'] .= '&turnir_id='.$turnir_id_return;
+                        } elseif (!empty($turnir_id_before_list)) {
+                            $this->subMenu['add']['post'] .= '&turnir_id='.$turnir_id_before_list;
+                        }
+                        if (!empty($league_id_return)) {
+                            $this->subMenu['add']['post'] .= '&league_id='.$league_id_return;
+                        } elseif (!empty($league_id_before_list)) {
+                            $this->subMenu['add']['post'] .= '&league_id='.$league_id_before_list;
+                        }
+                    } else {
+                        // Если параметров нет, используем post_return_noMA
+                        $this->subMenu['add']['post'] = $post_return_noMA;
+                    }
+                } else {
+                    // Если subMenu['add']['post'] пустой, устанавливаем из post_return_noMA
+                    $this->subMenu['add']['post'] = $post_return_noMA;
+                }
+                
+                // Устанавливаем post_return в SystemClass (главное место для JSON ответа)
+                SystemClass::setPost_return($post_return_final);
+                // НЕ устанавливаем в $_SESSION['POST_RETURN'], чтобы избежать дублирования
+                // Сохраняем параметры турнира в сессии для использования при следующем запросе
+                // (они будут использованы в setPostReturn() при следующем запросе)
+                if (!empty($turnir_id_return)) {
+                    $_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'] = $turnir_id_return;
+                } elseif (!empty($turnir_id_before_list)) {
+                    $_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'] = $turnir_id_before_list;
+                }
+                if (!empty($league_id_return)) {
+                    $_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'] = $league_id_return;
+                } elseif (!empty($league_id_before_list)) {
+                    $_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'] = $league_id_before_list;
+                }
+                // Очищаем team_id из сессии, так как он уже в URL
+                if (!empty($_SESSION['TEAMPLAYERS_SAVE_TEAM_ID'])) {
+                    unset($_SESSION['TEAMPLAYERS_SAVE_TEAM_ID']);
+                }
+                // wLog('edit_ok FINAL post_return: '.$post_return_final);
+            } elseif ($this->module == 'teamplayers' && !empty($team_id_for_return)) {
+                // Даже если нет RedirectUrl, но есть team_id для teamplayers, устанавливаем post_return
+                $post_return_final = 'teamplayers-list-team_id='.$team_id_for_return;
+                
+                // Добавляем параметры турнира и лиги, если они есть
+                $turnir_id_return = poste('turnir_id');
+                if (empty($turnir_id_return) && !empty($_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'])) {
+                    $turnir_id_return = $_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'];
+                }
+                if (!empty($turnir_id_return)) {
+                    $post_return_final .= '&turnir_id='.$turnir_id_return;
+                }
+                
+                $league_id_return = poste('league_id');
+                if (empty($league_id_return) && !empty($_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'])) {
+                    $league_id_return = $_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'];
+                }
+                if (!empty($league_id_return)) {
+                    $post_return_final .= '&league_id='.$league_id_return;
+                }
+                
+                // Очищаем все старые значения, чтобы избежать дублирования
+                SystemClass::setPost_return('');
+                
+                // Формируем post_return_noMA с параметрами для использования в ссылках (add, edit)
+                $post_return_noMA = '&team_id='.$team_id_for_return;
+                if (!empty($turnir_id_return)) {
+                    $post_return_noMA .= '&turnir_id='.$turnir_id_return;
+                } elseif (!empty($turnir_id_before_list)) {
+                    $post_return_noMA .= '&turnir_id='.$turnir_id_before_list;
+                }
+                if (!empty($league_id_return)) {
+                    $post_return_noMA .= '&league_id='.$league_id_return;
+                } elseif (!empty($league_id_before_list)) {
+                    $post_return_noMA .= '&league_id='.$league_id_before_list;
+                }
+                // Устанавливаем post_return_noMA для использования в ссылках добавления/редактирования
+                SystemClass::setPost_return_noMA($post_return_noMA);
+                
+                // Обновляем subMenu['add']['post'] с правильными параметрами для кнопки "+"
+                if (!empty($this->subMenu['add']['post'])) {
+                    // Извлекаем старые параметры из post (если есть)
+                    $old_post = $this->subMenu['add']['post'];
+                    // Формируем новый post с параметрами турнира
+                    if (strpos($old_post, 'team_id=') !== false && strpos($old_post, 'turnir_id=') === false) {
+                        // Если есть team_id, но нет turnir_id, добавляем параметры турнира
+                        $this->subMenu['add']['post'] = $old_post;
+                        if (!empty($turnir_id_return)) {
+                            $this->subMenu['add']['post'] .= '&turnir_id='.$turnir_id_return;
+                        } elseif (!empty($turnir_id_before_list)) {
+                            $this->subMenu['add']['post'] .= '&turnir_id='.$turnir_id_before_list;
+                        }
+                        if (!empty($league_id_return)) {
+                            $this->subMenu['add']['post'] .= '&league_id='.$league_id_return;
+                        } elseif (!empty($league_id_before_list)) {
+                            $this->subMenu['add']['post'] .= '&league_id='.$league_id_before_list;
+                        }
+                    } else {
+                        // Если параметров нет, используем post_return_noMA
+                        $this->subMenu['add']['post'] = $post_return_noMA;
+                    }
+                } else {
+                    // Если subMenu['add']['post'] пустой, устанавливаем из post_return_noMA
+                    $this->subMenu['add']['post'] = $post_return_noMA;
+                }
+                
+                // Устанавливаем только в SystemClass, не в сессию, чтобы избежать дублирования
+                SystemClass::setPost_return($post_return_final);
+                // Сохраняем параметры турнира в сессии для использования при следующем запросе
+                if (!empty($turnir_id_return)) {
+                    $_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'] = $turnir_id_return;
+                } elseif (!empty($turnir_id_before_list)) {
+                    $_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'] = $turnir_id_before_list;
+                }
+                if (!empty($league_id_return)) {
+                    $_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'] = $league_id_return;
+                } elseif (!empty($league_id_before_list)) {
+                    $_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'] = $league_id_before_list;
+                }
+                // Очищаем team_id из сессии, так как он уже в URL
+                if (!empty($_SESSION['TEAMPLAYERS_SAVE_TEAM_ID'])) {
+                    unset($_SESSION['TEAMPLAYERS_SAVE_TEAM_ID']);
+                }
+            } else {
+                // Если нет RedirectUrl, но есть параметры турнира, также сохраняем их в post_return_noMA
+                // для использования в ссылках добавления/редактирования
+                if ($this->module == 'teamplayers') {
+                    $team_id_post = poste('team_id');
+                    $turnir_id_post = poste('turnir_id');
+                    $league_id_post = poste('league_id');
+                    
+                    // Если параметры есть в POST, сохраняем их в post_return_noMA
+                    if (!empty($team_id_post)) {
+                        $post_noMA = '&team_id='.$team_id_post;
+                        if (!empty($turnir_id_post)) {
+                            $post_noMA .= '&turnir_id='.$turnir_id_post;
+                        } elseif (!empty($turnir_id_before_list)) {
+                            $post_noMA .= '&turnir_id='.$turnir_id_before_list;
+                        }
+                        if (!empty($league_id_post)) {
+                            $post_noMA .= '&league_id='.$league_id_post;
+                        } elseif (!empty($league_id_before_list)) {
+                            $post_noMA .= '&league_id='.$league_id_before_list;
+                        }
+                        
+                        // Получаем текущий post_return_noMA и добавляем параметры, если их там нет
+                        $current_post_noMA = SystemClass::getPost_return_noMA();
+                        if (!empty($current_post_noMA)) {
+                            // Если в текущем post_return_noMA уже есть team_id, добавляем только недостающие параметры
+                            if (strpos($current_post_noMA, 'turnir_id=') === false && !empty($turnir_id_post)) {
+                                $current_post_noMA .= '&turnir_id='.$turnir_id_post;
+                            } elseif (strpos($current_post_noMA, 'turnir_id=') === false && !empty($turnir_id_before_list)) {
+                                $current_post_noMA .= '&turnir_id='.$turnir_id_before_list;
+                            }
+                            if (strpos($current_post_noMA, 'league_id=') === false && !empty($league_id_post)) {
+                                $current_post_noMA .= '&league_id='.$league_id_post;
+                            } elseif (strpos($current_post_noMA, 'league_id=') === false && !empty($league_id_before_list)) {
+                                $current_post_noMA .= '&league_id='.$league_id_before_list;
+                            }
+                            SystemClass::setPost_return_noMA($current_post_noMA);
+                        } else {
+                            SystemClass::setPost_return_noMA($post_noMA);
+                        }
+                    }
+                }
+            }
 
         }
         
@@ -240,7 +557,33 @@ class ActionModule
     $sql = 'update `' . $table . '` SET '.$aElem['bd_field_short_name'].' = "' . $NewvalField .
                     '" WHERE id = ' . $id_table;
 
-           if (db_query($sql) ) $this->setContent('OK'); else  $this->setContent('ERROR');
+           if (db_query($sql) ) {
+               if ($this->module == 'reiting') {
+                   $updated_field = !empty($aElem['bd_field_short_name']) ? $aElem['bd_field_short_name'] : $nameField;
+                   if (in_array($updated_field, array('set_1', 'set_2', 'break_1', 'break_2'), true)) {
+                       $game = db_row('SELECT id, turnir_id, etap_id, pl_id_1, pl_id_2, set_1, set_2, break_1, break_2 FROM '.T_REITING.' WHERE id='.(int)$id_table);
+                       if (!empty($game)) {
+                           $_POST['form'] = array(
+                               'pl_id_1' => $game['pl_id_1'],
+                               'pl_id_2' => $game['pl_id_2'],
+                               'set_1' => $game['set_1'],
+                               'set_2' => $game['set_2'],
+                               'break_1' => $game['break_1'],
+                               'break_2' => $game['break_2']
+                           );
+                           $_POST['id'] = $game['id'];
+                           $_POST['turnir_id'] = $game['turnir_id'];
+                           $_POST['etap_id'] = $game['etap_id'];
+                           if (file_exists('modules/grp_turnirs/reiting/triger/after.edit_ok.php')) {
+                               include_once 'modules/grp_turnirs/reiting/triger/after.edit_ok.php';
+                           }
+                       }
+                   }
+               }
+               $this->setContent('OK');
+           } else  {
+               $this->setContent('ERROR');
+           }
   }  
   // поиск по первых буквах по полю
   function searchFirstLetter()
@@ -550,11 +893,41 @@ $name_field_sql = !empty($name_field_sql) ? $name_field_sql : $feald.'=' . $pare
              $post_return .='&'. (!empty($this->name_aParent) ? $this->name_aParent . '="' . $this->id_aParent . '"' : '');
                             $post_return = str_replace('"','',$post_return);  
            }
+           
+           // Для модуля teamplayers и turnirsteams добавляем параметры турнира, если они есть в POST или сессии
+           if ($this->module == 'teamplayers' || $this->module == 'turnirsteams') {
+               $turnir_id_param = poste('turnir_id');
+               $league_id_param = poste('league_id');
+               
+               // Если параметры не в POST, пытаемся получить из сессии
+               if (empty($turnir_id_param)) {
+                   if ($this->module == 'teamplayers' && !empty($_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'])) {
+                       $turnir_id_param = $_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'];
+                   } elseif ($this->module == 'turnirsteams' && !empty($_SESSION['TURNIRSTEAMS_SAVE_TURNIR_ID'])) {
+                       $turnir_id_param = $_SESSION['TURNIRSTEAMS_SAVE_TURNIR_ID'];
+                   }
+               }
+               if (empty($league_id_param)) {
+                   if ($this->module == 'teamplayers' && !empty($_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'])) {
+                       $league_id_param = $_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'];
+                   } elseif ($this->module == 'turnirsteams' && !empty($_SESSION['TURNIRSTEAMS_SAVE_LEAGUE_ID'])) {
+                       $league_id_param = $_SESSION['TURNIRSTEAMS_SAVE_LEAGUE_ID'];
+                   }
+               }
+               
+               if (!empty($turnir_id_param) && strpos($post_return, 'turnir_id=') === false) {
+                   $post_return .= '&turnir_id='.$turnir_id_param;
+               }
+               if (!empty($league_id_param) && strpos($post_return, 'league_id=') === false) {
+                   $post_return .= '&league_id='.$league_id_param;
+               }
+           }
+           
              SystemClass::setPost_return_noMA($post_return);
              $post_return = $this->module.'-list-'.$post_return;
              
-             SystemClass::setPost_return($post_return);
-             
+              SystemClass::setPost_return($post_return);
+              
         } 
   }  
   function getPostReturnId ($key)

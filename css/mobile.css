@@ -75,6 +75,12 @@
     .table_mob_player tr td{
         font-size: 14px;
     }
+    .table_teams_mob td,
+    .table_teams_mob td a,
+    .table_teams_mob th {
+        font-size: 10px !important;
+        line-height: 12px !important;
+    }
     .table_mob_player tr td {
         min-height: 59px !important;
         height: 59px;
@@ -202,8 +208,8 @@
 
     }
     .table_table_mini{
-        height: 130px; /* Высота блока */
-        width: 96px; /* Ширина блока */
+        height: 130px; /* пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ */
+        width: 96px; /* пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ */
         display: inline-block;
         padding: 2px;
 
@@ -216,8 +222,8 @@
     }
     .mainTable {
         display: block;
-        height: auto; /* Высота блока */
-        width: auto; /* Ширина блока */
+        height: auto; /* пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ */
+        width: auto; /* пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ */
         margin: 0;
 
     }
@@ -226,8 +232,8 @@
         margin: 15px;
         float: none;
         text-align: left;
-        height: 120px; /* Высота блока */
-        width: 100%; /* Ширина блока */
+        height: 120px; /* пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ */
+        width: 100%; /* пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ */
         font-size: 14px;
         font-weight: 600;
         color: #333333;
@@ -454,7 +460,7 @@
         margin: 0;
     }
     .menuLineLeft a{
-        white-space: nowrap; /* Запрещаем перенос слов */
+        white-space: nowrap; /* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ */
         line-height: 25px;
     }
     .logo{
@@ -477,9 +483,19 @@
     }
 .table-responsive{
     margin-top: 10px;
-    max-width: 390px;
-    width: auto;
+    padding: 0 5px;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
 }
+ .table-responsive-turnirsteams{
+      max-width: 100% !important;
+      width: 100% !important;
+  }
+  .table-responsive.table-responsive-teams{
+      max-width: 100% !important;
+      width: 100% !important;
+  }
 .zagolovok{
     width: 100% !important;
  /*   margin: 0 5px 10px 0;*/
@@ -897,7 +913,7 @@ background-color: #ECEDEE;
         }
     .table td{
         /*  white-space: pre-wrap;  css-3 */
-        white-space: -moz-pre-wrap; /* Mozilla, начиная с 1999 года */
+        white-space: -moz-pre-wrap; /* Mozilla, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 1999 пїЅпїЅпїЅпїЅ */
         white-space: -pre-wrap; /* Opera 4-6 */
         white-space: -o-pre-wrap; /* Opera 7 */
         word-wrap: break-word; /* Internet Explorer 5.5+ */
@@ -1017,7 +1033,7 @@ margin-right: -50px;
         color: #333333;
     }
     td.zach{
-        background: rgba(236, 237, 238, 1)  !important; /* Цвет фона */
+        background: rgba(236, 237, 238, 1)  !important; /* пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ */
         min-width: 30px;
         min-height: 32px;
     }
@@ -1138,7 +1154,11 @@ margin-right: -50px;
         width: 395px !important;
     }
     .table_mob_turn tr{
-        height: 19px;
+        height: 59px;
+    }
+    .table_mob_turn tr td{
+        min-height: 59px;
+        height: 59px;
     }
     .login_in {
         display: inline-block;

@@ -12,7 +12,42 @@ FROM '.T_TURNIR_PLAYERS.' tpp
         }
     }
 }
-function sql_raschet($turnir_id=0)
+// добавим в турнир командных лиг просто игроков чтобы вывести по ним статистику и в рейтинг добавить
+function add_players_to_command_turnirs($turnir_id=0)
+{
+    // возьмем всех уникальных игроков которые играли хоть 1 игру и выведем в массив
+    $sql ='SELECT pl_id_1 AS player_id
+FROM bs_reiting
+WHERE turnir_id = '.$turnir_id.'
+  AND pair_number > 0
+
+UNION
+
+SELECT pl_id_2 AS player_id
+FROM bs_reiting
+WHERE turnir_id = '.$turnir_id.'
+  AND pair_number > 0;
+';
+  //  s($sql);
+    $aPlayers = db_list($sql);
+ //   s($aPlayers);
+    $values = [];
+// вставляем уникальных игроков IGNORE защита от дублей
+    foreach ($aPlayers as $playerId) {
+        $values[] = '(' . (int)$playerId['player_id'] . ', ' . (int)$turnir_id . ')';
+    }
+   // s($values);
+    if ($values) {
+        $sql = "
+        INSERT IGNORE INTO bs_turnirplayers (player_id, turnir_id)
+        VALUES " . implode(',', $values);
+      //  s($sql);
+        db_query($sql);
+    }
+
+
+}
+function sql_raschet($turnir_id=0,$is_team_league=0)
 {
 
     //  $this->id=$turnir_id;
@@ -24,12 +59,15 @@ function sql_raschet($turnir_id=0)
         AND tp1.player_id=p.id AND tp1.turnir_id='.$turnir_id.' AND CASE WHEN tt.dat=tt1.dat then tt1.id>tt.id else tt1.id<>tt.id end)>=tt.dat) 
 order by tt.dat DESC, tt.id DESC  limit 1) as reit,p.start_reiting,p.id,reiting_ukraine 
 FROM '.T_PLAYERS.' p,bs_turnirplayers tpp 
-            where  p.id=tpp.player_id  and tpp.turnir_id='.$turnir_id.'
+            where  p.id=tpp.player_id  and tpp.turnir_id='.$turnir_id.' 
+            and p.is_team=0  
 				AND  exists(select * from `'.T_REITING.'` tp where (p.id=tp.pl_id_1 or p.id=tp.pl_id_2) and perenos_etap=0  and tp.turnir_id='.$turnir_id.' ) 
             order by 1 desc, start_reiting desc  ';
     s($sql);
     $allPlayers_ = db_list($sql);
     $allPlayers =array();
+ //   s('dooooooo');
+  //  s($allPlayers_);
     // этот прогон чтобы в масссиве id сооьевтовал игроку
     foreach ($allPlayers_ as  $k => $aPlayer)
     {
@@ -57,14 +95,16 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
         $aPlayer['start_reiting'] = $start_reiting;
         $allPlayers[$aPlayer['id']]= $aPlayer;
     }
-    // запустим проверку по туриниру и всех играх и запишем разницы рейтингов по играх дельты
-    proverkaTurnirs($allPlayers,$turnir_id);
-
+   // запустим проверку по туриниру и всех играх и запишем разницы рейтингов по играх дельты
+    proverkaTurnirs($allPlayers,$turnir_id,$is_team_league);
+  //  s('posle proverkaTurnirs');
 
     foreach ($allPlayers as  $PlayId => $aPlayer)
     {// получим все результаты игр по данному турниру и игороку
         $sqlR = 'select * from '.T_REITING.' where (pl_id_1='.$PlayId.' or pl_id_2='.$PlayId.') and COALESCE(win_player,0)>0 and perenos_etap=0 and turnir_id='.$turnir_id;
+    //  s($sqlR);
         $allGames = db_list($sqlR);
+    //    s($allGames);
         $is_new=0;
         if (!empty($allGames)) // если массив не пустой и игрок играл на данном турнире тогда естьсмысл продолжать
         {
@@ -164,6 +204,7 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
             updateStatisticPlayer($PlayId,$turnir_id);
         } // end if $allGames
     } // end for $allPlayers
+ //   s('eneeessssddd');
 }
 function updateStatisticPlayer($PlayId,$turnir_id)
 {
@@ -195,7 +236,7 @@ from bs_players p where id='.$PlayId;
     reiting_avg='.$aPlayer['avg_reiting'].',
     cnt_turnirs='.$aPlayer['cnt_turnirs'].' where id='.$PlayId);
 }
-function proverkaTurnirs($allPlayers,$turnir_id)
+function proverkaTurnirs($allPlayers,$turnir_id,$is_team_league=0)
 {
     $is_first=1;
     $sql = 'select id,date_create,dat from ' . T_TURNIRS . ' r WHERE  id=' . $turnir_id;
@@ -203,8 +244,10 @@ function proverkaTurnirs($allPlayers,$turnir_id)
     $aTurnirs = db_row($sql);
     //  $aTurnirs['dat']= date_for_firebird_format($aTurnirs['dat']);
     // s($aTurnirs);
+    $sql_='';
+    if ($is_team_league>0) $sql_ = ' and pair_number>0 ';
     // получим все результаты игр по данному турниру
-    $sqlR = 'select * from '.T_REITING.' where  perenos_etap=0 and COALESCE(win_player,0)>0 and turnir_id='.$turnir_id;
+    $sqlR = 'select * from '.T_REITING.' where  perenos_etap=0 and COALESCE(win_player,0)>0 and turnir_id='.$turnir_id.' '.$sql_;
     $allGames = db_list($sqlR);
     //  s($allPlayers);
     //  s($allGames);
@@ -285,6 +328,71 @@ function proverkaTurnirs($allPlayers,$turnir_id)
         }
     }
 }
+// расччитвваем очки за места турнира для топ лиг topplayersLeagueObject
+function set_points_turnir ($league_id=0,$is_team_league=0){
+    global $ochki_top_ligs; // глобальный массив по правилам начисление очков по местам
+    $sql_='';
+    if ($is_team_league>0) $sql_= 'AND EXISTS(SELECT * from  bs_players p where p.id=tp.player_id AND p.is_team=1) ';
+    $sql = 'SELECT player_id, (SELECT NAME FROM bs_players WHERE player_id=id) AS NAME, SUM(tp.points) AS points,
+COUNT(tp.turnir_id) AS turnirs,
+SUM(tp.cnt_games) AS cnt_games,SUM(tp.cnt_wins) AS cnt_wins,SUM(tp.cnt_lose) AS cnt_lose,
+SUM(tp.cnt_sets) AS cnt_sets,SUM(tp.cnt_sets_win) AS cnt_sets_win,SUM(tp.cnt_sets_lose) AS cnt_sets_lose
+
+ FROM '.T_TURNIR_PLAYERS.' tp, '.T_TURNIRS.' t  WHERE t.league_id='.$league_id.' AND t.id=tp.turnir_id '.$sql_.' 
+GROUP BY player_id ORDER BY points desc';
+      s($sql);
+    $UserMesta = db_list($sql);
+  //  s($UserMesta);
+    if (!empty($UserMesta))
+    {
+
+        foreach ($UserMesta as $row) {
+            $upsertSql = '
+    INSERT INTO bs_top_players
+        (league_id, player_id, turnirs, points, cnt_games, cnt_wins, cnt_lose, cnt_sets, cnt_sets_win, cnt_sets_lose)
+    VALUES
+        ('.$league_id.', '.$row['player_id'].', '.$row['turnirs'].', '.$row['points'].', '.$row['cnt_games'].', 
+        '.$row['cnt_wins'].', '.$row['cnt_lose'].', '.$row['cnt_sets'].', '.$row['cnt_sets_win'].', '.$row['cnt_sets_lose'].')
+    ON DUPLICATE KEY UPDATE
+        turnirs       = VALUES(turnirs),
+        points        = VALUES(points),
+        cnt_games     = VALUES(cnt_games),
+        cnt_wins      = VALUES(cnt_wins),
+        cnt_lose      = VALUES(cnt_lose),
+        cnt_sets      = VALUES(cnt_sets),
+        cnt_sets_win  = VALUES(cnt_sets_win),
+        cnt_sets_lose = VALUES(cnt_sets_lose)
+';
+
+ //   s($upsertSql);
+            // Вызови свою обёртку. Если у тебя есть метод insertOrUpdate — можно им.
+            db_query($upsertSql);
+        }
+
+    }
+}
+// берет по массиву определенных правил за какие места сколько балов и возвращает количесвто балов
+function getPointsForPlace(int $place, array $rules): int
+{
+    foreach ($rules as $key => $points) {
+        if (strpos($key, '-') !== false) {
+            // диапазон
+            [$start, $end] = explode('-', $key);
+            if ($place >= (int)$start && $place <= (int)$end) {
+                return $points;
+            }
+        } else {
+            // конкретное место
+            if ($place === (int)$key) {
+                return $points;
+            }
+        }
+    }
+
+    // если ничего не найдено
+    return 0;
+}
+// расчитывааем места для турира
 function set_mesta_turnir ($turnir_id=0)
 {
     $sql = 'SELECT * FROM bs_etaps_work WHERE turnir_id='.$turnir_id.' AND istochnik_posev=0';
@@ -322,6 +430,7 @@ function setRecurMesta ($etap_id,$turnir_id,$mestaFrom=1)
 }
 function setMesta ($etap_id,$turnir_id,$mestaFrom=1)
 {
+    global $ochki_top_ligs; // глобальный массив по правилам начисление очков по местам
     $sql = 'select * from bs_etaps_players_mesta where etap_id='.$etap_id;
     //  s($sql);
     $UserMesta = db_list($sql);
@@ -330,7 +439,8 @@ function setMesta ($etap_id,$turnir_id,$mestaFrom=1)
         foreach ($UserMesta as $Usrmesta)
         {
             $mesto = $mestaFrom + ($Usrmesta['mesto_all']-1);
-            $sql = 'update '.T_TURNIR_PLAYERS.' set mesto='.$mesto. ' where player_id='.$Usrmesta['player_id'].' and  turnir_id='.$turnir_id;
+            $points = getPointsForPlace($mesto, $ochki_top_ligs);
+            $sql = 'update '.T_TURNIR_PLAYERS.' set mesto='.$mesto.', points='.$points.'  where player_id='.$Usrmesta['player_id'].' and  turnir_id='.$turnir_id;
             //   s($sql);
             db_query($sql);
         }

@@ -69,7 +69,7 @@ function getMonUKR($mon)
         case 12 : return 'Грудень'; break;
     }
 }
-function getNominationHeader($name='',$text='',$minYear='2023',$maxYear='2023',$aMonthsThisYear,$selectedMon=0,$selectedYear=0)
+function getNominationHeader($name='',$text='',$minYear='2023',$maxYear='2023',$aMonthsThisYear=array(),$selectedMon=0,$selectedYear=0)
 {
     $id_spis = 4; // міста
     $name_vibor = 'Виберіть місто';

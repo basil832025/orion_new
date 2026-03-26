@@ -11,7 +11,8 @@ class put_resultsAction extends ActionModule
   protected  $ArrEtaps = array();
   protected  $subMenu = array();
   protected  $Java_script = ''; // джаваскрипт функции для данного действия например иницлизация функции календаря, или редактора контента
-   
+
+
     function init ()
     {
    /* s($this->module);
@@ -22,11 +23,19 @@ class put_resultsAction extends ActionModule
     s($this->type_module);
     s($this->aEditField );*/
     //s($_POST);
+     $turnir_id = (int)poste('id');
+     if ($turnir_id <= 0) {
+         $turnir_id = (int)poste('turnir_id');
+     }
+     if ($turnir_id > 0) {
+          $this->id = $turnir_id;
+      }
+
      $this->get_idTokenGoogle();
      if (!empty($this->ligas_session))
-        $this->put_results_ligas();
-        else
-        window_mess('Не верный логин или пароль лигас');
+         $this->put_results_ligas();
+         else
+         window_mess('Не верный логин или пароль лигас');
        
     
     $this->list_show_lig();
@@ -47,6 +56,10 @@ class put_resultsAction extends ActionModule
         function get_idTokenGoogle()
     {
       //  s($_SESSION);
+        if (empty($_SESSION['gt']['ligas_login_email']) || empty($_SESSION['gt']['ligas_password'])) {
+            return;
+        }
+
         if (!empty($_SESSION['gt']['ligas_login_email']) &&  !empty($_SESSION['gt']['ligas_password']))
         {
         $data = array(
@@ -66,22 +79,44 @@ curl_setopt($ch, CURLOPT_HEADER, false);
 $res = curl_exec($ch);
 curl_close($ch);
 $res = json_decode($res, true);
-$this->ligas_session = $res['idToken'];
+$this->ligas_session = !empty($res['idToken']) ? $res['idToken'] : '';
 }
 }
     function put_results_ligas()
     {
-        $sql = 'select turnir_id_ligas,ligas_session from '.T_TURNIRS.' where id='.$this->id;
+        $turnir_id = (int)$this->id;
+        if ($turnir_id <= 0) {
+            $turnir_id = (int)poste('id');
+        }
+        if ($turnir_id <= 0) {
+            $turnir_id = (int)poste('turnir_id');
+        }
+        if ($turnir_id <= 0) {
+            return;
+        }
+
+        $this->id = $turnir_id;
+        $sql = 'select turnir_id_ligas,ligas_session from '.T_TURNIRS.' where id='.$turnir_id;
         $aTurn=db_row($sql);
         if (!empty($aTurn['turnir_id_ligas']) )
         { //&& !empty($aTurn['ligas_session'])
-            $sql = 'select (select p.name_ligas from bs_players p where p.id=r.pl_id_1) as participant1Name ,
+            $base_sql = 'select (select p.name_ligas from bs_players p where p.id=r.pl_id_1) as participant1Name ,
+(r.id) as local_game_id,
 (select p.id_reiting from bs_players p where p.id=r.pl_id_1) as participant1,
 (select p.name_ligas from bs_players p where p.id=r.pl_id_2) as participant2Name,
 (select p.id_reiting from bs_players p where p.id=r.pl_id_2) as participant2,
- r.set_1 ,r.set_2 
- from  bs_reiting r where (set_1>0 or set_2>0) and no_send=0  and perenos_etap=0 and r.turnir_id='.$this->id.' ORDER BY id';
+ r.set_1 ,r.set_2, r.break_1, r.break_2, r.win_player, r.lose_player, r.pl_id_1, r.pl_id_2
+ from  bs_reiting r where ((set_1>0 or set_2>0 ) ) and no_send=0
+                       AND EXISTS(SELECT * FROM bs_players p WHERE p.is_team=0 AND r.pl_id_1=p.id)
+                       and (perenos_etap=0 or perenos_etap is null) and r.turnir_id='.$turnir_id;
+
+            $sql = $base_sql.' and (no_send=0 or no_send is null) ORDER BY id';
           $aResults = db_list($sql);
+
+          if (empty($aResults)) {
+              $sql = $base_sql.' ORDER BY id';
+              $aResults = db_list($sql);
+          }
           $id=1;
           if (!empty($aResults))
           {
@@ -230,8 +265,36 @@ curl_close($ch);
     function addPlayerLigas($aPlay,$turnir_id_ligas,$ligas_session,$id)
     {
       $ligas_session = $this->ligas_session;  
-       // s($aPlay);
-        $status= ($aPlay['set_1']>$aPlay['set_2']) ? 3 : 4;
+      if (empty($aPlay['participant1']) || empty($aPlay['participant2'])) {
+          return;
+      }
+
+      $set_1 = trim((string)$aPlay['set_1']);
+      $set_2 = trim((string)$aPlay['set_2']);
+      if (($set_1 === '' || $set_1 === '0') && ($set_2 === '' || $set_2 === '0')) {
+          if (!empty($aPlay['break_1']) && empty($aPlay['break_2'])) {
+              $set_1 = 'L';
+              $set_2 = 'W';
+          } elseif (!empty($aPlay['break_2']) && empty($aPlay['break_1'])) {
+              $set_1 = 'W';
+              $set_2 = 'L';
+          } elseif (!empty($aPlay['win_player']) && !empty($aPlay['lose_player'])) {
+              if ((int)$aPlay['win_player'] === (int)$aPlay['pl_id_1']) {
+                  $set_1 = 'W';
+                  $set_2 = 'L';
+              } elseif ((int)$aPlay['win_player'] === (int)$aPlay['pl_id_2']) {
+                  $set_1 = 'L';
+                  $set_2 = 'W';
+              }
+          }
+      }
+
+      if ($set_1 === 'W' || $set_2 === 'L' || ((is_numeric($set_1) && is_numeric($set_2) && (float)$set_1 > (float)$set_2))) {
+          $status = 3;
+      } else {
+          $status = 4;
+      }
+
         $data = array(
  "stageIndex"=>0, 
  "id"=>$id,
@@ -248,7 +311,7 @@ curl_close($ch);
  "participant1Name"=>$aPlay['participant1Name'],
  "participant2Name"=>$aPlay['participant2Name'],
  "place"=>null,
- "result"=>$aPlay['set_1'].':'.$aPlay['set_2'],
+ "result"=>$set_1.':'.$set_2,
  
  );
  //s($data);
@@ -275,16 +338,43 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_VERBOSE, true);
 
 $respond = curl_exec($ch);
-curl_close($ch); 
+curl_close($ch);
     }
   
       function list_show_lig()
-    {   SystemClass::setAction('anyaction');
-        SystemClass::setModule('players');
-     //  $this->Java_script='reload_page_();';
-       parent::list_show();
-        //  $post_return = 'reiting-list-turnir_id='.$this->id;
-       // SystemClass::setPost_return($post_return);
+    {
+        $turnir_id = (int)$this->id;
+        if ($turnir_id <= 0) {
+            $turnir_id = (int)poste('id');
+        }
+        if ($turnir_id <= 0) {
+            $turnir_id = (int)poste('turnir_id');
+        }
+        if ($turnir_id <= 0) {
+            return;
+        }
+
+        $this->id = $turnir_id;
+        // После выгрузки возвращаемся к списку игр текущего турнира,
+        // а не к модулю players (иначе в reiting подтягивается players.where).
+        SystemClass::setAction('list');
+        SystemClass::setModule('reiting');
+        $_POST['turnir_id'] = $turnir_id;
+
+        $league_id = (int)poste('league_id');
+        if ($league_id <= 0) {
+            $league_id = (int)db_field('SELECT league_id FROM `'.T_TURNIRS.'` WHERE id='.$turnir_id, 'league_id');
+        }
+        if ($league_id > 0) {
+            $_POST['league_id'] = $league_id;
+        }
+
+      //  $this->Java_script='reload_page_();';
+        parent::list_show();
+
+        $post_no_ma = 'turnir_id='.$turnir_id.($league_id > 0 ? '&league_id='.$league_id : '');
+        SystemClass::setPost_return_noMA('&'.$post_no_ma);
+        SystemClass::setPost_return('reiting-list-'.$post_no_ma);
       
         // SystemClass::setJava_script($this->Java_script);
      

@@ -35,7 +35,8 @@ class StatisticsAction extends ActionModule
         p.* from '.T_PLAYERS. ' p where id='.$id;
         $aPlayer = db_row($sql);
         $zagl = !empty($_SESSION['is_mobile']) ? $aPlayer['name'] : '';
-        $sql ='SELECT t.dat,t.name,tp.* from '.T_TURNIR_PLAYERS.' tp , '.T_TURNIRS.' t WHERE t.date_raschet IS not null and t.id=tp.turnir_id AND tp.player_id='.$id.' order by dat desc,t.id desc';
+        $sql ='SELECT t.dat,t.name,t.league_id AS tur_league_id,tp.* from '.T_TURNIR_PLAYERS.' tp , '.T_TURNIRS.' t 
+        WHERE t.date_raschet IS not null and t.id=tp.turnir_id AND tp.player_id='.$id.' order by dat desc,t.id desc';
         $aTurnirs = db_list($sql,$page_number,0,0,'&id='.$id);
        // s($sql);
        // s($aTurnirs);
@@ -93,10 +94,11 @@ class StatisticsAction extends ActionModule
        (SELECT NAME FROM bs_players p WHERE p.id=pl_id_1) AS name_1,
 (SELECT NAME FROM bs_players p WHERE p.id=pl_id_2) AS name_2,
        r.* from '.T_REITING.' r , '.T_TURNIRS.' t WHERE  t.id=r.turnir_id and 
-             ((pl_id_1='.$id.' AND pl_id_2='.$compare_id.') OR  (pl_id_1='.$compare_id.' AND pl_id_2='.$id.')) AND win_player>0  order by dat,t.id';
+             ((pl_id_1='.$id.' AND pl_id_2='.$compare_id.') OR  (pl_id_1='.$compare_id.' AND pl_id_2='.$id.')) 
+             AND win_player>0  order by dat,t.id';
             $aTurnirs = db_list($sql,$page_number,0,0,'&id='.$id);
 s($sql);
-            $this->content .= $this->getTurnirsCompare($aTurnirs,$id);
+            $this->content .= $this->getTurnirsCompare($id,$aTurnirs);
             $this->content.='</div>';
             $_SESSION['MESSAGE_AJAX']='';
 
@@ -677,14 +679,18 @@ s($sql);
     }
     function MainPlayer ($aPlayer=[])
     {
-        $birthd = substr($aPlayer['birthday'],0,4);
-        if ($birthd!='0000')
+        $birthday = isset($aPlayer['birthday']) ? (string)$aPlayer['birthday'] : '';
+        $birthd = $birthday !== '' ? substr($birthday,0,4) : '';
+        if ($birthd!='0000' && $birthday !== '')
         {
-         //   s($birthd);
-            $date = new DateTimeImmutable($aPlayer['birthday']);
-            $aPlayer['birthd'] =   $date->format('Y');
+            try {
+                $date = new DateTimeImmutable($birthday);
+                $aPlayer['birthd'] =   $date->format('Y');
+            } catch (Exception $e) {
+                $aPlayer['birthd'] = !empty($aPlayer['god_rogd']) ? $aPlayer['god_rogd'] : date('Y');
+            }
         }else
-            $aPlayer['birthd'] = $aPlayer['god_rogd'];
+            $aPlayer['birthd'] = !empty($aPlayer['god_rogd']) ? $aPlayer['god_rogd'] : date('Y');
         $today_Y = date("Y");
         $aPlayer['rokiv'] = $today_Y - $aPlayer['birthd'];
         $sex = !empty($aPlayer['sex']) && $aPlayer['sex']=='f' ? 'f' : 'm';
@@ -702,7 +708,7 @@ s($sql);
         $this->MainPlayerHtml($aPlayer);
 
     }
-    function getTurnirsCompare($aTurnirs=[],$id){
+    function getTurnirsCompare($id,$aTurnirs=[]){
         //  <th scope="col" class="text-center align-middle">#</th>
         //
         if ($_SESSION['is_mobile'] ) {
@@ -774,7 +780,7 @@ s($sql);
 </table>
   ';
         //  ;
-        $content .=$_SESSION['pagging_html'].'
+        $content .= (!empty($_SESSION['pagging_html']) ? $_SESSION['pagging_html'] : '').'
 </div>';
         return $content;
     }
@@ -795,6 +801,7 @@ s($sql);
       <th scope="col"   class="text-center align-middle"><span class="rotate-sm-90">К-ть<br>перемог</span></th>
       <th scope="col"   class="text-center align-middle" ><span class="rotate-sm-90">К-сть<br>поразок</span></th>
       <th scope="col"   class="text-center align-middle"><span class="rotate-sm-90">К-сть<br>сетів</span></th>
+      <th scope="col"   class="text-center align-middle"><span class="rotate-sm-90">Балів за<br>лігу</span></th>
       <th scope="col"   class="text-center align-middle"><span class="rotate-sm-90">Місце в<br>турнірі</span></th>
     
     </tr> </thead>
@@ -816,6 +823,7 @@ s($sql);
       <th scope="col" class="text-center">Кількість<br>перемог</th>
       <th scope="col" class="text-center">Кількість<br>поразок</th>
       <th scope="col" class="text-center">Кількість<br>сетів</th>
+      <th scope="col" class="text-center">Балів за<br>лігу</th>
       <th scope="col" class="text-center">Місце<br>в турнірі</th>
     
     </tr> </thead>
@@ -830,11 +838,16 @@ s($sql);
 
         $name='';$sm_turnirs=0;
         $cn_players=0;
+       // s($aTurnirs);
         foreach ($aTurnirs as $user)
-        {   $content.='<tr class="f14">
+        {
+          //  s($user);
+            $league_id = $user['tur_league_id']>0 ? '&league_id='.$user['tur_league_id'] : '';
+            $league_points = ((int)$user['tur_league_id'] > 0) ? (string)$user['points'] : '';
+            $content.='<tr class="f14">
       <th class="align-middle text-center" scope="row">'.$n.'</th>
       <td class="px_my-2 align-middle text-center">'.date_for_firebird_format($user['dat']).'</td>
-      <td class="px_my-2 text-start"><a target="_blank" href="#etapresult-show-turnir_id='.$user['turnir_id'].'">'.$user['name'].'</a></td>
+      <td class="px_my-2 text-start"><a target="_blank" href="#etapresult-show-turnir_id='.$user['turnir_id'].$league_id.'">'.$user['name'].'</a></td>
       <td class="align-middle text-center">'.round($user['beg_reiting']).'</td>
       <td class="align-middle text-center">'.round($user['end_reiting']).'</td>
       <td class="align-middle text-center "><span class="coral_color">'.round($user['end_reiting']-$user['beg_reiting']).'</span></td>
@@ -842,6 +855,7 @@ s($sql);
       <td class="align-middle text-center">'.$user['cnt_wins'].'</td>
       <td class="align-middle text-center">'.$user['cnt_lose'].'</td>
       <td class="align-middle text-center">'.$user['cnt_sets'].'</td>
+      <td class="align-middle text-center">'.$league_points.'</td>
       <td class="align-middle text-center">'.$user['mesto'].'</td>
       
     </tr>';
@@ -850,7 +864,7 @@ s($sql);
         $content .='</tbody>
 </table></div></div>';
         //  ;
-        $content .=$_SESSION['pagging_html'];
+        $content .= (!empty($_SESSION['pagging_html']) ? $_SESSION['pagging_html'] : '');
         return $content;
     }
 

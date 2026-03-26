@@ -4,7 +4,7 @@
   define('DB_USER','root');
   define('DB_PASS','');
 //  define('DB_NAME','rt');
- define('DB_NAME','rt_orion');
+ define('DB_NAME','orionnew');
   // доступ к FTP серверу - нужен для корректной работы системы
   define('FTP_SERVER', 'ficloud899.zahid.host');
   define('FTP_USER_NAME', 'casio_ukrainecom');

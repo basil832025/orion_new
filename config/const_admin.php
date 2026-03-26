@@ -24,15 +24,15 @@
                         ),*/
    $globMenuArr_avtor = array( '1'=>
                                array(
-                                   'name'=>'ГРАВЦІ',
-                                   'href'=>'#players-list',
-                                   'module'=>'players',
+                                   'name'=>'ТУРНІРИ',
+                                   'href'=>'#turnirs-list',
+                                   'module'=>'turnirs',
                                ),
                                '2'=>
                                    array(
-                                       'name'=>'ТУРНІРИ',
-                                       'href'=>'#turnirs-list',
-                                       'module'=>'turnirs',
+                                       'name'=>'ГРАВЦІ',
+                                       'href'=>'#players-list',
+                                       'module'=>'players',
                                    ),
 
                                '3'=>
@@ -44,38 +44,45 @@
 
        '4'=>
            array(
-               'name'=>'ЛІГА ЧЕМПІОНІВ',
+               'name'=>'ЛІГИ',
                'href'=>'#leagues-list',
-               'module'=>'pair',
+               'module'=>'leagues',
            ),
 
-       '6'=>
-                        array(
-                                'name'=>'Продажі',
-                                'href'=>'#shop-list',
-                                'module'=>'shop',
-                        ),
-                        '7'=>
-                        array(
-                                'name'=>'Візити',
-                                'href'=>'#visits-list',
-                                'module'=>'visits',
-                        ),
-                        '8'=>
-                        array(
-                                'name'=>'ДОВІДНИКИ',
-                                'href'=>'#sprtov-list',
-                                'module'=>'sprtov',
-                        ),
-                       '9'=>
-                           array(
-                               'name'=>'НОМІНАЦІЇ',
-                               'href'=>'#nomination-show',
-                               'module'=>'nomination',
-                           ),
-       '10'=>
+       '5'=>
            array(
-               'name'=>'НАЛАШТУВАННЯ',
+               'name'=>'КОМАНДИ',
+               'href'=>'#teams-list',
+               'module'=>'teams',
+           ),
+
+        '6'=>
+                            array(
+                                'name'=>'НОМІНАЦІЇ',
+                                'href'=>'#nomination-show',
+                                'module'=>'nomination',
+                            ),
+        '7'=>
+                         array(
+                                 'name'=>'Продажі',
+                                 'href'=>'#shop-list',
+                                 'module'=>'shop',
+                         ),
+                         '8'=>
+                         array(
+                                 'name'=>'Візити',
+                                 'href'=>'#visits-list',
+                                 'module'=>'visits',
+                         ),
+                         '9'=>
+                         array(
+                                 'name'=>'ДОВІДНИКИ',
+                                 'href'=>'#sprtov-list',
+                                 'module'=>'sprtov',
+                         ),
+        '10'=>
+            array(
+                'name'=>'НАЛАШТУВАННЯ',
                'href'=>'#settings-show',
                'module'=>'settings',
            ),
@@ -90,15 +97,15 @@
    $globMenuArr = array(
                   '1'=>
                        array(
-                           'name'=>'ГРАВЦІ',
-                           'href'=>'#players-list',
-                           'module'=>'players',
+                           'name'=>'ТУРНІРИ',
+                           'href'=>'#turnirs-list',
+                           'module'=>'turnirs',
                        ),
                     '2'=>
                         array(
-                                'name'=>'ТУРНІРИ',
-                                'href'=>'#turnirs-list',
-                                'module'=>'turnirs',
+                                'name'=>'ГРАВЦІ',
+                                'href'=>'#players-list',
+                                'module'=>'players',
                         ),
 
                           '3'=>
@@ -109,11 +116,17 @@
                         ),
        '4'=>
            array(
-               'name'=>'ЛІГА ЧЕМПІОНІВ',
+               'name'=>'ЛІГИ',
                'href'=>'#leagues-list',
-               'module'=>'pair',
+               'module'=>'leagues',
            ),
-                       '5'=>
+       '5'=>
+           array(
+               'name'=>'КОМАНДИ',
+               'href'=>'#teams-list',
+               'module'=>'teams',
+           ),
+                       '6'=>
                            array(
                                'name'=>'НОМІНАЦІЇ',
                                'href'=>'#nomination-show',
@@ -162,12 +175,16 @@
      'turnirs' =>array('path'=>'grp_turnirs/turnirs'),
      'etapresult' =>array('path'=>'grp_turnirs/etapresult'),
      'turnirsplayers' =>array('path'=>'grp_turnirs/turnirsplayers'),
+     'turnirsteams' =>array('path'=>'grp_turnirs/turnirsteams'),
+     'teamplayers' =>array('path'=>'teamplayers'),
      'reiting' =>array('path'=>'grp_turnirs/reiting'),
      'etapplayers' =>array('path'=>'grp_turnirs/etapplayers'),
      'etaps' =>array('path'=>'grp_turnirs/etaps'),
      'tables' =>array('path'=>'grp_turnirs/tables'),
      'leagues' =>array('path'=>'grp_leagues/leagues'),
-     'topplayersLeague' =>array('path'=>'grp_leagues/topplayersLeague'),
+     'topplayersleague' =>array('path'=>'grp_leagues/topplayersleague'),
+     'teamleaguetable' =>array('path'=>'grp_leagues/teamleaguetable'),
+     'infoleagues' =>array('path'=>'grp_leagues/infoleagues'),
     // 'sprvalues' =>array('path'=>'settings/sprlist'),
     // 'users' =>array('path'=>'settings/users'), 
   );
@@ -224,7 +241,7 @@ $aVariantsOlimp_16 = array(
     '22' => array('player1'=>'22.1','player2'=>'22.2','lost'=>'','win'=>'','etap'=>'за 9 місце','cnt'=>'10'),
     // за 5-8
     '23' => array('player1'=>'23.1','player2'=>'23.2','lost'=>'31.1','win'=>'25.1','etap'=>'за 5 місце 1/2','cnt'=>'9'),
-    '24' => array('player1'=>'24.1','player2'=>'24.2','lost'=>'31.2','win'=>'25.2','etap'=>'за 3 місце 1/2','cnt'=>'9'),
+    '24' => array('player1'=>'24.1','player2'=>'24.2','lost'=>'31.2','win'=>'25.2','etap'=>'за 5 місце 1/2','cnt'=>'9'),
     // за 5 місце
     '25' => array('player1'=>'25.1','player2'=>'25.2','lost'=>'','win'=>'','etap'=>'за 5 місце'),
     // за 3 место
@@ -314,7 +331,21 @@ $aVariants2minuska_8 = array(
 '14' => array('player1'=>'14.1','player2'=>'14.2','lost'=>'','win'=>'','etap'=>'за 5 місце','cnt'=>'6'),
 
 ); 
-  
+ // очки топ лиг за места
+$ochki_top_ligs = [
+    '1'=>1000,
+    '2'=>800,
+    '3'=>600,
+    '4'=>400,
+    '5'=>350,
+    '6'=>300,
+    '7'=>250,
+    '8'=>200,
+    '9'=>150,
+    '10'=>100,
+    '11-20'=>100,
+    '21-1000'=>50
+];
   
     // Выполниь даже если пользователь закрыл брпаузер   test
    ignore_user_abort("1");

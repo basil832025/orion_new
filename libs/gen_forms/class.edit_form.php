@@ -8,6 +8,12 @@ class FormEdit extends ActionModule
  protected $thVdata = array(); // массив настроек для одного поля
  protected $postButton=''; 
 protected $fieldLinksUnion= '';   // связь по первисным и вторичным полям нескольких таблиц
+ protected $nameZ = '';
+ protected $nameZEdit = '';
+ protected $aTabs = array();
+ protected $isAdd = 0;
+ protected $name_list_parent = '';
+ protected $name_list_parent_dop = '';
 
  
  public function __construct() // конструктор
@@ -182,8 +188,8 @@ protected $fieldLinksUnion= '';   // связь по первисным и вт�
             $page_id = poste('page_id');
             $this->postButton .= !empty($page_id) ? '&page_id='.$page_id : '';
             //
-               if (empty($this->submenu)){
-             $this->submenu = array(
+               if (empty($this->subMenu)){
+             $this->subMenu = array(
                 'back' => array(
                     'module' => $this->module,
                     'action' => 'list',
@@ -194,7 +200,7 @@ protected $fieldLinksUnion= '';   // связь по первисным и вт�
                     'action' => 'edit_ok',
                     'post' => $this->postButton),
                 );
-                $this->setSubMenu($this->submenu);
+                $this->setSubMenu($this->subMenu);
             }
              $objEdirFieald = new formField($this->aEditField,$this->aData,$this->module,$this->id);
             //$objEdirFieald->init();

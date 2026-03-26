@@ -65,7 +65,7 @@ p.id not in (SELECT  tp.player_id from bs_turnirs t, bs_turnirplayers tp
  WHERE  tp.turnir_id=t.id AND p.id= tp.player_id AND virt=0  and
   dat between date_format(DATE_SUB("' . $today . '", INTERVAL ' . $cnt_mounth . ' month),"%Y-%m-01")
             and date_add(last_day(date_sub("' . $today . '", INTERVAL 1 month)),interval "23:59:59" HOUR_SECOND) GROUP BY  tp.player_id) ';
-            //  s($sql);
+            s($sql);
             $aPlayers = db_list($sql);
             if (!empty($aPlayers)) {
                 $cn = count($aPlayers);
@@ -106,6 +106,7 @@ p.id not in (SELECT  tp.player_id from bs_turnirs t, bs_turnirplayers tp
         // s('rs');
         if (empty($cron))
             $this->list_show_rs();
+        return $this->turnir_id;
     }
 
     function getContent ()

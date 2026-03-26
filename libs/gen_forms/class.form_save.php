@@ -17,7 +17,10 @@ class FormSave extends ActionModule
    // echo 'tyt';exit();
     $this->aEditField = ObjectRT::getAEditField(); 
     $this->module= SystemClass::getModule();
-    $this->form= SystemClass::getAFormPost();
+    $this->form= poste('form');
+    if (!is_array($this->form) || empty($this->form)) {
+        $this->form = SystemClass::getAFormPost();
+    }
     $this->files = isset($_FILES) ? $_FILES : [];
   //  s($this->form);
    // s($_FILES);
@@ -61,6 +64,7 @@ class FormSave extends ActionModule
           'type_view' => $type_view,
           'id_elem' => $this->id,
           'module' => $this->module,
+          'table_module' => $this->table_module, // передаем имя таблицы
           'file_size' => $file_size,
           'file_type' => $file_type,
           'name_file' => $this->files[$fieldName]['name'], // оригинальное имя файла,
@@ -98,10 +102,17 @@ class FormSave extends ActionModule
   $this->aEditField = array_merge($this->aSpecField, $this->aEditField);
   foreach ($this->aEditField as $fieldName => $v) {
    // s($v);
+     if (!empty($v['no_sql'])) {
+         continue;
+     }
      $type_f = !empty($v['type']) ? strtolower($v['type']) : 'text';
     switch ($type_f) {
     case 'img':
-        if (!empty($this->files)){
+        // Логика как на удалённом проекте: при наличии файла вызываем SaveIMAGE,
+        // но дополнительно проверяем, что файл реально загружен без ошибок.
+        if (!empty($this->files[$fieldName]) &&
+            isset($this->files[$fieldName]['tmp_name']) &&
+            $this->files[$fieldName]['error'] == UPLOAD_ERR_OK) {
             $this->SaveIMAGE($fieldName);
         }
 
@@ -111,8 +122,12 @@ class FormSave extends ActionModule
     break;
     case 'date':
         if (empty($v['readonly'])) {
-        $oQeury->addField($v['bd_field_syn'],$v['bd_field_short_name'],date_for_sql_format($this->form[$fieldName]));
-               
+        $date_value = isset($this->form[$fieldName]) ? trim((string)$this->form[$fieldName]) : '';
+        $date_sql = date_for_sql_format($date_value);
+        if (!empty($date_sql) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_sql)) {
+            $oQeury->addField($v['bd_field_syn'],$v['bd_field_short_name'],$date_sql);
+        }
+                
         }
     break;
                     
@@ -189,6 +204,7 @@ class FormSave extends ActionModule
           $oQeury->addField($v['bd_field_syn'],$v['bd_field_short_name'],$field);
         break;
          case  'out_key':
+        case  'out_keynosql':
         // s($fieldName);
        //  s($v);
       //  $out_result_field=$v['out_result_field'];
@@ -197,15 +213,45 @@ class FormSave extends ActionModule
         break;
         case  'radiobox':
         case  'prostspredit':
+        case  'Redaktor_mini':
+        case  'Redaktor':
+        case  'redaktor':
+        case  'textarea':
         case  'text':
            if (empty($v['readonly']))
           $oQeury->addField($v['bd_field_syn'],$v['bd_field_short_name'],(!empty($this->form[$fieldName]) ? $this->form[$fieldName] : poste($fieldName)));
          break;
-        case  'hidden': 
-          $oQeury->addField($v['bd_field_syn'],$v['bd_field_short_name'],(!empty($this->form[$fieldName]) ? $this->form[$fieldName] : poste($fieldName)));
+        case  'hidden':
+          if (array_key_exists($fieldName, $this->form)) {
+              $hidden_value = $this->form[$fieldName];
+          } else {
+              $hidden_value = poste($fieldName);
+          }
+          if (($hidden_value === '' || $hidden_value === false) && isset($v['def'])) {
+              $hidden_value = $v['def'];
+          }
+          if ($hidden_value === false || $hidden_value === '') {
+              $hidden_value = 0;
+          }
+          $oQeury->addField($v['bd_field_syn'],$v['bd_field_short_name'],$hidden_value);
          break;
          }
         }
+
+      // MySQL 8 strict mode: обязательные поля bs_players без default.
+      // Для новых записей игрока гарантируем значения даже если поля не были в форме.
+      if ($this->module == 'players' && empty($this->id)) {
+          $club_default = !empty($_SESSION['gt']['club']) ? (int)$_SESSION['gt']['club'] : 0;
+          $city_default = !empty($_SESSION['gt']['city']) ? (int)$_SESSION['gt']['city'] : 0;
+          $oQeury->addField('', 'ispara', 0);
+          $oQeury->addField('', 'player_id_1', 0);
+          $oQeury->addField('', 'player_id_2', 0);
+          $oQeury->addField('', 'photo', '');
+          $oQeury->addField('', 'ligas_photo', '');
+          $oQeury->addField('', 'club', $club_default);
+          $oQeury->addField('', 'city_def', $city_default);
+      }
+
              if (!empty($this->aParent))
           { //s('$this->postButton='.$this->postButton);
             foreach ($this->aParent as $key =>$vParent)
@@ -231,7 +277,22 @@ class FormSave extends ActionModule
         }
         }
       $grp_module = !empty($aModulesSettings[$this->module]['path']) ? $aModulesSettings[$this->module]['path'] : '';    // запуск модуля
+      $grp_module = !empty($aModulesSettings[$this->module]['path']) ? $aModulesSettings[$this->module]['path'] : '';    // запуск модуля
 
+      // Сохраняем информацию о загруженных файлах для новой записи (id=0)
+      $uploaded_files = [];
+      if (empty($this->id) || $this->id == 0) {
+          foreach ($this->aEditField as $fieldName => $v) {
+              $type_f = !empty($v['type']) ? strtolower($v['type']) : 'text';
+              if ($type_f == 'img' && !empty($this->files[$fieldName]) && 
+                  isset($this->files[$fieldName]['tmp_name']) && 
+                  !empty($this->files[$fieldName]['tmp_name']) &&
+                  $this->files[$fieldName]['error'] == UPLOAD_ERR_OK) {
+                  $uploaded_files[$fieldName] = $v;
+              }
+          }
+      }
+      
       // если есть более сложная обработка для сохранения в БД при сохранение, то подхгружаем данній тригер
         if (file_exists('modules/'.(!empty($grp_module) ? $grp_module :$this->module) .'/sql/save.php'))
             include_once 'modules/'.(!empty($grp_module) ? $grp_module :$this->module) .'/sql/save.php';
@@ -244,6 +305,37 @@ class FormSave extends ActionModule
         //    $oQeury->insert();
            
             }
+      
+      // Если это новая запись, получаем ID созданной записи и связываем загруженные файлы
+      if (empty($this->id) || $this->id == 0) {
+          $new_id = db_insert_id();
+          if (!empty($new_id) && !empty($uploaded_files)) {
+              // Обновляем id_elem в bs_files_s для всех загруженных файлов
+              foreach ($uploaded_files as $fieldName => $v) {
+                  // Находим последний загруженный файл для этого поля (id_elem=0 или текущий module_id)
+                  $sql = 'SELECT id FROM `'.T_FILES.'` WHERE module="'.$this->module.'" AND field="'.$fieldName.'" AND id_elem=0 ORDER BY id DESC LIMIT 1';
+                  $file_id = db_field($sql, 'id');
+                  if (!empty($file_id)) {
+                      // Обновляем id_elem в bs_files_s
+                      db_query('UPDATE `'.T_FILES.'` SET id_elem='.$new_id.' WHERE id='.$file_id);
+                      // Обновляем поле в основной таблице
+                      $table_name = !empty($this->table_module) ? $this->table_module : get_table_name($this->module);
+                      if (!empty($table_name)) {
+                          db_query('UPDATE `'.$table_name.'` SET '.$v['bd_field'].'='.$file_id.' WHERE id='.$new_id);
+                      }
+                  }
+              }
+              $this->id = $new_id;
+          }
+      }
+
+        // DEBUG: логируем факт сохранения формы и режим AJAX
+        if (function_exists('wLog')) {
+            wLog('FORMSAVE_DEBUG module='.$this->module.' id='.$this->id.
+                ' ajax='.SystemClass::getIsAjax(),
+                'debug','form_save');
+        }
+
 //s('2222');
 //
 //SystemClass::getIsAjax());

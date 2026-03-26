@@ -128,6 +128,23 @@ $(document).on('keyup', '#search_field_games', function(e) {
 //    }
 });
 
+$(document).on('change', '#search_field_games_select', function() {
+    var $this = $(this);
+    var val = $this.val();
+    var href = document.location.hash.replace('#', '');
+    var aCurrentUrl = href.split('-');
+    var post_string_ = '';
+    if (aCurrentUrl.length >= 2) {
+        post_string_ = aCurrentUrl[2];
+    }
+
+    if (val && val.length > 0) {
+        post_string_ = post_string_ + '&fio_search=' + encodeURIComponent(val);
+    }
+    $content = ajax_content('', '', post_string_);
+    $("#data_adminsite").html($content);
+});
+
 
     var nameIdGL = '';
  //-------------------------------------------------------------------------------------------
@@ -463,33 +480,56 @@ function select2_vibor_tables(preselectedTables = []) {
 
 
 function chosen_vibor_filter_turnir(width='100%') {
-   // console.log('saasas');
-   // alert('tyttt')
-    $('#city-chosen-select').chosen({
+   // Проверяем наличие league_id в hash URL - если есть реальное значение, скрываем фильтры города и клуба
+   var currentHash = window.location.hash || '';
+   // Проверяем, что после league_id= есть непустое значение (до & или до конца строки)
+   var leagueIdMatch = currentHash.match(/league_id=([^&]*)/);
+   var hasLeagueId = leagueIdMatch && leagueIdMatch[1] && leagueIdMatch[1].trim() !== '';
+   if (hasLeagueId) {
+       // Есть league_id - скрываем фильтры города и клуба, но продолжаем инициализацию etap-chosen-select
+       $('#city-chosen-select').hide();
+       $('#club-chosen-select').hide();
+       // Скрываем только контейнеры для city и club, но не для etap
+       $('#city-chosen-select').closest('.chosen-container').hide();
+       $('#club-chosen-select').closest('.chosen-container').hide();
+       $('#slugeb_info').html('');
+       // НЕ делаем return - продолжаем выполнение для инициализации etap-chosen-select
+   }
+   
+   // Проверяем наличие всех элементов перед инициализацией
+    var citySelect = $('#city-chosen-select');
+    var prostidcity = $('#Prostidcity');
+    var prostidclub = $('#Prostidclub');
+    var clubSelect = $('#club-chosen-select');
+    var etapSelect = $('#etap-chosen-select');
+    var searchSelect = $('#search_field_games_select');
+   
+   if (citySelect.length > 0) {
+       $('#city-chosen-select').chosen({
         width: width,
         no_results_text: 'Співпадінь не знайдено',
         placeholder_text_single: 'Виберіть місто.'
     });
-    $('#Prostidcity').chosen({
+       $("#city-chosen-select").chosen().change(function(e){
+            ElemVar= $(this).val();
+            post_string_ ='&city='+ElemVar;
+            send_ajax('','','',post_string_);
+        });
+   }
+   if (prostidcity.length > 0) {
+       $('#Prostidcity').chosen({
         width: width,
         no_results_text: 'Співпадінь не знайдено',
         placeholder_text_single: 'Виберіть місто.'
     });
-
-    $('#Prostidclub').chosen({
+   }
+   if (prostidclub.length > 0) {
+       $('#Prostidclub').chosen({
         width: width,
         no_results_text: 'Співпадінь не знайдено',
         placeholder_text_single: 'Виберіть клуб.'
     });
-    $("#city-chosen-select").chosen().change(function(e){
-        ElemVar= $(this).val();
-     //   console.log(ElemVar)
-        post_string_ ='&city='+ElemVar;
-        // alert(post_string_)
-        send_ajax('','','',post_string_);
-
-    });
-
+   }
 
     // фикс: переключаем выбранность вручную при клике по опции
     $(document).on('mouseup', '.select2-results__option', function (e) {
@@ -507,20 +547,18 @@ function chosen_vibor_filter_turnir(width='100%') {
         e.stopPropagation(); // предотвратим закрытие выпадающего списка
     });
 
-
-    $('#club-chosen-select').chosen({
+   if (clubSelect.length > 0) {
+       $('#club-chosen-select').chosen({
         width: width,
         no_results_text: 'Співпадінь не знайдено',
         placeholder_text_single: 'Виберіть клуб'
     });
-    $("#club-chosen-select").chosen().change(function(e){
-        ElemVar= $(this).val();
-     //   console.log(ElemVar)
-        post_string_ ='&club='+ElemVar;
-        // alert(post_string_)
-        send_ajax('','','',post_string_);
-
-    });
+       $("#club-chosen-select").chosen().change(function(e){
+            ElemVar= $(this).val();
+            post_string_ ='&club='+ElemVar;
+            send_ajax('','','',post_string_);
+        });
+   }
 
     $('#month_nomination').chosen({
         width: width,
@@ -551,19 +589,28 @@ function chosen_vibor_filter_turnir(width='100%') {
     });
 
 
-    $('#etap-chosen-select').chosen({
+   if (etapSelect.length > 0) {
+       $('#etap-chosen-select').chosen({
         width: width,
         no_results_text: 'Співпадінь не знайдено',
         placeholder_text_single: 'Виберіть етап'
     });
-    $("#etap-chosen-select").chosen().change(function(e){
-        ElemVar= $(this).val();
-        //   console.log(ElemVar)
-        post_string_ ='&etap_id='+ElemVar;
-        // alert(post_string_)
-        send_ajax('','','',post_string_);
+       $("#etap-chosen-select").chosen().change(function(e){
+            ElemVar= $(this).val();
+            //   console.log(ElemVar)
+            post_string_ ='&etap_id='+ElemVar;
+            // alert(post_string_)
+            send_ajax('','','',post_string_);
 
+        });
+   }
+   if (searchSelect.length > 0) {
+       $('#search_field_games_select').chosen({
+        width: width,
+        no_results_text: 'Співпадінь не знайдено',
+        placeholder_text_single: $('#search_field_games_select').attr('data-placeholder')
     });
+   }
 }
 function formatRepoSelection (repo) {
     return repo.name || repo.text;

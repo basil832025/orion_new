@@ -32,7 +32,7 @@ class SqlQuery
     }
 
  //добавляем в массив поля для дальнейшего использования
- function addField($syn='p',$field,$value='')
+ function addField($syn,$field,$value='')
  {//b
     $syn = $syn ? $syn : 'p';
     $this->aFields[$syn][$field] = $value;

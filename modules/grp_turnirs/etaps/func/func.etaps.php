@@ -2,6 +2,32 @@
 include_once 'func.etapresultedit.php';
 include_once 'func.etapresult_2x_minus_edit.php';
 
+function is_team_league_no_qual($turnir_id, $league_id = 0)
+{
+    $turnir_id = (int)$turnir_id;
+    $league_id = (int)$league_id;
+    if ($turnir_id <= 0 && $league_id <= 0) {
+        return false;
+    }
+
+    $turnir = null;
+    if ($turnir_id > 0) {
+        $turnir = db_row('SELECT league_id, is_team_qual FROM `'.T_TURNIRS.'` WHERE id='.$turnir_id);
+        if ($league_id <= 0 && !empty($turnir['league_id'])) {
+            $league_id = (int)$turnir['league_id'];
+        }
+    }
+
+    if ($league_id <= 0) {
+        return false;
+    }
+
+    $is_team_league = (int)db_field('SELECT is_team_league FROM `bs_leagues` WHERE id='.$league_id, 'is_team_league');
+    $is_team_qual = !empty($turnir['is_team_qual']) ? 1 : 0;
+
+    return ($is_team_league === 1 && $is_team_qual === 0);
+}
+
 function get_games($field,$id)
 {
      // s('get_play');
@@ -185,7 +211,7 @@ if (!empty($aPlayersGrp))
             $aIsGames[]=$num;
             $prim = $aVariants[$num]['etap'];
           $where = 'turnir_id='.$turnir_id.',pl_id_1=0,pl_id_2=0,
-            rt_id_1_beg=0,rt_id_2_beg=0,olimp16_num='.$num.',etap_prim="'.$prim.'",type_game=2, etap_id='.$etap_id.', auto=1
+            rt_id_1_beg=0,rt_id_2_beg=0,groups_pred1=0,groups_pred2=0,grp_num_pred1=0,grp_num_pred2=0,mesto_all_pred1=0,mesto_all_pred2=0,olimp16_num='.$num.',etap_prim="'.$prim.'",type_game=2, etap_id='.$etap_id.', auto=1
             ';
             
             $sql ='insert into '.T_REITING.'  SET '.$where  ;
@@ -248,7 +274,7 @@ if (!empty($aPlayersGrp))
            if ($cn_p<=$cnt_people && $is_game)
             {
                 $where = 'turnir_id='.$turnir_id.',pl_id_1=0,pl_id_2=0,
-                rt_id_1_beg=0,rt_id_2_beg=0,olimp16_num='.$numGame.',etap_prim="'.$aGame['etap'].'",type_game=2, etap_id='.$etap_id.', auto=1'; 
+                rt_id_1_beg=0,rt_id_2_beg=0,groups_pred1=0,groups_pred2=0,grp_num_pred1=0,grp_num_pred2=0,mesto_all_pred1=0,mesto_all_pred2=0,olimp16_num='.$numGame.',etap_prim="'.$aGame['etap'].'",type_game=2, etap_id='.$etap_id.', auto=1'; 
                 
                 $sql ='insert into '.T_REITING.'  SET '.$where  ;
                //  s('t3='.$sql);
@@ -707,8 +733,8 @@ function setGroupsEtapPlayers($form,$turnir_id,$etap_id,$updateGrp=0)
      $istochnik_posev=!empty($form['istochnik_posev']) ? $form['istochnik_posev'] : 0; 
     //s($istochnik_posev);
     // сколько игроков будет участовать в данном этапе, если 0 то все игроки турнира
-    $cnt_people=!empty($form['cnt_people']) ? $form['cnt_people'] : 0; 
-    $cnGrp=!empty($form['cnt_grp']) ? $form['cnt_grp'] : 1;
+    $cnt_people=!empty($form['cnt_people']) ? (int)$form['cnt_people'] : 0; 
+    $cnGrp=!empty($form['cnt_grp']) ? (int)$form['cnt_grp'] : 1;
    // s('$cnGrp='.$cnGrp);
     //if (!empty($turnir_id))
     //{
@@ -740,15 +766,79 @@ function setGroupsEtapPlayers($form,$turnir_id,$etap_id,$updateGrp=0)
     
     //************ єто старая логика добавления нового игрока, доработаем по другому позже
     ///if ($group_id_old==0) {
+    $use_league_groups = false;
+    $type_etap = !empty($form['type_etap']) ? (int)$form['type_etap'] : 0;
+    $league_id_local = (int)poste('league_id');
+    $is_team_league_no_qual = is_team_league_no_qual($turnir_id, $league_id_local);
+    if ($is_team_league_no_qual && ($type_etap == 1 || $type_etap == 66)) {
+        $use_league_groups = true;
+        if ($league_id_local <= 0) {
+            $league_id_local = (int)db_field('SELECT league_id FROM `'.T_TURNIRS.'` WHERE id='.$turnir_id, 'league_id');
+        }
+    }
+
     if ($updateGrp==0)
     {    
     if ($istochnik_posev==0) // если это источник игроков все игроки (для первого этапа в основоом)) 
-    {  
-        $sql = 'SELECT  '.($is_reiting>0 ? 'reiting_ukraine, ' :'').'  case when reiting>0 then reiting else start_reiting end as beg_reit,
-        tp.is_command_num, tp.id as turn_id, p.*  
-        FROM `'.T_TURNIR_PLAYERS.'` tp,'.T_PLAYERS.' p where turnir_id='.$turnir_id.' and p.id=tp.player_id 
-        ORDER BY is_command_num, 1 desc,2 desc '. ($cnt_people>0 ? ' limit '.$cnt_people : '');
-        //$aPlayers = db_list($sql);
+    {
+        if ($use_league_groups) {
+            $sql_stats = 'SELECT team_id,
+                                 SUM(win_cnt) AS wins,
+                                 SUM(lose_cnt) AS losses,
+                                 SUM(sets_win) AS sets_win,
+                                 SUM(sets_lose) AS sets_lose
+                          FROM (
+                              SELECT
+                                  r.pl_id_1 AS team_id,
+                                  CASE WHEN r.win_player = r.pl_id_1 THEN 1 ELSE 0 END AS win_cnt,
+                                  CASE WHEN r.lose_player = r.pl_id_1 THEN 1 ELSE 0 END AS lose_cnt,
+                                  (r.set_1+0) AS sets_win,
+                                  (r.set_2+0) AS sets_lose
+                              FROM `'.T_REITING.'` r
+                              INNER JOIN `'.T_TURNIRS.'` t ON t.id=r.turnir_id AND t.league_id='.$league_id_local.' AND t.virt=0 AND COALESCE(t.is_no_league_stat,0)=0
+                              WHERE (r.pair_number = 0 OR r.pair_number IS NULL OR r.pair_number = "")
+                                    AND (r.match_id IS NOT NULL AND r.match_id != "")
+                                    AND r.pl_id_1 > 0
+                              UNION ALL
+                              SELECT
+                                  r.pl_id_2 AS team_id,
+                                  CASE WHEN r.win_player = r.pl_id_2 THEN 1 ELSE 0 END AS win_cnt,
+                                  CASE WHEN r.lose_player = r.pl_id_2 THEN 1 ELSE 0 END AS lose_cnt,
+                                  (r.set_2+0) AS sets_win,
+                                  (r.set_1+0) AS sets_lose
+                              FROM `'.T_REITING.'` r
+                              INNER JOIN `'.T_TURNIRS.'` t ON t.id=r.turnir_id AND t.league_id='.$league_id_local.' AND t.virt=0 AND COALESCE(t.is_no_league_stat,0)=0
+                              WHERE (r.pair_number = 0 OR r.pair_number IS NULL OR r.pair_number = "")
+                                    AND (r.match_id IS NOT NULL AND r.match_id != "")
+                                    AND r.pl_id_2 > 0
+                          ) s
+                          GROUP BY team_id';
+
+            $sql = 'SELECT  '.($is_reiting>0 ? 'p.reiting_ukraine, ' :'').'  case when p.reiting>0 then p.reiting else p.start_reiting end as beg_reit,
+                    tp.is_command_num, tp.id as turn_id, p.*, ltg.group_num AS league_group,
+                    COALESCE(rs.wins,0) AS wins,
+                    COALESCE(rs.losses,0) AS losses,
+                    COALESCE(rs.sets_win,0) AS sets_win,
+                    COALESCE(rs.sets_lose,0) AS sets_lose,
+                    (COALESCE(rs.wins,0)*2 + COALESCE(rs.losses,0)) AS points_total
+                    FROM `'.T_TURNIR_PLAYERS.'` tp
+                    INNER JOIN `'.T_PLAYERS.'` p ON p.id=tp.player_id
+                    LEFT JOIN `bs_league_team_groups` ltg ON ltg.league_id='.$league_id_local.' AND ltg.team_id=tp.player_id
+                    LEFT JOIN ('.$sql_stats.') rs ON rs.team_id=tp.player_id
+                    WHERE tp.turnir_id='.$turnir_id.' AND p.is_team=1 AND p.not_use=0
+                    ORDER BY ltg.group_num ASC,
+                             points_total DESC,
+                             wins DESC,
+                             losses ASC,
+                             (sets_win - sets_lose) DESC,
+                             sets_win DESC,
+                             p.name ASC '.($cnt_people>0 ? ' limit '.$cnt_people : '');
+        } else {
+            $sql = 'SELECT  '.($is_reiting>0 ? 'reiting_ukraine, ' :'').'  case when reiting>0 then reiting else start_reiting end as beg_reit,
+            tp.is_command_num, tp.id as turn_id, p.*  
+            FROM `'.T_TURNIR_PLAYERS.'` tp,'.T_PLAYERS.' p where turnir_id='.$turnir_id.' and p.id=tp.player_id 
+            ORDER BY is_command_num, 1 desc,2 desc '. ($cnt_people>0 ? ' limit '.$cnt_people : '');
+        }
     }else
     {
         $cnt_players_etaps = $form['cnt_people'];
@@ -756,9 +846,63 @@ function setGroupsEtapPlayers($form,$turnir_id,$etap_id,$updateGrp=0)
         //  $etap_id=$istochnik_posev;
         ////----------здесь нужно добавить боллее сложную логику выбрать места согласна занятых мест в группах 
         // с возможным определением дополнительных мест по рейтингу если установлена такаая опция по турниру или по этапу
-        $sql='SELECT e.*,p.name,p.id FROM `'.T_ETAPS_PLAYER_MESTA.'` e, `'.T_PLAYERS.'` p 
-        where e.player_id=p.id and etap_id='.$istochnik_posev.' order by mesto_all limit '.$mesto_from.','.$cnt_players_etaps;
-     }
+        if ($use_league_groups) {
+            $sql_stats = 'SELECT team_id,
+                                 SUM(win_cnt) AS wins,
+                                 SUM(lose_cnt) AS losses,
+                                 SUM(sets_win) AS sets_win,
+                                 SUM(sets_lose) AS sets_lose
+                          FROM (
+                              SELECT
+                                  r.pl_id_1 AS team_id,
+                                  CASE WHEN r.win_player = r.pl_id_1 THEN 1 ELSE 0 END AS win_cnt,
+                                  CASE WHEN r.lose_player = r.pl_id_1 THEN 1 ELSE 0 END AS lose_cnt,
+                                  (r.set_1+0) AS sets_win,
+                                  (r.set_2+0) AS sets_lose
+                              FROM `'.T_REITING.'` r
+                              INNER JOIN `'.T_TURNIRS.'` t ON t.id=r.turnir_id AND t.league_id='.$league_id_local.' AND t.virt=0 AND COALESCE(t.is_no_league_stat,0)=0
+                              WHERE (r.pair_number = 0 OR r.pair_number IS NULL OR r.pair_number = "")
+                                    AND (r.match_id IS NOT NULL AND r.match_id != "")
+                                    AND r.pl_id_1 > 0
+                              UNION ALL
+                              SELECT
+                                  r.pl_id_2 AS team_id,
+                                  CASE WHEN r.win_player = r.pl_id_2 THEN 1 ELSE 0 END AS win_cnt,
+                                  CASE WHEN r.lose_player = r.pl_id_2 THEN 1 ELSE 0 END AS lose_cnt,
+                                  (r.set_2+0) AS sets_win,
+                                  (r.set_1+0) AS sets_lose
+                              FROM `'.T_REITING.'` r
+                              INNER JOIN `'.T_TURNIRS.'` t ON t.id=r.turnir_id AND t.league_id='.$league_id_local.' AND t.virt=0 AND COALESCE(t.is_no_league_stat,0)=0
+                              WHERE (r.pair_number = 0 OR r.pair_number IS NULL OR r.pair_number = "")
+                                    AND (r.match_id IS NOT NULL AND r.match_id != "")
+                                    AND r.pl_id_2 > 0
+                          ) s
+                          GROUP BY team_id';
+
+            $sql = 'SELECT e.*,p.name,p.id, ltg.group_num AS league_group,
+                    COALESCE(rs.wins,0) AS wins,
+                    COALESCE(rs.losses,0) AS losses,
+                    COALESCE(rs.sets_win,0) AS sets_win,
+                    COALESCE(rs.sets_lose,0) AS sets_lose,
+                    (COALESCE(rs.wins,0)*2 + COALESCE(rs.losses,0)) AS points_total
+                    FROM `'.T_TURNIR_PLAYERS.'` tp
+                    INNER JOIN `'.T_PLAYERS.'` p ON p.id=tp.player_id
+                    LEFT JOIN `bs_league_team_groups` ltg ON ltg.league_id='.$league_id_local.' AND ltg.team_id=tp.player_id
+                    LEFT JOIN ('.$sql_stats.') rs ON rs.team_id=tp.player_id
+                    LEFT JOIN `'.T_ETAPS_PLAYER_MESTA.'` e ON e.player_id=tp.player_id
+                    WHERE tp.turnir_id='.$turnir_id.' AND p.is_team=1 AND p.not_use=0
+                    ORDER BY ltg.group_num ASC,
+                             points_total DESC,
+                             wins DESC,
+                             losses ASC,
+                             (sets_win - sets_lose) DESC,
+                             sets_win DESC,
+                             p.name ASC '.($cnt_players_etaps>0 ? ' limit '.$mesto_from.','.$cnt_players_etaps : '');
+        } else {
+            $sql='SELECT e.*,p.name,p.id FROM `'.T_ETAPS_PLAYER_MESTA.'` e, `'.T_PLAYERS.'` p 
+            where e.player_id=p.id and etap_id='.$istochnik_posev.' order by mesto_all limit '.$mesto_from.','.$cnt_players_etaps;
+        }
+      }
      }
      else
      {
@@ -771,6 +915,32 @@ function setGroupsEtapPlayers($form,$turnir_id,$etap_id,$updateGrp=0)
     $aPlayers = db_list($sql);
     //s($aPlayers);
     
+    if ($use_league_groups) {
+        $plAll = 0;
+        $group_positions = array();
+        foreach ($aPlayers as $por => $player) {
+            $groups_pred = ($istochnik_posev==0) ? '' :',groups_pred='.$player['groups'].', grp_num_pred='.$player['grp_num'].',mesto_all_pred= '.$player['mesto_all'].',etap_id_pred='.$player['etap_id'];
+            $player['id']= (($istochnik_posev==0) or (!empty($player['grp_mesto']))) ? $player['id'] : 0;
+            $group_num = !empty($player['league_group']) ? (int)$player['league_group'] : 0;
+            if ($group_num <= 0) {
+                $group_num = 1;
+            }
+            if (empty($group_positions[$group_num])) {
+                $group_positions[$group_num] = 0;
+            }
+            $group_positions[$group_num] = (int)$group_positions[$group_num] + 1;
+            $plAll++;
+            $where = 'turnir_id='.$turnir_id.',player_id='.$player['id'].',etap_id='.$etap_id.',is_command_num="'.$player['is_command_num'].'",
+            `groups`='.$group_num.',grp_num='.$group_positions[$group_num].',mesto_all='.$plAll.$groups_pred; 
+            if ($updateGrp==0)
+                $sql ='insert into '.T_ETAPS_PLAYER_MESTA.'  SET '.$where  ;
+            else
+                $sql ='update '.T_ETAPS_PLAYER_MESTA.'  SET '.$where .' where player_id='.$player['id'].' and etap_id='.$etap_id ;
+            db_query($sql);
+        }
+        return;
+    }
+
     $zmeyka = 1; $n=1; $numPl=1;
     $plAll=0;
      ///if ($group_id_old==0) {
@@ -789,7 +959,7 @@ function setGroupsEtapPlayers($form,$turnir_id,$etap_id,$updateGrp=0)
         if ($sug && $zmeyka==1 && $n<=$cnGrp) 
         {
             $where = 'turnir_id='.$turnir_id.',player_id='.$player['id'].',etap_id='.$etap_id.',is_command_num="'.$player['is_command_num'].'",
-            groups='.$n.',grp_num='.$numPl.',mesto_all='.$plAll. $groups_pred; 
+            `groups`='.$n.',grp_num='.$numPl.',mesto_all='.$plAll. $groups_pred; 
               //   s($where) ;
             if ($updateGrp==0)  
             $sql ='insert into '.T_ETAPS_PLAYER_MESTA.'  SET '.$where  ;
@@ -810,7 +980,7 @@ function setGroupsEtapPlayers($form,$turnir_id,$etap_id,$updateGrp=0)
         {
                // новая логика 03,12,20  
             $where = 'turnir_id='.$turnir_id.',player_id='.$player['id'].',etap_id='.$etap_id.',is_command_num="'.$player['is_command_num'].'",
-            groups='.$n.',grp_num='.$numPl.',mesto_all='.$plAll.$groups_pred ; 
+            `groups`='.$n.',grp_num='.$numPl.',mesto_all='.$plAll.$groups_pred ; 
             //  s($where) ;  
             if ($updateGrp==0)  
             $sql ='insert into '.T_ETAPS_PLAYER_MESTA.'  SET '.$where  ;
@@ -840,6 +1010,7 @@ function getCntGameInGroup($cntPlayers)
 //  добавить порядок игр в таблицу для не существующегго варианта таблицы
 function setPoryadokGame($aVariants_people)
 {
+    $aVariants_people = (int)$aVariants_people;
     $virtual_people = $aVariants_people;
     $isPar=1;
     // проверяем парное или не парное количество участников
@@ -918,10 +1089,9 @@ function setPoryadokGame($aVariants_people)
 // заполняем порядок игр для этапа группы
 function setGroupsEtap($form,$turnir_id,$etap_id)
 {
-    s($form);
     // сколько игроков будет участовать в данном этапе, если 0 то все игроки турнира
-    $cnt_people=!empty($form['cnt_people']) ? $form['cnt_people'] : 0; 
-    $cnGrp=!empty($form['cnt_grp']) ? $form['cnt_grp'] : 1;
+    $cnt_people=!empty($form['cnt_people']) ? (int)$form['cnt_people'] : 0; 
+    $cnGrp=!empty($form['cnt_grp']) ? (int)$form['cnt_grp'] : 1;
     $aVariants = array();    
   /*  if ($cnGrp==0)
     {
@@ -963,8 +1133,8 @@ function setGroupsEtap($form,$turnir_id,$etap_id)
     }
     ///******стараЯ логика 
     //$sql = 'SELECT groups,count(grp_num) as cnPlayer FROM `bs_turnirplayers` tp where turnir_id='.$turnir_id.' GROUP BY groups ORDER BY 2 asc,groups';
-    $sql = 'SELECT groups,count(grp_num) as cnPlayer FROM `'.T_ETAPS_PLAYER_MESTA.'` tp where etap_id='.$etap_id.' 
-    and turnir_id='.$turnir_id.' GROUP BY groups ORDER BY 2 asc,groups';
+    $sql = 'SELECT `groups`,count(grp_num) as cnPlayer FROM `'.T_ETAPS_PLAYER_MESTA.'` tp where etap_id='.$etap_id.' 
+    and turnir_id='.$turnir_id.' GROUP BY `groups` ORDER BY 2 asc,`groups`';
     $aPoryadPlayer= db_list($sql);
     //s($sql);
     $cn = count($aPoryadPlayer);
@@ -1020,11 +1190,11 @@ function setGroupsEtap($form,$turnir_id,$etap_id)
                             $aKoff[$grpN]['koff_sum']=$elem['koff_sum']+$elem['koff'];  
                             $aKoff[$grpN]['koff_okr']=round($aKoff[$grpN]['koff_sum'],0);  
                         }
-                        $aKoff[$grpN]['now']++;
+                        $aKoff[$grpN]['now'] = (int)$aKoff[$grpN]['now'] + 1;
                         if (!empty($aVarianPoryadPlayers[$grpN][$elem['elem']]['play1']))
                         {
                             $aPravPoryadok[] = array('group' => $grpN,'krug'=>  $aVarianPoryadPlayers[$grpN][$elem['elem']]['krug'] , 'play1' => $aVarianPoryadPlayers[$grpN][$elem['elem']]['play1'], 'play2' =>$aVarianPoryadPlayers[$grpN][$elem['elem']]['play2'] );
-                            $aKoff[$grpN]['elem'] ++;      
+                            $aKoff[$grpN]['elem'] = (int)$aKoff[$grpN]['elem'] + 1;      
                         }
                         else
                         {
@@ -1035,7 +1205,7 @@ function setGroupsEtap($form,$turnir_id,$etap_id)
                     // nдля других єлеентов 
                 } 
                 else 
-                    if ($elem['now']<>0) $aKoff[$grpN]['now'] ++; 
+                    if ($elem['now']<>0) $aKoff[$grpN]['now'] = (int)$aKoff[$grpN]['now'] + 1; 
             }
             if ($elem['prior']>1 && $sug) 
             { // приоритет  меньшие группы
@@ -1043,7 +1213,7 @@ function setGroupsEtap($form,$turnir_id,$etap_id)
                 {
                     $sug=0;
                     $aPravPoryadok[] = array('group' => $grpN, 'krug'=>  $aVarianPoryadPlayers[$grpN][$elem['elem']]['krug'] , 'play1' => $aVarianPoryadPlayers[$grpN][$elem['elem']]['play1'], 'play2' =>$aVarianPoryadPlayers[$grpN][$elem['elem']]['play2'] );
-                    $aKoff[$grpN]['elem'] ++;      
+                    $aKoff[$grpN]['elem'] = (int)$aKoff[$grpN]['elem'] + 1;      
                     if ($elem['prior']==3) $this_elem++;
                 }    
             }
@@ -1052,9 +1222,9 @@ function setGroupsEtap($form,$turnir_id,$etap_id)
     // закончили цикл c порядком игр
    //exit;
     
-    $sql = 'SELECT tp.is_command_num, tp.id as turn_id, p.name,p.id as play_id,tp.groups,tp.grp_num,tp.grp_mesto ,case when reiting>0 then reiting else start_reiting end as beg_reit  
+    $sql = 'SELECT tp.is_command_num, tp.id as turn_id, p.name,p.id as play_id,tp.`groups`,tp.grp_num,tp.grp_mesto ,case when reiting>0 then reiting else start_reiting end as beg_reit  
     FROM `'.T_ETAPS_PLAYER_MESTA.'` tp,'.T_PLAYERS.' p where etap_id='.$etap_id.' and turnir_id='.$turnir_id.' and p.id=tp.player_id 
-    ORDER BY is_command_num,tp.groups,tp.grp_num';
+    ORDER BY is_command_num,tp.`groups`,tp.grp_num';
     $aPlayers=db_list($sql);
    // s($sql);
     $aGroups = array();
@@ -1092,13 +1262,14 @@ function setGroupsEtap($form,$turnir_id,$etap_id)
             $group_num = $playThis['group'];
             $pl_num_grp1 = $playThis['play1'];
             $pl_num_grp2 = $playThis['play2'];;
-            $prim = 'Група ' . $group_num . ' ' . ' (коло ' . $playThis['krug'] . ')';//
+            $group_label = is_team_league_no_qual($turnir_id, poste('league_id')) ? 'Ліга' : 'Група';
+            $prim = $group_label . ' ' . $group_num . ' ' . ' (коло ' . $playThis['krug'] . ')';//
             // если командные и игроки не с одной группы
             if (($command_num1 == 0 && $command_num2 == 0) || ($command_num1 > 0 && $command_num1 != $command_num2))
             {
                 if (!empty($pl_num_grp1) && !empty($pl_num_grp2)){
                     $where = 'turnir_id='.$turnir_id.',pl_id_1='.$pl_id_1.',pl_id_2='.$pl_id_2.',etap_prim="'.$prim.'",
-            rt_id_1_beg='.$rt_id_1_beg.',rt_id_2_beg='.$rt_id_2_beg.',group_num='.$group_num.',pl_num_grp1='.$pl_num_grp1.'
+            rt_id_1_beg='.$rt_id_1_beg.',rt_id_2_beg='.$rt_id_2_beg.',groups_pred1=0,groups_pred2=0,grp_num_pred1=0,grp_num_pred2=0,mesto_all_pred1=0,mesto_all_pred2=0,group_num='.$group_num.',pl_num_grp1='.$pl_num_grp1.'
             ,pl_num_grp2='.$pl_num_grp2.',type_game=1, etap_id='.$etap_id.', auto=1';
 
                     $sql ='insert into '.T_REITING.'  SET '.$where  ;

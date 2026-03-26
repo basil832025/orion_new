@@ -99,6 +99,8 @@ class SystemClass
      self::$content =  $objAction->getContent(); // получаем результат действия в переменую контент для дальнейшего его отображения
  // wLog(self::$content);
     self::$Java_script =  $objAction->getJavaScript(); // получаем javascript код для выполнения
+    
+    
      self::$submenu = !empty(self::$submenu) ? self::$submenu : $objAction->getSubMenu(); // получаем подменю
      self::$submenu2 =  $ob->getSubMenu2() ?  $ob->getSubMenu2() :  $objAction->getSubMenu2(); // получаем подменю
      self:: $menuTurnirs=  $ob->getmenuTurnirs() ?  $ob->getmenuTurnirs() : ( $ob->getmenuLeagues() ? $ob->getmenuLeagues() :  self::$menuTurnirs_module); // получаем подменю
@@ -136,13 +138,32 @@ class SystemClass
     } 
     // для простеньких запросов выполняем то что нужно и возващаем по минимум
        $mess = !empty($_SESSION['MESSAGE_AJAX']) ? $_SESSION['MESSAGE_AJAX'] : self::getMessage_user();
-        $java_script = !empty($_SESSION['JAVA_SCRIPT']) ? $_SESSION['JAVA_SCRIPT'] : (!empty(self::$Java_script_module) ? self::$Java_script_module : self::getJava_script()) ;
+        // Объединяем JavaScript из разных источников: сначала из action (приоритет!), потом из module, потом из SESSION
+        $java_script_from_action = self::getJava_script(); // JavaScript из action имеет наивысший приоритет
+        $java_script_from_module = !empty(self::$Java_script_module) ? self::$Java_script_module : '';
+        $java_script_from_session = !empty($_SESSION['JAVA_SCRIPT']) ? $_SESSION['JAVA_SCRIPT'] : '';
+        
+        
+        // Объединяем JavaScript: сначала из action (наивысший приоритет), потом из module, потом из SESSION
+        $java_script = '';
+        if (!empty($java_script_from_action)) {
+            $java_script = $java_script_from_action;
+        }
+        if (!empty($java_script_from_module)) {
+            $java_script = (!empty($java_script) ? $java_script."\n" : '') . $java_script_from_module;
+        }
+        if (!empty($java_script_from_session)) {
+            $java_script = (!empty($java_script) ? $java_script."\n" : '') . $java_script_from_session;
+        }
         $java_script = !empty($_SESSION['JAVA_SCRIPT_DOP']) ? $java_script.$_SESSION['JAVA_SCRIPT_DOP'] : $java_script;
+        
         $Post_return__ = !empty($_SESSION['POST_RETURN']) ? $_SESSION['POST_RETURN'] : '' ;
 
         $_SESSION['JAVA_SCRIPT']='';
+        $_SESSION['JAVA_SCRIPT_DOP']='';
         if (!empty($_SESSION['MESSAGE_AJAX']))       unset($_SESSION['MESSAGE_AJAX']);
        if (!empty($_SESSION['JAVA_SCRIPT']))        unset($_SESSION['JAVA_SCRIPT']);
+       if (!empty($_SESSION['JAVA_SCRIPT_DOP']))        unset($_SESSION['JAVA_SCRIPT_DOP']);
        if (!empty($_SESSION['POST_RETURN']))        unset($_SESSION['POST_RETURN']);
        if (self::$isAjax==2)
         {
@@ -170,14 +191,16 @@ class SystemClass
         'submenu2' => self::getSubmenu2(),
         'mainmenu' => self::getMainmenu(),
         'menuTurinirs' => self::$menuTurnirs,
-        //'module' => $module_,
+        'module' => self::getModule(),
         'message_user' => $mess,
         'action' => self::getAction(),
         'content_body' => self::getContent_body(),
         'close_' => self::getClose_(),
         'zagl_module' => self::getZaglModule(),
         'java_script' => $java_script,
-        'post_return' => self::getPost_return().$Post_return__.self::$post_return_dop,
+        // Проверяем, не дублируется ли post_return при конкатенации
+        // Берем значение из getPost_return() как основное
+        'post_return' => self::getPost_return()
         //'profile' => self::getProfile(),
        // 'return_content_bool' =>   $_SESSION['kernel']['return_content_bool']
         ));
@@ -294,6 +317,10 @@ class SystemClass
       public static function getMessage_user()
    {
         return self::$message_user;
+   }
+      public static function setMessage_user($message)
+   {
+        self::$message_user = $message;
    } 
       public static function getContent_body()
    {
@@ -302,6 +329,10 @@ class SystemClass
          public static function getClose_()
    {
         return self::$close_;
+   }
+         public static function setClose_($close)
+   {
+        self::$close_ = $close;
    } 
          public static function getPost_return()
    {

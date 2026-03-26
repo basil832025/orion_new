@@ -3,9 +3,9 @@
 function setParaBD($Player_1,$Player_2,$updId=0)
 {
      
-   $sql = 'select id_reiting, reiting_ukraine,  reiting , start_reiting , name from '.T_PLAYERS.' where id='.$Player_1;
+   $sql = 'select id_reiting, reiting_ukraine,  reiting , start_reiting , name, club, city_def from '.T_PLAYERS.' where id='.$Player_1;
    $aPlayer_1 = db_row($sql); 
-      $sql = 'select id_reiting, reiting_ukraine,  reiting , start_reiting ,   name from '.T_PLAYERS.' where id='.$Player_2;
+      $sql = 'select id_reiting, reiting_ukraine,  reiting , start_reiting ,   name, club, city_def from '.T_PLAYERS.' where id='.$Player_2;
    $aPlayer_2 = db_row($sql);
    if ($updId>0) 
    {
@@ -34,11 +34,14 @@ function setParaBD($Player_1,$Player_2,$updId=0)
    }
    
    $name = $aPlayer_1['name'].'-'.$aPlayer_2['name'];
+   $club_pair = !empty($aPlayer_1['club']) ? (int)$aPlayer_1['club'] : (!empty($_SESSION['gt']['club']) ? (int)$_SESSION['gt']['club'] : 0);
+   $city_pair = !empty($aPlayer_1['city_def']) ? (int)$aPlayer_1['city_def'] : (!empty($_SESSION['gt']['city']) ? (int)$_SESSION['gt']['city'] : 0);
    $where = 'ispara=1, player_id_1='.$Player_1.', player_id_2='.$Player_2.', name="'.$name.'",
-   reiting_ukraine='.($aPlayer_1['reiting_ukraine']+$aPlayer_2['reiting_ukraine']).',
-   reiting='.($aPlayer_1['reiting']+$aPlayer_2['reiting']).',
-   start_reiting='.($aPlayer_1['start_reiting']+$aPlayer_2['start_reiting']).'
-   ' ;
+    reiting_ukraine='.($aPlayer_1['reiting_ukraine']+$aPlayer_2['reiting_ukraine']).',
+    reiting='.($aPlayer_1['reiting']+$aPlayer_2['reiting']).',
+    start_reiting='.($aPlayer_1['start_reiting']+$aPlayer_2['start_reiting']).',
+    photo="", ligas_photo="", club='.$club_pair.', city_def='.$city_pair.'
+    ' ;
    
     if ($updId>0)
     {
@@ -62,7 +65,7 @@ function setParaBD($Player_1,$Player_2,$updId=0)
 function setPlayerInsorUpd($turnir_id,$form_new,$syf='')
 {
     
-    $form['id_reiting']=$form_new['id_reiting'.$syf];
+    $form['id_reiting']=trim($form_new['id_reiting'.$syf]);
     $form['player_id']=$form_new['player_id'.$syf];
     $form['god_rogd']=$form_new['god_rogd'.$syf];
     $form['reiting_ukraine']=$form_new['reiting_ukraine'.$syf];
@@ -129,11 +132,9 @@ return $form['player_id'];
  function get_ligs_player($PlayId)
     {
       //  s($PlayId);
-      $url="https://ligas.io/api/organizations/uttf/users/".$PlayId;
+$url="https://ligas.io/api/organizations/uttf/users/".$PlayId;
 $json = file_get_contents($url);
 $data = json_decode($json, TRUE);
-s('$data');
-s($data);
 $aPlayer=array();
 foreach($data['fields'] as $val)
 {

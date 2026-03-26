@@ -126,8 +126,8 @@ class FormAdd extends FormEdit
         $this->data_edit($aDataADD);
         $this->Java_script = implode(';', $this->Java_script);
         $this->content .= '</table>';
-        if (empty($this->submenu)){
-             $this->submenu = array(
+        if (empty($this->subMenu)){
+             $this->subMenu = array(
                 'back' => array(
                     'module' => $this->module,
                     'action' => 'list',
@@ -138,7 +138,7 @@ class FormAdd extends FormEdit
                     'action' => 'edit_ok',
                     'post' => $this->postButton),
                 );
-                $this->setSubMenu($this->submenu);
+                $this->setSubMenu($this->subMenu);
             }
   }
   }

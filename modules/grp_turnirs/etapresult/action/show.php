@@ -22,6 +22,7 @@ class ShowAction extends ActionModule
 
         $name_turnir =db_row('select name,dat  from `' . T_TURNIRS .
             '` where id=' . $this->turnir_id);
+        $turnir_name = htmlspecialchars(stripslashes((string)$name_turnir['name']), ENT_QUOTES, 'UTF-8');
         $date = new DateTimeImmutable($name_turnir['dat']);
         $tdat = $date->format('d.m.Y');
 
@@ -40,9 +41,9 @@ class ShowAction extends ActionModule
         }
 
         if ($_SESSION['is_mobile'] )
-            $nameZ='<div class="compare_zagl">'.$name_turnir['name'].' ('.$tdat.$title. ')</div>';
+            $nameZ='<div class="compare_zagl">'.$turnir_name.' ('.$tdat.$title. ')</div>';
         else
-            $nameZ='<div class="poriv_zag">Результати турніру "'.$name_turnir['name'].'" ('.$tdat.$title. ')</div>';
+            $nameZ='<div class="poriv_zag">Результати турніру "'.$turnir_name.'" ('.$tdat.$title. ')</div>';
 
         SystemClass::setZaglModule($nameZ);
 
@@ -68,13 +69,52 @@ class ShowAction extends ActionModule
       // s($sql);
         $aEtapOpt = db_row($sql);
        // wLog($aEtapOpt);
+       
+
     // если это группы то выводим все что нужно для групп    
      if ($aEtapOpt['type_etap']==1) 
      {   
-     // обрабатываем результаты
-    $this->aResults= all_results_table($this->etap_id,$this->turnir_id);
-    // выводим таблицы
-    $this->content = all_tables($this->etap_id,$this->turnir_id,$this->aResults);
+        // Проверяем, есть ли командные игры (по наличию match_id)
+        $has_team_games = db_field('SELECT COUNT(*) FROM '.T_REITING.' WHERE turnir_id='.$this->turnir_id.' AND etap_id='.$this->etap_id.' AND (match_id IS NOT NULL AND match_id != "")', 'COUNT(*)');
+
+        // Для type_etap==1 используем обычные таблицы (all_tables), но с поддержкой клика на счет для командных турниров
+        // обрабатываем результаты
+        if ($has_team_games > 0) {
+            // Это командный турнир - используем all_results_table_comm для добавления кликабельных элементов
+            $this->aResults= all_results_table_comm($this->etap_id,$this->turnir_id);
+            if (!empty($this->aResults)) {
+                foreach ($this->aResults as $grp => $aGrpResults) {
+                    if (!empty($aGrpResults)) {
+                        foreach ($aGrpResults as $pl1 => $aPl1Results) {
+                            if (!empty($aPl1Results)) {
+                                foreach ($aPl1Results as $pl2 => $aPl2Result) {
+                                    if (!empty($aPl2Result['match_id'])) {
+                                        break 3;
+                                    }
+                                    if (!empty($aPl2Result['itog']) && strpos($aPl2Result['itog'], 'onclick="showTeamMatchDetails') !== false) {
+                                        break 3;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            // Обычный групповой турнир
+            $this->aResults= all_results_table($this->etap_id,$this->turnir_id);
+        }
+        
+        // Выводим обычные таблицы
+        $javascript_temp = '';
+        $this->content = all_tables($this->etap_id,$this->turnir_id,$this->aResults, $javascript_temp);
+        
+
+        // Добавляем JavaScript для модального окна, если он был сгенерирован
+        // Проверяем $javascript_temp независимо от $has_team_games, так как all_tables() может обнаружить команды по-другому
+        if (!empty($javascript_temp)) {
+            $this->Java_script = (!empty($this->Java_script) ? $this->Java_script."\n" : '') . $javascript_temp;
+        }
     }
     if ($aEtapOpt['type_etap']>1)
     {
@@ -140,8 +180,13 @@ class ShowAction extends ActionModule
                 // обрабатываем результаты
                 $this->aResults= all_results_table_comm($this->etap_id,$this->turnir_id);
               //  s($this->aResults);
-                // выводим таблицы
-                $this->content = all_tables_comm($this->etap_id,$this->turnir_id,$this->aResults);
+                // выводим таблицы (передаем $this->Java_script по ссылке для получения JavaScript)
+                $javascript_temp = '';
+                $this->content = all_tables_comm($this->etap_id,$this->turnir_id,$this->aResults, $javascript_temp);
+                // Добавляем JavaScript для выполнения через eval
+                if (!empty($javascript_temp)) {
+                    $this->Java_script = (!empty($this->Java_script) ? $this->Java_script."\n" : '') . $javascript_temp;
+                }
             }
 
         }
@@ -164,8 +209,7 @@ class ShowAction extends ActionModule
     }
     function getJavaScript ()
     {
-       
-     //   return $this->Java_script;
+        return $this->Java_script;
     }
   
 

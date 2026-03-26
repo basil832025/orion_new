@@ -12,6 +12,8 @@ class ShowAction extends ActionModule
     function init ()
     {
       $turnir_id = poste('turnir_id');
+        $league_id = poste('league_id');
+        $menu_league = !empty($league_id) ? '&league_id='.$league_id : '';
     // mess('HELLO','tables','show',0,10);
    //  redirect_Ajax('tables','tables|show|turnir_id='.$turnir_id,'STATUSok');
       
@@ -21,6 +23,7 @@ $tables_cnt = $aTables['tables'];
 $dat = $date = date('Y-m-d');
         $name_turnir =db_row('select name,dat  from `' . T_TURNIRS .
             '` where id=' . $turnir_id);
+        $turnir_name = htmlspecialchars(stripslashes((string)$name_turnir['name']), ENT_QUOTES, 'UTF-8');
         $date = new DateTimeImmutable($name_turnir['dat']);
         $tdat = $date->format('d.m.Y');
    //     self::$nameZList='<div class="poriv_zag"> Гравці турніру (статистика гравців) "' . $name_turnir['name'] . '" (' . $tdat . ') </div>';
@@ -38,19 +41,20 @@ $dat = $date = date('Y-m-d');
 
             $title=' - не розпочато';
         }
+        $show_zag_left = '';
         if ($_SESSION['is_mobile'] )
-            $nameZ='<div class="compare_zagl">Столи турніру "'.$name_turnir['name'].' ('.$tdat.$title. ')"</div>';
+            $nameZ='<div class="compare_zagl">Столи турніру "'.$turnir_name.' ('.$tdat.$title. ')"</div>';
         else
-            $nameZ='<div class="poriv_zag">Столи турніру "'.$name_turnir['name'].'" ('.$tdat.$title. ')</div>';
+            $nameZ='<div class="poriv_zag">Столи турніру "'.$turnir_name.'" ('.$tdat.$title. ')</div>';
         SystemClass::setZaglModule($nameZ);
     // выводим таблицы
     $this->content = getTablesAll($tables_cnt,$turnir_id,$dat,false,[],$aTables['selected_tables']);
         if ($_SESSION['is_mobile'] ){
 
          }else{
-            $show_zag_left='show_zag_center();show_zag_left_big("#turnirs-list");';
+            $show_zag_left='show_zag_center();show_zag_left_big("#turnirs-list'.$menu_league.'");';
             }
-     $this->Java_script.=' getTables();show_zag_left("#turnirs-list");'.$show_zag_left;
+     $this->Java_script.=' getTables();show_zag_left("#turnirs-list'.$menu_league.'");'.$show_zag_left;
          SystemClass::setJava_script($this->Java_script);
     
 
