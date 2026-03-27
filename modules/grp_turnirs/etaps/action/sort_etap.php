@@ -66,9 +66,7 @@ class Sort_etapAction extends ActionModule
                     }
                 }
 
-                if ($mesto <= 0 && $grp <= 0) {
-                    $_SESSION['MESSAGE_AJAX']='Некоректні параметри для зміни гравця';
-                } else {
+                if ($mesto > 0 || $grp > 0) {
                     // удалим предідущий варианты заполнения
                     $sql ='delete from '.T_REITING.'  where turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id ;
                     db_query($sql);
