@@ -686,19 +686,34 @@ if (elem_id=='Prostidistochnik_posev') {
     }
 }
         $val=$(this).val();
+        var newPlayer = parseInt($val, 10);
+        if (isNaN(newPlayer) || newPlayer < 0) {
+            newPlayer = 0;
+        }
         const   reg1 =/PlayeridGrp/g;
         mas_t_id_grp =elem_id.match(reg1)
       //  t_id=elem_id.replace(/Playerid/g, "" );
       //  console.log('mas_t_id='+ mas_t_id)
         if (mas_t_id_grp!=null)
         {
-            const   reg =/\d+/gi;
-            mas =elem_id.match(reg)
-         //   console.log(mas);
-            oldPlayer = mas[0];
-            grp = mas[1];
-            grpnum = mas[2];
-            post_string_ ='&grp='+grp+'&grpnum='+grpnum+'&oldPlayer=' +oldPlayer+'&newPlayer='+$val;
+            var row_id = parseInt($(this).attr('data-row-id'), 10);
+            oldPlayer = parseInt($(this).attr('data-old-player'), 10);
+            grp = parseInt($(this).attr('data-grp'), 10);
+            grpnum = parseInt($(this).attr('data-grpnum'), 10);
+            if (isNaN(oldPlayer) || isNaN(grp) || isNaN(grpnum)) {
+                var partsGrp = elem_id.split('_');
+                oldPlayer = parseInt(partsGrp[1], 10);
+                grp = parseInt(partsGrp[2], 10);
+                grpnum = parseInt(partsGrp[3], 10);
+            }
+            if (!isNaN(oldPlayer) && !isNaN(grp) && !isNaN(grpnum)) {
+                post_string_ ='&grp='+grp+'&grpnum='+grpnum+'&oldPlayer=' +oldPlayer+'&newPlayer='+newPlayer;
+                if (!isNaN(row_id) && row_id > 0) {
+                    post_string_ += '&row_id='+row_id;
+                }
+            } else {
+                return;
+            }
             // alert(post_string_)
              send_ajax('','','',post_string_);
             //console.log('post_string_=' + post_string_)
@@ -709,13 +724,22 @@ if (elem_id=='Prostidistochnik_posev') {
         //  console.log('mas_t_id='+ mas_t_id)
         if (mas_t_id_setka!=null)
         {
-            const   reg =/\d+/gi;
-            mas =elem_id.match(reg)
-            //   console.log(mas);
-            oldPlayer = mas[0];
-            mesto = mas[1];
-            grpnum = mas[2];
-            post_string_ ='&mesto='+mesto+'&oldPlayer=' +oldPlayer+'&newPlayer='+$val;
+            var row_id = parseInt($(this).attr('data-row-id'), 10);
+            oldPlayer = parseInt($(this).attr('data-old-player'), 10);
+            mesto = parseInt($(this).attr('data-mesto'), 10);
+            if (isNaN(oldPlayer) || isNaN(mesto)) {
+                var partsSetka = elem_id.split('_');
+                oldPlayer = parseInt(partsSetka[1], 10);
+                mesto = parseInt(partsSetka[2], 10);
+            }
+            if (!isNaN(oldPlayer) && !isNaN(mesto)) {
+                post_string_ ='&mesto='+mesto+'&oldPlayer=' +oldPlayer+'&newPlayer='+newPlayer;
+                if (!isNaN(row_id) && row_id > 0) {
+                    post_string_ += '&row_id='+row_id;
+                }
+            } else {
+                return;
+            }
             // alert(post_string_)
                  send_ajax('','','',post_string_);
             //console.log('post_string_=' + post_string_)

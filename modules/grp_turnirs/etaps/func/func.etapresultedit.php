@@ -18,7 +18,7 @@
     order by olimp16_num;';*/
      // получаем отсортированных людей по местам в группе
      $sql = 'select (select  p.name from  '.T_PLAYERS.' p where p.id=e.player_id) as name,
-      player_id,num_posev_olimp from '.T_ETAPS_PLAYER_MESTA.' e where num_posev_olimp>0  and  etap_id='.$etap_id.
+      e.id as row_id, player_id,num_posev_olimp from '.T_ETAPS_PLAYER_MESTA.' e where num_posev_olimp>0  and  etap_id='.$etap_id.
          '  order by num_posev_olimp';
      $aPlayersGrp = db_list($sql);
      $cnt_people = count ($aPlayersGrp);
@@ -34,6 +34,7 @@
         {
             $aPlayer['mesto_all_1'] = $aPlayer['num_posev_olimp'];
             $aPlayer['pl_id_1'] = $aPlayer['player_id'];
+            $aPlayer['row_id_1'] = $aPlayer['row_id'];
             $aPlayer['name1'] = $aPlayer['name'];
             $aPlayer['mesto_all_1'] = $aPlayer['num_posev_olimp'];
         }
@@ -41,6 +42,7 @@
         {
             $aPlayer['mesto_all_2'] = $aPlayer['num_posev_olimp'];
             $aPlayer['pl_id_2'] = $aPlayer['player_id'];
+            $aPlayer['row_id_2'] = $aPlayer['row_id'];
             $aPlayer['name2'] = $aPlayer['name'];
             $aPlayer['mesto_all_2'] = $aPlayer['num_posev_olimp'];
         }
@@ -214,7 +216,7 @@ $minGrp=0;
       $id_select = 'PlayeridGrp_'.$aPl['player_id'].'_'.$aPl['groups'].'_'.$aPl['grp_num'];
       $content .= '<tr>
       <td>'.$n.'</td>
-      <td><div class="supper-wrapper">'.getSpisPlayerEdit($allPlayers,$aPl['player_id'],$ANoPlayerSeyan,$id_select).'</div></td>';
+      <td><div class="supper-wrapper">'.getSpisPlayerEdit($allPlayers,$aPl['player_id'],$ANoPlayerSeyan,$id_select,$aPl['groups'],$aPl['grp_num'],$aPl['turn_id']).'</div></td>';
 
       //if ($cnt_players==$n) $content .='<td class="zach"></td>';
        $content .='
@@ -227,10 +229,10 @@ $minGrp=0;
  ';  
  return $content;
  }
- function getSpisPlayerEdit($aPlayers, $idPlayer,$ANoPlayerSeyan,$id_select)
+ function getSpisPlayerEdit($aPlayers, $idPlayer,$ANoPlayerSeyan,$id_select,$grp=0,$grpnum=0,$row_id=0)
  {
 //s($aPlayers);
-     $sSpisPlayer = '<select class="chosen-select " style="width:100%;max-width:100%;" tabindex="5" name="player" id="'.$id_select.'">';
+     $sSpisPlayer = '<select class="chosen-select " style="width:100%;max-width:100%;" tabindex="5" name="player" id="'.$id_select.'" data-old-player="'.(int)$idPlayer.'" data-grp="'.(int)$grp.'" data-grpnum="'.(int)$grpnum.'" data-row-id="'.(int)$row_id.'">';
    if (!empty($ANoPlayerSeyan))
    {
        $sSpisPlayer.='<optgroup label="Не сіяні гравці">';

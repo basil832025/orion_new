@@ -14,7 +14,9 @@ function GamePara($numGame,$num1,$num2,$aResults_,$aPlayers,$ANoPlayerSeyan)
         $work_game_css='';
         // идет игра на столе
      //   $work_game_css = $aResults['table_game']>0 ? 't-grid-team_table' : '';
-        $pl_id_2='';$pl_id_1='';$name2='';$name1='';
+    $pl_id_2='';$pl_id_1='';$name2='';$name1='';
+    $row_id_2 = !empty($aResults['row_id_2']) ? (int)$aResults['row_id_2'] : 0;
+    $row_id_1 = !empty($aResults['row_id_1']) ? (int)$aResults['row_id_1'] : 0;
 
     $pl_id_2 = !empty($aResults['pl_id_2']) ? $aResults['pl_id_2'] : 0;
   //  $id_select = 'PlayeridSetka_'.$pl_id_2.'_'.$num2;
@@ -22,7 +24,7 @@ function GamePara($numGame,$num1,$num2,$aResults_,$aPlayers,$ANoPlayerSeyan)
     $name2 = !empty($aResults['name2']) ?   $aResults['name2'] : '';
         $id_select2 = 'PlayeridSetka_'.$pl_id_2.'_'.$num2;
 
-        $name2 = '<select class="chosen-select" tabindex="5" name="player_id_1" id="'.$id_select2.'">';
+        $name2 = '<select class="chosen-select" tabindex="5" name="player_id_1" id="'.$id_select2.'" data-old-player="'.(int)$pl_id_2.'" data-mesto="'.(int)$num2.'" data-row-id="'.$row_id_2.'">';
         //<option value="'.$pl_id_2.'">'.$name2.'</option></select>
         if (!empty($ANoPlayerSeyan))
         {
@@ -68,7 +70,7 @@ function GamePara($numGame,$num1,$num2,$aResults_,$aPlayers,$ANoPlayerSeyan)
        // $name1 = !empty($aResults['name1']) ? $aResults['name1'] : '';
      //   $name1 = '<select class="chosen-select form-control">';//<option value="'.$pl_id_1.'">'.$name1.'</option></select>
 
-        $name1 = '<select class="chosen-select" tabindex="5" name="player_id_2" id="'.$id_select1.'">';
+        $name1 = '<select class="chosen-select" tabindex="5" name="player_id_2" id="'.$id_select1.'" data-old-player="'.(int)$pl_id_1.'" data-mesto="'.(int)$num1.'" data-row-id="'.$row_id_1.'">';
         //<option value="'.$pl_id_2.'">'.$name2.'</option></select>
         if (!empty($ANoPlayerSeyan))
         {

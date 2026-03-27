@@ -14,18 +14,26 @@ class Sort_etapAction extends ActionModule
 
     function init()
     {
-        $this->turnir_id = poste('turnir_id');
-        $this->etap_id = poste('etap_id');
-        $oldPlayer = poste('oldPlayer');
-        $newPlayer = poste('newPlayer');
-        $grp= poste('grp');
-        $grpnum= poste('grpnum');
-        $mesto= poste('mesto');
+        $this->turnir_id = (int)poste('turnir_id');
+        $this->etap_id = (int)poste('etap_id');
+        $oldPlayerRaw = poste('oldPlayer');
+        $newPlayerRaw = poste('newPlayer');
+        $oldPlayer = (int)$oldPlayerRaw;
+        $newPlayer = (int)$newPlayerRaw;
+        $grp= (int)poste('grp');
+        $grpnum= (int)poste('grpnum');
+        $mesto= (int)poste('mesto');
+        $row_id = (int)poste('row_id');
+        $hasSwapParams = ($newPlayerRaw !== '' && $newPlayerRaw !== null)
+            && (
+                ($oldPlayerRaw !== '' && $oldPlayerRaw !== null)
+                || $row_id > 0
+                || $mesto > 0
+                || $grp > 0
+            );
 
-        if (isset($newPlayer) && isset($oldPlayer) && $newPlayer!=$oldPlayer)
+        if ($hasSwapParams)
         {
-           // s('$oldPlayer='.$oldPlayer);
-           // s('newPlayer='.$newPlayer);
             $sql ='select count(*) as cn from '.T_REITING.'  where etap_id='.$this->etap_id.' and turnir_id='.$this->turnir_id.' and COALESCE(win_player,0)>0';
             $cn_results=db_field($sql,'cn');
             if ($cn_results>0)
@@ -34,41 +42,96 @@ class Sort_etapAction extends ActionModule
                // window_mess('В даному турнірі зіграні є ігри! Міняти порядок неможна!');
             }else
             {
-                // удалим предідущий варианты заполнения
-                $sql ='delete from '.T_REITING.'  where turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id ;
-                db_query($sql);
-                if (!empty($mesto))
-                {
-                    $sql = 'select num_posev_olimp from `'.T_ETAPS_PLAYER_MESTA.'` where num_posev_olimp='.$mesto.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
-                     $num_pos = db_field($sql,'num_posev_olimp');
-                    // нового гравця замінюмо амість старого
-                    if (!empty($num_pos))
-                    {
-                        $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id='.$newPlayer.' where num_posev_olimp='.$mesto.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
-                        db_query($sql);
-                    }else
-                    {
-                        $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set num_posev_olimp='.$mesto.' where player_id='.$newPlayer.' and  turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
-                        db_query($sql);
-
+                if ($row_id > 0) {
+                    $sqlTargetById = 'select id, num_posev_olimp, `groups`, grp_num from `'.T_ETAPS_PLAYER_MESTA.'` where id='.$row_id.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id.' limit 1';
+                    $aTargetById = db_row($sqlTargetById);
+                    if (!empty($aTargetById)) {
+                        $mesto = (int)$aTargetById['num_posev_olimp'];
+                        $grp = (int)$aTargetById['groups'];
+                        $grpnum = (int)$aTargetById['grp_num'];
+                    } else {
+                        $row_id = 0;
                     }
-                    // s($sql);
-                    // старе місце нового гравя очищаємо
-                    $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id=0 where player_id='.$newPlayer.' and (num_posev_olimp<>'.$mesto.')  and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
-                    db_query($sql);
-                }else
-                {
-                    // нового гравця замінюмо амість старого
-                    $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id='.$newPlayer.' where groups='.$grp.' and grp_num='.$grpnum.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
-                    db_query($sql);
-                    // s($sql);
-                    // старе місце нового гравя очищаємо
-                    $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id=0 where player_id='.$newPlayer.' and (groups<>'.$grp.' or grp_num<>'.$grpnum.')  and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
-                    db_query($sql);
                 }
 
-              //  s($sql);
+                if ($mesto <= 0 && $grp <= 0 && $oldPlayer > 0) {
+                    $sqlTarget = 'select num_posev_olimp, `groups`, grp_num from `'.T_ETAPS_PLAYER_MESTA.'` where player_id='.$oldPlayer.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id.' limit 1';
+                    $aTarget = db_row($sqlTarget);
+                    if (!empty($aTarget)) {
+                        $mesto = (int)$aTarget['num_posev_olimp'];
+                        if ($mesto <= 0) {
+                            $grp = (int)$aTarget['groups'];
+                            $grpnum = (int)$aTarget['grp_num'];
+                        }
+                    }
+                }
 
+                if ($mesto <= 0 && $grp <= 0) {
+                    $_SESSION['MESSAGE_AJAX']='Некоректні параметри для зміни гравця';
+                } else {
+                    // удалим предідущий варианты заполнения
+                    $sql ='delete from '.T_REITING.'  where turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id ;
+                    db_query($sql);
+
+                    if ($row_id > 0) {
+                        if ($newPlayer > 0) {
+                            $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id=0 where player_id='.$newPlayer.' and id<>'.$row_id.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                            db_query($sql);
+                        }
+
+                        $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id='.$newPlayer.' where id='.$row_id.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                        db_query($sql);
+
+                        if ($newPlayer > 0) {
+                            $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id=0 where player_id='.$newPlayer.' and id<>'.$row_id.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                            db_query($sql);
+                        }
+                        $mesto = 0;
+                        $grp = 0;
+                    }
+
+                    if (!empty($mesto) && $row_id <= 0) {
+                        // если ставим конкретного гравця - сначала очищаем его старую позицию(и)
+                        if ($newPlayer > 0) {
+                            $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id=0 where player_id='.$newPlayer.' and (num_posev_olimp<>'.$mesto.') and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                            db_query($sql);
+                        }
+
+                        // обновляем целевую позицию в сетке
+                        $sql = 'select num_posev_olimp from `'.T_ETAPS_PLAYER_MESTA.'` where num_posev_olimp='.$mesto.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                        $num_pos = (int)db_field($sql,'num_posev_olimp');
+                        if ($num_pos > 0) {
+                            $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id='.$newPlayer.' where num_posev_olimp='.$mesto.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                            db_query($sql);
+                        } elseif ($newPlayer > 0) {
+                            // для случаев, когда позиции нет в явном виде, переносим игрока на нужное место
+                            $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set num_posev_olimp='.$mesto.' where player_id='.$newPlayer.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                            db_query($sql);
+                        }
+
+                        // страховка от дублей по игроку в этапе
+                        if ($newPlayer > 0) {
+                            $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id=0 where player_id='.$newPlayer.' and (num_posev_olimp<>'.$mesto.') and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                            db_query($sql);
+                        }
+                    } elseif ($row_id <= 0) {
+                        // если ставим конкретного гравця - сначала очищаем его старую позицию(и)
+                        if ($newPlayer > 0) {
+                            $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id=0 where player_id='.$newPlayer.' and (groups<>'.$grp.' or grp_num<>'.$grpnum.') and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                            db_query($sql);
+                        }
+
+                        // обновляем целевую ячейку группы (старый игрок автоматически становится несеяным)
+                        $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id='.$newPlayer.' where groups='.$grp.' and grp_num='.$grpnum.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                        db_query($sql);
+
+                        // страховка от дублей по игроку в этапе
+                        if ($newPlayer > 0) {
+                            $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id=0 where player_id='.$newPlayer.' and (groups<>'.$grp.' or grp_num<>'.$grpnum.') and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                            db_query($sql);
+                        }
+                    }
+                }
             }
         }
      //  $ob = new ObjectRT(); // иницилизируем объект

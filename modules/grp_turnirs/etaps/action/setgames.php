@@ -89,7 +89,7 @@ if ($cn_results==0)
         switch ($form['type_etap']) 
         {
             case 1:
-                $sql = 'select count(*) as cn from '.T_ETAPS_PLAYER_MESTA.' where groups>0 and player_id>0 and  etap_id='.$etap_id   ;
+                $sql = 'select count(*) as cn from '.T_ETAPS_PLAYER_MESTA.' where `groups`>0 and player_id>0 and  etap_id='.$etap_id   ;
                 $aPlayersCn = db_field($sql,'cn');
                 // если количество участников этапа меньше или вообще еще нет то заполняем
                 if ($cnt_people>$aPlayersCn)         setGroupsEtapPlayers($form,$turnir_id,$etap_id,1);
