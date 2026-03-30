@@ -357,21 +357,25 @@
     {
      //   $name_players = $_SESSION['is_mobile']  ? 'Гравці' : 'Гравці';
         $name_players = 'Гравці';
-        $league_id = poste('league_id');
-        $hrefLeag = !empty($league_id) ? '&league_id='.$league_id : '';
-        $turnir_id = poste('turnir_id');
+        $league_id = (int)poste('league_id');
+        $hrefLeag = $league_id > 0 ? '&league_id='.$league_id : '';
+        $turnir_id = (int)poste('turnir_id');
+        if ($turnir_id <= 0) {
+            $turnir_id = (int)poste('id');
+        }
         $date_raschet ='';
         // Проверяем, является ли лига командной
         $is_team_league = 0;
-        if (!empty($league_id)) {
+        if ($league_id > 0) {
             $is_team_league = (int)db_field('SELECT is_team_league FROM `bs_leagues` WHERE id='.$league_id, 'is_team_league');
         }
         
         // Если командная лига, меняем название и модуль
         if ($is_team_league) {
-            $sql = 'select date_raschet from bs_turnirs where id='.$turnir_id;
-            $date_raschet = db_field($sql,'date_raschet');
-
+            if ($turnir_id > 0) {
+                $sql = 'select date_raschet from bs_turnirs where id='.$turnir_id;
+                $date_raschet = db_field($sql,'date_raschet');
+            }
             $name_players = 'Команди';
             $module_players = 'turnirsteams'; // будет создан отдельный модуль для команд в турнире
         } else {
@@ -383,19 +387,19 @@
               '2' =>
                   array(
                       'name' => 'Результати ',
-                      'href' => '#etapresult-show-turnir_id=' . poste('turnir_id') . $hrefLeag,
+                       'href' => '#etapresult-show-turnir_id=' . $turnir_id . $hrefLeag,
                       'module' => 'etapresult',
                   ),
               '3' =>
                   array(
                       'name' => 'Ігри ',
-                      'href' => '#reiting-list-turnir_id=' . poste('turnir_id') . $hrefLeag,
+                       'href' => '#reiting-list-turnir_id=' . $turnir_id . $hrefLeag,
                       'module' => 'reiting',
                   ),
               '4' =>
                   array(
                       'name' => $name_players,
-                      'href' => '#' . $module_players . '-list-turnir_id=' . poste('turnir_id') . $hrefLeag,
+                       'href' => '#' . $module_players . '-list-turnir_id=' . $turnir_id . $hrefLeag,
                       'module' => $module_players,
                   ),
 
@@ -403,13 +407,13 @@
               '5' =>
                   array(
                       'name' => 'Етапи ',
-                      'href' => '#etaps-list-turnir_id=' . poste('turnir_id') . $hrefLeag,
+                       'href' => '#etaps-list-turnir_id=' . $turnir_id . $hrefLeag,
                       'module' => 'etaps',
                   ),
               '6' =>
                   array(
                       'name' => 'Столи ',
-                      'href' => '#tables-show-turnir_id=' . poste('turnir_id') . $hrefLeag,
+                       'href' => '#tables-show-turnir_id=' . $turnir_id . $hrefLeag,
                       'module' => 'tables',
                   ),
           );
@@ -419,19 +423,19 @@
                           '2'=>
                               array(
                                   'name'=>'Результати ',
-                                  'href'=>'#etapresult-show-turnir_id='.poste('turnir_id').$hrefLeag,
+                                   'href'=>'#etapresult-show-turnir_id='.$turnir_id.$hrefLeag,
                                   'module'=>'etapresult',
                               ),
                           '3'=>
                               array(
                                   'name'=>'Ігри ',
-                                  'href'=>'#reiting-list-turnir_id='.poste('turnir_id').$hrefLeag,
+                                   'href'=>'#reiting-list-turnir_id='.$turnir_id.$hrefLeag,
                                   'module'=>'reiting',
                               ),
                           '4'=>
                         array(
                                 'name'=>$name_players,
-                                'href'=>'#'.$module_players.'-list-turnir_id='.poste('turnir_id').$hrefLeag,
+                                'href'=>'#'.$module_players.'-list-turnir_id='.$turnir_id.$hrefLeag,
                                 'module'=>$module_players,
                         ),
 
@@ -440,7 +444,7 @@
                           '5'=>
                               array(
                                   'name'=>'Столи ',
-                                  'href'=>'#tables-show-turnir_id='.poste('turnir_id').$hrefLeag,
+                                   'href'=>'#tables-show-turnir_id='.$turnir_id.$hrefLeag,
                                   'module'=>'tables',
                               ),
                       );
@@ -448,7 +452,7 @@
         if (!empty($date_raschet)) {
             self::$MenuTurnirs[] =  [
                 'name' => 'Гравці',
-                'href' => '#turnirsplayers-list-turnir_id=' . poste('turnir_id') . $hrefLeag,
+                'href' => '#turnirsplayers-list-turnir_id=' . $turnir_id . $hrefLeag,
                 'module' => 'turnirsplayers',
             ];
         }
