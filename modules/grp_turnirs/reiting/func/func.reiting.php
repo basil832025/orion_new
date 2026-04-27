@@ -601,10 +601,12 @@ ORDER BY tp.`groups`, tp.grp_ochki desc,grp_num';
         $aTempPlayers=array();
         $grpoch=0;
         if ($vhodRec==0) $tp='grp_ochki';
-        if ($vhodRec==1)  $tp='win_ochok';
-        if ($vhodRec==2)  $tp='diff_sets';
-        if ($vhodRec==3)  $tp='diff_sets_all';
-        if ($vhodRec==4)  $tp='beg_reit';
+        if ($vhodRec==1) $tp='win_ochok';
+        if ($vhodRec==2) $tp='diff_sets';
+        if ($vhodRec==3) $tp='diff_sets_all';
+        if ($vhodRec==4) $tp='win_game_all';
+        if ($vhodRec==5) $tp='lose_game_all';
+        if ($vhodRec>=6) $tp='grp_num';
         // пройдемся по игрокам
         foreach ($aGroupPlayers as $aPlay)
         {
@@ -642,15 +644,68 @@ ORDER BY tp.`groups`, tp.grp_ochki desc,grp_num';
         }
        if ($cnPlayers==2) 
         {
-            // определяем кто из 2 игроков выиграл между собой
-          $aTempPlayers=  obrabOdinOchek($aTempPlayers,$this_aResults);
-          foreach ($aTempPlayers as $aPlay)
-          {
-            $mesto_in_grp++;
-            $aMestaPlayersGrp[$mesto_in_grp]=$aPlay;
-          }
-         // s($aTempPlayers);
-        } 
+            // Для пары игроков на первом шаге используем личную встречу
+            if ($vhodRec==0)
+            {
+                $aTempPlayers=  obrabOdinOchek($aTempPlayers,$this_aResults);
+                foreach ($aTempPlayers as $aPlay)
+                {
+                    $mesto_in_grp++;
+                    $aMestaPlayersGrp[$mesto_in_grp]=$aPlay;
+                }
+            }
+            // Если равенство пришло с более поздних критериев,
+            // продолжаем цепочку критериев, не возвращаясь к личной встрече
+            if ($vhodRec==1)
+            {
+                $aTempPlayers = obrPoSets($aTempPlayers,$this_aResults);
+                obrGroup($grp,$aTempPlayers,2,$this_aResults);
+            }
+            if ($vhodRec==2)
+            {
+                $aTempPlayers = obrPoSetsAll($grp, $aTempPlayers, $this_aResults);
+                obrGroup($grp,$aTempPlayers,3,$this_aResults);
+            }
+            if ($vhodRec==3)
+            {
+                $aTempPlayers = obrWinsLosesAll($grp, $aTempPlayers, $this_aResults);
+                uasort($aTempPlayers, function($a, $b){
+                    return (int)$b['win_game_all'] - (int)$a['win_game_all'];
+                });
+                obrGroup($grp,$aTempPlayers,4,$this_aResults);
+            }
+            if ($vhodRec==4)
+            {
+                $aTempPlayers = obrWinsLosesAll($grp, $aTempPlayers, $this_aResults);
+                uasort($aTempPlayers, function($a, $b){
+                    return (int)$a['lose_game_all'] - (int)$b['lose_game_all'];
+                });
+                obrGroup($grp,$aTempPlayers,5,$this_aResults);
+            }
+            // 7-й критерий: для 2 игроков используем личную встречу
+            if ($vhodRec==5)
+            {
+                $aTempPlayers= obrabOdinOchek($aTempPlayers,$this_aResults);
+                $aTempPlayers = stabilizeBySeeding($aTempPlayers, 'win_ochok');
+                foreach ($aTempPlayers as $aPlay)
+                {
+                    $mesto_in_grp++;
+                    $aMestaPlayersGrp[$mesto_in_grp]=$aPlay;
+                }
+            }
+            // 8-й (финальный) критерий: посев
+            if ($vhodRec>=6)
+            {
+                uasort($aTempPlayers, function($a, $b){
+                    return (int)$a['grp_num'] - (int)$b['grp_num'];
+                });
+                foreach ($aTempPlayers as $aPlay)
+                {
+                    $mesto_in_grp++;
+                    $aMestaPlayersGrp[$mesto_in_grp]=$aPlay;
+                }
+            }
+         } 
       if ($cnPlayers>2) 
         {
             
@@ -670,22 +725,58 @@ ORDER BY tp.`groups`, tp.grp_ochki desc,grp_num';
         //       s('$vhodRec='.$vhodRec);
        //   s($aTempPlayers);
          }
-         // проверка разница между всема сетами
-      /*   if ($vhodRec==2) 
-         { 
-            $aTempPlayers = $this->obrPoSets($aTempPlayers,$this->aGroupPlayers);
-            $this->obrGroup($grp,$aTempPlayers,3);
-         
-         }*/
-         // если все условия проверенны тогда по рейтингу определяем кто будет выше
-         if ($vhodRec==2) 
-         { 
-            
-              uasort($aTempPlayers, function($a, $b){
-            return -($a['beg_reit'] - $b['beg_reit']);
-        });
+          // проверка разницы сетов по всем играм группы
+          if ($vhodRec==2) 
+          { 
+             $aTempPlayers = obrPoSetsAll($grp, $aTempPlayers, $this_aResults);
+             obrGroup($grp,$aTempPlayers,3,$this_aResults);
+          }
+
+          // больше побед по всем играм группы
+          if ($vhodRec==3)
+          {
+             $aTempPlayers = obrWinsLosesAll($grp, $aTempPlayers, $this_aResults);
+             uasort($aTempPlayers, function($a, $b){
+                return (int)$b['win_game_all'] - (int)$a['win_game_all'];
+             });
              obrGroup($grp,$aTempPlayers,4,$this_aResults);
-         }
+          }
+
+          // меньше поражений по всем играм группы
+          if ($vhodRec==4)
+          {
+             $aTempPlayers = obrWinsLosesAll($grp, $aTempPlayers, $this_aResults);
+             uasort($aTempPlayers, function($a, $b){
+                return (int)$a['lose_game_all'] - (int)$b['lose_game_all'];
+             });
+             obrGroup($grp,$aTempPlayers,5,$this_aResults);
+          }
+
+          // 7-й критерий для >2 равных не применяется,
+          // сразу переходим к 8-му критерию (посев)
+          if ($vhodRec==5)
+          {
+             uasort($aTempPlayers, function($a, $b){
+                return (int)$a['grp_num'] - (int)$b['grp_num'];
+             });
+             foreach ($aTempPlayers as $aPlay)
+             {
+                $mesto_in_grp++;
+                $aMestaPlayersGrp[$mesto_in_grp] = $aPlay;
+             }
+          }
+
+          if ($vhodRec>=6)
+          {
+             uasort($aTempPlayers, function($a, $b){
+                return (int)$a['grp_num'] - (int)$b['grp_num'];
+             });
+             foreach ($aTempPlayers as $aPlay)
+             {
+                $mesto_in_grp++;
+                $aMestaPlayersGrp[$mesto_in_grp] = $aPlay;
+             }
+          }
           
         }
     
@@ -721,6 +812,79 @@ ORDER BY tp.`groups`, tp.grp_ochki desc,grp_num';
             return -($a['diff_sets'] - $b['diff_sets']);
         });
       return $aTempPlayers;
+    }
+
+    function tie_set_to_int($setVal)
+    {
+        if ($setVal === 'W') return 3;
+        if ($setVal === 'L') return 0;
+        return (int)$setVal;
+    }
+
+    function obrPoSetsAll($grp, $aTempPlayers, $this_aResults)
+    {
+        foreach ($aTempPlayers as $key => $aPlay)
+        {
+            $win_sets_all = isset($aPlay['grp_win_set']) ? (int)$aPlay['grp_win_set'] : 0;
+            $lose_sets_all = isset($aPlay['grp_lose_set']) ? (int)$aPlay['grp_lose_set'] : 0;
+            $aTempPlayers[$key]['diff_sets_all'] = $win_sets_all - $lose_sets_all;
+        }
+
+        uasort($aTempPlayers, function($a, $b){
+            return (int)$b['diff_sets_all'] - (int)$a['diff_sets_all'];
+        });
+
+        return $aTempPlayers;
+    }
+
+    function obrWinsLosesAll($grp, $aTempPlayers, $this_aResults)
+    {
+        foreach ($aTempPlayers as $key => $aPlay)
+        {
+            $play_this = (int)$aPlay['grp_num'];
+            $wins_all = 0;
+            $loses_all = 0;
+
+            if (!empty($this_aResults[$grp][$play_this]))
+            {
+                foreach ($this_aResults[$grp][$play_this] as $play_enemy => $aGame)
+                {
+                    $play_enemy = (int)$play_enemy;
+                    if ($play_enemy === $play_this) {
+                        continue;
+                    }
+                    if (!isset($aGame['win'])) {
+                        continue;
+                    }
+
+                    $id_win = (int)$aGame['win'];
+                    if ($id_win === $play_this) {
+                        $wins_all++;
+                    } elseif ($id_win === (int)$play_enemy) {
+                        $loses_all++;
+                    }
+                }
+            }
+
+            $aTempPlayers[$key]['win_game_all'] = $wins_all;
+            $aTempPlayers[$key]['lose_game_all'] = $loses_all;
+        }
+
+        return $aTempPlayers;
+    }
+
+    function stabilizeBySeeding($aPlayers, $primary_field)
+    {
+        uasort($aPlayers, function($a, $b) use ($primary_field) {
+            $a_val = isset($a[$primary_field]) ? (int)$a[$primary_field] : 0;
+            $b_val = isset($b[$primary_field]) ? (int)$b[$primary_field] : 0;
+            if ($a_val === $b_val) {
+                return (int)$a['grp_num'] - (int)$b['grp_num'];
+            }
+            return $b_val - $a_val;
+        });
+
+        return $aPlayers;
     }
   /*    function obrPoSets_old($aTempPlayers,$aAll=array())
     {
