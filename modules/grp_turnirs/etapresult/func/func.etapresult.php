@@ -2,6 +2,7 @@
 include_once 'func.etapresult_2x_minus.php';
 include_once 'func.etapresult_2x_minuska8.php';
 include_once 'func.etapresult_olimp.php';
+include_once dirname(__DIR__, 2).'/reiting/func/func.reiting.php';
 
 function etap_group_label($turnir_id, $league_id)
 {
@@ -65,6 +66,35 @@ function render_team_name_link($name, $player_id, $turnir_id)
 
     $safe_name = htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8');
     return '<span class="team-roster-link" data-team-id="'.$player_id.'" data-turnir-id="'.(int)$turnir_id.'" data-team-name="'.$safe_name.'" onclick="showTeamRoster(this, event)" style="cursor:pointer; text-decoration: underline dotted;">'.$safe_name.'</span>';
+}
+
+function etapresult_get_display_place_map($turnir_id, $etap_id, $players)
+{
+    if (empty($players) || !function_exists('ranking_get_group_places_map')) {
+        return array();
+    }
+
+    $results = all_results($turnir_id, $etap_id);
+    $grouped_players = array();
+
+    foreach ($players as $player) {
+        $group_num = isset($player['groups']) ? (int)$player['groups'] : 0;
+        $grp_num = isset($player['grp_num']) ? (int)$player['grp_num'] : 0;
+        if ($group_num <= 0 || $grp_num <= 0 || empty($player['player_id'])) {
+            continue;
+        }
+        $grouped_players[$group_num][] = $player;
+    }
+
+    $display_map = array();
+    foreach ($grouped_players as $group_num => $group_players) {
+        $places_map = ranking_get_group_places_map($group_players, $group_num, $results);
+        foreach ($places_map as $grp_num => $place_data) {
+            $display_map[$group_num][$grp_num] = (int)$place_data['display_place'];
+        }
+    }
+
+    return $display_map;
 }
 
 
@@ -510,6 +540,7 @@ ORDER BY tp.is_command_num,tp.grp_num';
 //ORDER BY tp.groups,tp.grp_num';
 
 $aPlayers = db_list($sql);
+$display_place_map = etapresult_get_display_place_map($turnir_id, $etap_id, $aPlayers);
 //s($sql);
 if (!empty($aPlayers)){
 $aGroups = array();
@@ -521,10 +552,14 @@ $whoCommand=0;
 foreach ($aPlayers  as $k=> $player) 
 {
    $group_label = etap_group_label($turnir_id, poste('league_id'));
+   $player['grp_mesto_internal'] = (int)$player['grp_mesto'];
    $player['name'] = $player['grp_mesto']==0 && $player['player_id']==0 ? $group_label.' '.$player['groups_pred']. ' місце '.$player['grp_num_pred'] : $player['name'];
    $player['beg_reit'] = $player['grp_mesto']==0 && $player['player_id']==0 ? '' :round($player['beg_reit'],0);
    $player['reiting_ukraine'] = $player['grp_mesto']==0 && $player['player_id']==0 ? '' : $player['reiting_ukraine'];
-   $player['grp_mesto'] = $player['grp_mesto']==0 ? '' : $player['grp_mesto'];
+   $display_place = isset($display_place_map[(int)$player['groups']][(int)$player['grp_num']])
+       ? (int)$display_place_map[(int)$player['groups']][(int)$player['grp_num']]
+       : (int)$player['grp_mesto'];
+   $player['grp_mesto'] = $display_place==0 ? '' : $display_place;
    // Для очков всегда показываем числовое значение, даже если это 0
    $player['grp_ochki'] = (int)$player['grp_ochki'];
    $player['grp_win_set'] = $player['grp_win_set']==0 && $player['grp_lose_set']==0 ? '' : $player['grp_win_set'];
@@ -540,7 +575,7 @@ foreach ($aPlayers  as $k=> $player)
   {
       // ВАЖНО: Используем grp_mesto (новое место) для индексации, если оно есть, иначе grp_num (старая позиция)
       // Это нужно для правильного отображения команд в таблице после сортировки по местам
-      $index_key = (!empty($player['grp_mesto']) && $player['grp_mesto'] > 0) ? $player['grp_mesto'] : $player['grp_num'];
+      $index_key = (!empty($player['grp_mesto_internal']) && $player['grp_mesto_internal'] > 0) ? $player['grp_mesto_internal'] : $player['grp_num'];
       $aTemp[$index_key] = $player;
       $a=$player['is_command_num'];
   }  
@@ -982,6 +1017,7 @@ ORDER BY tp.groups,tp.grp_mesto,tp.grp_num';
 //ORDER BY tp.groups,tp.grp_num';
 
 $aPlayers = db_list($sql);
+$display_place_map = etapresult_get_display_place_map($turnir_id, $etap_id, $aPlayers);
 //s($sql);
 if (!empty($aPlayers)){
 $aGroups = array();
@@ -990,10 +1026,14 @@ $aTemp=array();
 foreach ($aPlayers  as $k=> $player)
 {
    $group_label = etap_group_label($turnir_id, poste('league_id'));
+   $player['grp_mesto_internal'] = (int)$player['grp_mesto'];
    $player['name'] = $player['grp_mesto']==0 && $player['player_id']==0 ? $group_label.' '.$player['groups_pred']. ' місце '.$player['grp_num_pred'] : $player['name'];
    $player['beg_reit'] = $player['grp_mesto']==0 && $player['player_id']==0 ? '' :round($player['beg_reit'],0);
    $player['reiting_ukraine'] = $player['grp_mesto']==0 && $player['player_id']==0 ? '' : $player['reiting_ukraine'];
-   $player['grp_mesto'] = $player['grp_mesto']==0 ? '' : $player['grp_mesto'];
+   $display_place = isset($display_place_map[(int)$player['groups']][(int)$player['grp_num']])
+       ? (int)$display_place_map[(int)$player['groups']][(int)$player['grp_num']]
+       : (int)$player['grp_mesto'];
+   $player['grp_mesto'] = $display_place==0 ? '' : $display_place;
    // Для очков всегда показываем числовое значение, даже если это 0
    $player['grp_ochki'] = (int)$player['grp_ochki'];
    $player['grp_win_set'] = $player['grp_win_set']==0 && $player['grp_lose_set']==0 ? '' : $player['grp_win_set'];
@@ -1005,8 +1045,8 @@ foreach ($aPlayers  as $k=> $player)
   }
   if ($player['groups']>0)
   {
-      if (!empty($player['grp_mesto']))
-      $aTemp[$player['grp_mesto']]=$player;
+      if (!empty($player['grp_mesto_internal']))
+      $aTemp[$player['grp_mesto_internal']]=$player;
       else
       $aTemp[$player['grp_num']]=$player;
       $a=$player['groups'];

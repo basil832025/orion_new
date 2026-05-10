@@ -554,45 +554,417 @@ function get_team_score($field, $id) {
     }
 }
 
-  function sql_raschet($turnir_id, $etap_id,$this_aResults,$group_num)
-    { global $mesto_in_grp,$aMestaPlayersGrp;
-       
-       $sql = 'SELECT p.name,tp.player_id,tp.`groups` as `groups`,grp_num,grp_win_set,grp_lose_set,grp_mesto,grp_ochki,case when reiting>0 then reiting else start_reiting end as beg_reit
+function ranking_player_rating($player)
+{
+    if (isset($player['beg_reit'])) {
+        return (int)$player['beg_reit'];
+    }
+
+    if (!empty($player['player_id'])) {
+        return (int)db_field('SELECT case when reiting>0 then reiting else start_reiting end as beg_reit FROM `'.T_PLAYERS.'` WHERE id='.(int)$player['player_id'].' LIMIT 1', 'beg_reit');
+    }
+
+    return 0;
+}
+
+function ranking_sort_players_technical($players)
+{
+    uasort($players, function($a, $b){
+        return (int)$a['grp_num'] - (int)$b['grp_num'];
+    });
+
+    return $players;
+}
+
+function ranking_get_head_to_head_winner($group_num, $playerA, $playerB, $this_aResults)
+{
+    $grpA = (int)$playerA['grp_num'];
+    $grpB = (int)$playerB['grp_num'];
+
+    return isset($this_aResults[$group_num][$grpA][$grpB]['win'])
+        ? (int)$this_aResults[$group_num][$grpA][$grpB]['win']
+        : 0;
+}
+
+function ranking_get_match_points($group_num, $player_grp_num, $enemy_grp_num, $this_aResults)
+{
+    if (empty($this_aResults[$group_num][$player_grp_num][$enemy_grp_num])) {
+        return 0;
+    }
+
+    $game = $this_aResults[$group_num][$player_grp_num][$enemy_grp_num];
+    $first_res = isset($game['first_res']) ? trim((string)$game['first_res']) : '';
+
+    if ($first_res === 'L') {
+        return 0;
+    }
+
+    $winner = isset($game['win']) ? (int)$game['win'] : 0;
+    if ($winner === (int)$player_grp_num) {
+        return 2;
+    }
+
+    return 1;
+}
+
+function ranking_group_by_metric($players, $metric_values)
+{
+    $groups = array();
+    foreach ($players as $key => $player) {
+        $metric = isset($metric_values[$key]) ? (int)$metric_values[$key] : 0;
+        if (!isset($groups[$metric])) {
+            $groups[$metric] = array();
+        }
+        $groups[$metric][$key] = $player;
+    }
+
+    krsort($groups, SORT_NUMERIC);
+
+    return $groups;
+}
+
+function ranking_split_by_rating($players)
+{
+    $players = ranking_sort_players_technical($players);
+    $rating_groups = array();
+    $has_non_zero_rating = false;
+
+    foreach ($players as $key => $player) {
+        $rating = ranking_player_rating($player);
+        if ($rating > 0) {
+            $has_non_zero_rating = true;
+        }
+        if (!isset($rating_groups[$rating])) {
+            $rating_groups[$rating] = array();
+        }
+        $rating_groups[$rating][$key] = $player;
+    }
+
+    if (!$has_non_zero_rating) {
+        return array($players);
+    }
+
+    krsort($rating_groups, SORT_NUMERIC);
+
+    return array_values($rating_groups);
+}
+
+function ranking_resolve_two_players($group_num, $players, $this_aResults)
+{
+    $players = ranking_sort_players_technical($players);
+    $keys = array_keys($players);
+    $first = $players[$keys[0]];
+    $second = $players[$keys[1]];
+    $winner = ranking_get_head_to_head_winner($group_num, $first, $second, $this_aResults);
+
+    if ($winner === (int)$first['grp_num']) {
+        return array(array($first), array($second));
+    }
+
+    if ($winner === (int)$second['grp_num']) {
+        return array(array($second), array($first));
+    }
+
+    return ranking_split_by_rating($players);
+}
+
+function ranking_get_mini_points($group_num, $players, $this_aResults)
+{
+    $mini_points = array();
+    foreach ($players as $key => $player) {
+        $mini_points[$key] = 0;
+        foreach ($players as $enemy_key => $enemy) {
+            if ($enemy_key === $key) {
+                continue;
+            }
+            $mini_points[$key] += ranking_get_match_points($group_num, (int)$player['grp_num'], (int)$enemy['grp_num'], $this_aResults);
+        }
+    }
+
+    return $mini_points;
+}
+
+function ranking_get_set_totals($group_num, $players, $this_aResults)
+{
+    $set_totals = array();
+    foreach ($players as $key => $player) {
+        $win_sets = 0;
+        $lose_sets = 0;
+        foreach ($players as $enemy_key => $enemy) {
+            if ($enemy_key === $key) {
+                continue;
+            }
+
+            if (empty($this_aResults[$group_num][$player['grp_num']][$enemy['grp_num']])) {
+                continue;
+            }
+
+            $game = $this_aResults[$group_num][$player['grp_num']][$enemy['grp_num']];
+            $win_sets += tie_set_to_int(isset($game['first_res']) ? $game['first_res'] : 0);
+            $lose_sets += tie_set_to_int(isset($game['second_res']) ? $game['second_res'] : 0);
+        }
+
+        $set_totals[$key] = array(
+            'win_sets' => $win_sets,
+            'lose_sets' => $lose_sets,
+        );
+    }
+
+    return $set_totals;
+}
+
+function ranking_get_ratio_group_key($win_sets, $lose_sets)
+{
+    $win_sets = (int)$win_sets;
+    $lose_sets = (int)$lose_sets;
+
+    if ($lose_sets === 0) {
+        return 'inf:'.$win_sets;
+    }
+
+    if ($win_sets === 0) {
+        return '0:'.$lose_sets;
+    }
+
+    $a = abs($win_sets);
+    $b = abs($lose_sets);
+    while ($b !== 0) {
+        $tmp = $a % $b;
+        $a = $b;
+        $b = $tmp;
+    }
+    $gcd = $a > 0 ? $a : 1;
+
+    return (int)($win_sets / $gcd).':'.(int)($lose_sets / $gcd);
+}
+
+function ranking_compare_ratios($left, $right)
+{
+    $left_lose = (int)$left['lose_sets'];
+    $right_lose = (int)$right['lose_sets'];
+
+    if ($left_lose === 0 && $right_lose === 0) {
+        return (int)$right['win_sets'] - (int)$left['win_sets'];
+    }
+    if ($left_lose === 0) {
+        return -1;
+    }
+    if ($right_lose === 0) {
+        return 1;
+    }
+
+    $left_val = (int)$left['win_sets'] * (int)$right['lose_sets'];
+    $right_val = (int)$right['win_sets'] * (int)$left['lose_sets'];
+
+    if ($left_val === $right_val) {
+        return 0;
+    }
+
+    return ($left_val > $right_val) ? -1 : 1;
+}
+
+function ranking_get_ratio_groups($group_num, $players, $this_aResults)
+{
+    $set_totals = ranking_get_set_totals($group_num, $players, $this_aResults);
+    $ratio_groups = array();
+    $ratio_meta = array();
+
+    foreach ($players as $key => $player) {
+        $win_sets = isset($set_totals[$key]['win_sets']) ? (int)$set_totals[$key]['win_sets'] : 0;
+        $lose_sets = isset($set_totals[$key]['lose_sets']) ? (int)$set_totals[$key]['lose_sets'] : 0;
+        $ratio_key = ranking_get_ratio_group_key($win_sets, $lose_sets);
+
+        if (!isset($ratio_groups[$ratio_key])) {
+            $ratio_groups[$ratio_key] = array();
+            $ratio_meta[$ratio_key] = array(
+                'win_sets' => $win_sets,
+                'lose_sets' => $lose_sets,
+            );
+        }
+
+        $ratio_groups[$ratio_key][$key] = $player;
+    }
+
+    uasort($ratio_meta, function($left, $right){
+        return ranking_compare_ratios($left, $right);
+    });
+
+    $sorted_groups = array();
+    foreach ($ratio_meta as $ratio_key => $meta) {
+        $sorted_groups[] = $ratio_groups[$ratio_key];
+    }
+
+    return $sorted_groups;
+}
+
+function ranking_resolve_mini_table_players($group_num, $players, $this_aResults)
+{
+    $players = ranking_sort_players_technical($players);
+    $count_players = count($players);
+
+    if ($count_players <= 1) {
+        return array(array_values($players));
+    }
+
+    if ($count_players === 2) {
+        return ranking_resolve_two_players($group_num, $players, $this_aResults);
+    }
+
+    $mini_points = ranking_get_mini_points($group_num, $players, $this_aResults);
+    $metric_groups = ranking_group_by_metric($players, $mini_points);
+
+    if (count($metric_groups) === 1) {
+        $ratio_groups = ranking_get_ratio_groups($group_num, $players, $this_aResults);
+        if (count($ratio_groups) === 1) {
+            return ranking_split_by_rating($players);
+        }
+
+        $buckets = array();
+        foreach ($ratio_groups as $ratio_group_players) {
+            $sub_count = count($ratio_group_players);
+
+            if ($sub_count === 1) {
+                $buckets[] = array_values($ratio_group_players);
+            } elseif ($sub_count === 2) {
+                $buckets = array_merge($buckets, ranking_resolve_two_players($group_num, $ratio_group_players, $this_aResults));
+            } else {
+                $buckets = array_merge($buckets, ranking_resolve_mini_table_players($group_num, $ratio_group_players, $this_aResults));
+            }
+        }
+
+        return $buckets;
+    }
+
+    $buckets = array();
+    foreach ($metric_groups as $group_players) {
+        $sub_count = count($group_players);
+
+        if ($sub_count === 1) {
+            $buckets[] = array_values($group_players);
+        } elseif ($sub_count === 2) {
+            $buckets = array_merge($buckets, ranking_resolve_two_players($group_num, $group_players, $this_aResults));
+        } else {
+            $buckets = array_merge($buckets, ranking_resolve_mini_table_players($group_num, $group_players, $this_aResults));
+        }
+    }
+
+    return $buckets;
+}
+
+function ranking_resolve_players($group_num, $players, $this_aResults, $use_mini_table = false)
+{
+    $players = ranking_sort_players_technical($players);
+    $count_players = count($players);
+
+    if ($count_players <= 1) {
+        return array(array_values($players));
+    }
+
+    if (!$use_mini_table) {
+        $metric_values = array();
+        foreach ($players as $key => $player) {
+            $metric_values[$key] = isset($player['grp_ochki']) ? (int)$player['grp_ochki'] : 0;
+        }
+    } else {
+        $metric_values = ranking_get_mini_points($group_num, $players, $this_aResults);
+    }
+
+    $metric_groups = ranking_group_by_metric($players, $metric_values);
+
+    if (count($metric_groups) === 1) {
+        if ($count_players === 2) {
+            return ranking_resolve_two_players($group_num, $players, $this_aResults);
+        }
+
+        if ($use_mini_table) {
+            return ranking_resolve_mini_table_players($group_num, $players, $this_aResults);
+        }
+
+        return ranking_resolve_players($group_num, $players, $this_aResults, true);
+    }
+
+    $buckets = array();
+    foreach ($metric_groups as $group_players) {
+        $sub_count = count($group_players);
+
+        if ($sub_count === 1) {
+            $buckets[] = array_values($group_players);
+            continue;
+        }
+
+        if ($sub_count === 2) {
+            $buckets = array_merge($buckets, ranking_resolve_two_players($group_num, $group_players, $this_aResults));
+            continue;
+        }
+
+        $buckets = array_merge($buckets, ranking_resolve_players($group_num, $group_players, $this_aResults, true));
+    }
+
+    return $buckets;
+}
+
+function ranking_prepare_places_from_buckets($buckets)
+{
+    $prepared = array();
+    $display_place = 1;
+    $internal_place = 1;
+
+    foreach ($buckets as $bucket) {
+        $bucket = ranking_sort_players_technical($bucket);
+        $bucket_size = count($bucket);
+
+        foreach ($bucket as $player) {
+            $player['display_place'] = $display_place;
+            $player['internal_place'] = $internal_place;
+            $prepared[] = $player;
+            $internal_place++;
+        }
+
+        $display_place += $bucket_size;
+    }
+
+    return $prepared;
+}
+
+function ranking_get_group_places_map($group_players, $group_num, $this_aResults)
+{
+    $buckets = ranking_resolve_players($group_num, $group_players, $this_aResults, false);
+    $prepared = ranking_prepare_places_from_buckets($buckets);
+    $map = array();
+
+    foreach ($prepared as $player) {
+        $map[(int)$player['grp_num']] = array(
+            'display_place' => (int)$player['display_place'],
+            'internal_place' => (int)$player['internal_place'],
+        );
+    }
+
+    return $map;
+}
+
+function sql_raschet($turnir_id, $etap_id,$this_aResults,$group_num)
+{
+    $sql = 'SELECT p.name,tp.player_id,tp.`groups` as `groups`,grp_num,grp_win_set,grp_lose_set,grp_mesto,grp_ochki,case when reiting>0 then reiting else start_reiting end as beg_reit
  FROM '.T_ETAPS_PLAYER_MESTA.' tp, '.T_PLAYERS.' p where  turnir_id='.$turnir_id.' and etap_id='.$etap_id.' and tp.`groups`='.$group_num.' and p.id=tp.player_id 
 ORDER BY tp.`groups`, tp.grp_ochki desc,grp_num';
-       $allPlayers = db_list($sql);
-//s($sql);
-       $gr  = 0;
-     // $chel=0;
-  ///   s($allPlayers);
-  $aGroupsPlays=array();
-     // загоним в массив по группам
-       foreach ($allPlayers as $aRec)
-       {
-           if ($gr<>$aRec['groups'])
-          {
-            $gr=$aRec['groups'];
-          }
-          $aGroupsPlays[$gr][]=$aRec;
-        }  
-      //  s($this->aGroupsPlays); 
-      // пройдемся по группам
-       foreach ($aGroupsPlays  as $grp => $aGroupPlayers)
-       {
-          $mesto_in_grp=0; // обновляем место
-          $aMestaPlayersGrp=array();
-         // if ($grp==2) // temp
-       //  $this->aGroupPlayers = $aGroupPlayers;
-          obrGroup($grp,$aGroupPlayers,0,$this_aResults);
-         // s($aMestaPlayersGrp);
-          foreach($aMestaPlayersGrp as $mesto =>$aPlay)
-          {
-            db_query('update '.T_ETAPS_PLAYER_MESTA.' set grp_mesto='.$mesto.' where turnir_id='.$turnir_id.' and etap_id='.$etap_id.'  
-            and `groups`='.$aPlay['groups'].' and grp_num='.$aPlay['grp_num']);
-          }
-        //  s('itog');s($this->aMestaPlayersGrp);
-       }  
+    $allPlayers = db_list($sql);
+
+    $aGroupsPlays = array();
+    foreach ($allPlayers as $aRec)
+    {
+        $grp = (int)$aRec['groups'];
+        $aGroupsPlays[$grp][] = $aRec;
     }
+
+    foreach ($aGroupsPlays as $grp => $aGroupPlayers)
+    {
+        $places_map = ranking_get_group_places_map($aGroupPlayers, (int)$grp, $this_aResults);
+        foreach ($places_map as $grp_num_key => $place_data)
+        {
+            db_query('update '.T_ETAPS_PLAYER_MESTA.' set grp_mesto='.(int)$place_data['internal_place'].' where turnir_id='.(int)$turnir_id.' and etap_id='.(int)$etap_id.' and `groups`='.(int)$grp.' and grp_num='.(int)$grp_num_key);
+        }
+    }
+}
     // занесения в массив по местам 
     function obrGroup($grp,$aGroupPlayers,$vhodRec,$this_aResults)
     {

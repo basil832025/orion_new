@@ -65,6 +65,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="new_3pirugu">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="orion_new">
         <serverdata>
           <mappings>

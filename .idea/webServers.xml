@@ -107,6 +107,13 @@
           </advancedOptions>
         </fileTransfer>
       </webServer>
+      <webServer id="1c55dc0a-bf26-4698-9e7b-5179cd0710d4" name="new_3pirugu" url="http://a3piroga.ftp.tools">
+        <fileTransfer host="a3piroga.ftp.tools" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
     </option>
   </component>
 </project>

@@ -54,9 +54,14 @@ if ($is_command)
       if ($cn_koff<3) window_mess('Груп максимум для такой кількості гравців повинно бути  не більше '.$cn_koff_korr);
    }
 //  window_mess('Заполните поле Варианты групп или укажите кл-во групп!');
-if ($form['type_etap']>1 && $form['cnt_people']<2)   window_mess('Мінімальна кількість гравців для сітки 2!');
-  //  window_mess('Заполните поле Варианты групп или укажите кл-во групп!');
-   if ($form['type_etap']>1 && $form['cnt_people']>16)   window_mess('Максимальна кількість гравців для сітки 16!');
+ if ($form['type_etap']>1 && $form['cnt_people']<2)   window_mess('Мінімальна кількість гравців для сітки 2!');
+   //  window_mess('Заполните поле Варианты групп или укажите кл-во групп!');
+    // Ліміт 16 актуальний тільки для етапів з "сіткою" (олімп/2-минуска тощо).
+    // Для командного формату "команда проти команди" (type_etap=66) цей ліміт не застосовуємо.
+    $type_etap_int = (int)$form['type_etap'];
+    if (in_array($type_etap_int, array(2, 3, 4, 5), true) && $form['cnt_people']>16) {
+        window_mess('Максимальна кількість гравців для сітки 16!');
+    }
   if ($istochnik_posev>0) // если источник не участтники
             {
                 $sql = 'select  count(*) as cn from bs_etaps_players_mesta t  where  t.etap_id='.$istochnik_posev;
