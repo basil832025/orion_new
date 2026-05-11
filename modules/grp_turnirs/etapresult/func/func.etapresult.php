@@ -97,6 +97,32 @@ function etapresult_get_display_place_map($turnir_id, $etap_id, $players)
     return $display_map;
 }
 
+function etapresult_mark_duplicate_places($players)
+{
+    if (empty($players)) {
+        return $players;
+    }
+
+    $place_counts = array();
+    foreach ($players as $player) {
+        $place = isset($player['grp_mesto']) ? trim((string)$player['grp_mesto']) : '';
+        if ($place === '') {
+            continue;
+        }
+        if (!isset($place_counts[$place])) {
+            $place_counts[$place] = 0;
+        }
+        $place_counts[$place]++;
+    }
+
+    foreach ($players as $key => $player) {
+        $place = isset($player['grp_mesto']) ? trim((string)$player['grp_mesto']) : '';
+        $players[$key]['grp_mesto_is_duplicate'] = ($place !== '' && !empty($place_counts[$place]) && $place_counts[$place] > 1) ? 1 : 0;
+    }
+
+    return $players;
+}
+
 
 
  function all_results_2xminuska ($etap_id,$turnir_id)
@@ -1055,6 +1081,9 @@ foreach ($aPlayers  as $k=> $player)
 
     $aGroups[$player['groups']] =$aTemp;
     $aTemp=array();
+    foreach ($aGroups as $group_key => $group_players) {
+        $aGroups[$group_key] = etapresult_mark_duplicate_places($group_players);
+    }
  //s($aGroups);
     /*<style>
          @import url("css/print.css?ver=1");
@@ -1816,6 +1845,7 @@ function table($aPlay,$aResults,$zagl, $turnir_id = 0)
     foreach ($aPlay as $n => $aPl)
     {
      $team_name_html = render_team_name_link($aPl['name'], !empty($aPl['player_id']) ? $aPl['player_id'] : 0, (int)$turnir_id);
+     $place_cell_class = !empty($aPl['grp_mesto_is_duplicate']) ? ' duplicate-place' : '';
      $content .= '<tr>
   <td class="text-center ft14 align-middle">'.$n.'</td>
   <td class="text-center ft14 align-middle min_width_td">'.($aPl['beg_reit'] ? $aPl['beg_reit'].'<br />'.$aPl['reiting_ukraine'] : '').'</td>
@@ -1838,11 +1868,11 @@ function table($aPlay,$aResults,$zagl, $turnir_id = 0)
         $pl_this++;
     }
     //if ($cnt_players==$n) $content .='<td class="zach"></td>';
-    $content .='
+     $content .='
   <td class="text-center ft14 align-middle min_width_td fw700">'.$aPl['grp_ochki'].'</td> 
   <td class="text-center ft14 align-middle min_width_td_vid">'.$aPl['grp_win_set'].'-'.$aPl['grp_lose_set'].'</td>
-  <td class="text-center ft14 align-middle min_width_td">'.$aPl['grp_mesto'].'</td>
-  
+  <td class="text-center ft14 align-middle min_width_td'.$place_cell_class.'">'.$aPl['grp_mesto'].'</td>
+   
   </tr> ';
     }
     $content.='</table></div>

@@ -1058,6 +1058,10 @@ td.zach{
 }
 .min_width_td{min-width: 86px;max-width: 86px;}
 .min_width_td_vid{min-width: 86px;max-width: 86px;}
+.duplicate-place{
+    color: #c62828 !important;
+    font-weight: 700;
+}
 th.fio{min-width:175px;max-width: 175px; text-align: left}
 td.fio{ text-align: left}
 th.num{min-width:60px;max-width: 60px}
