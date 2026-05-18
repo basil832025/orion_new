@@ -1357,18 +1357,27 @@ function all_results ($turnir_id,$etap_id)
 
         $this_aResults[$group_num][$pl_num_grp1][$pl_num_grp2]['first_res'] = $aRec['set_1'];
         $this_aResults[$group_num][$pl_num_grp1][$pl_num_grp2]['second_res'] = $aRec['set_2'];
-        if ($aRec['set_1']>$aRec['set_2'])
+
+        $set_1 = tie_set_to_int(isset($aRec['set_1']) ? $aRec['set_1'] : 0);
+        $set_2 = tie_set_to_int(isset($aRec['set_2']) ? $aRec['set_2'] : 0);
+        if (!empty($aRec['win_player'])) {
+            $this_aResults[$group_num][$pl_num_grp1][$pl_num_grp2]['win'] = ((int)$aRec['win_player'] === (int)$aRec['pl_id_1']) ? $pl_num_grp1 : $pl_num_grp2;
+        } elseif ($set_1 > $set_2) {
             $this_aResults[$group_num][$pl_num_grp1][$pl_num_grp2]['win'] = $pl_num_grp1;
-         else     
-           $this_aResults[$group_num][$pl_num_grp1][$pl_num_grp2]['win'] = $pl_num_grp2;
+        } else {
+            $this_aResults[$group_num][$pl_num_grp1][$pl_num_grp2]['win'] = $pl_num_grp2;
+        }
         
           // теперь перевоачиваем для нижней части таблицы
         $this_aResults[$group_num][$pl_num_grp2][$pl_num_grp1]['first_res'] = $aRec['set_2'];
         $this_aResults[$group_num][$pl_num_grp2][$pl_num_grp1]['second_res'] = $aRec['set_1'];
-     if ($aRec['set_2']>$aRec['set_1'])
+        if (!empty($aRec['win_player'])) {
+            $this_aResults[$group_num][$pl_num_grp2][$pl_num_grp1]['win'] = ((int)$aRec['win_player'] === (int)$aRec['pl_id_2']) ? $pl_num_grp2 : $pl_num_grp1;
+        } elseif ($set_2 > $set_1) {
             $this_aResults[$group_num][$pl_num_grp2][$pl_num_grp1]['win'] = $pl_num_grp2;
-         else     
-           $this_aResults[$group_num][$pl_num_grp2][$pl_num_grp1]['win'] = $pl_num_grp1;
+        } else {
+            $this_aResults[$group_num][$pl_num_grp2][$pl_num_grp1]['win'] = $pl_num_grp1;
+        }
         
     }   
     }

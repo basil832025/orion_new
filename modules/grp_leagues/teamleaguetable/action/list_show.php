@@ -110,10 +110,138 @@ class list_showAction extends ActionModule
             }
         }
 
+        $this->Java_script = '
+if (typeof window.showTeamRoster !== "function") {
+window.showTeamRoster = function(element, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
+    var teamId = element.getAttribute("data-team-id");
+    var turnirId = element.getAttribute("data-turnir-id") || 0;
+
+    if (!teamId) {
+        alert("Помилка: не вдалося визначити команду");
+        return;
+    }
+
+    if (typeof window.__teamRosterRequestId === "undefined") {
+        window.__teamRosterRequestId = 0;
+    }
+    var requestId = ++window.__teamRosterRequestId;
+
+    var formData = new FormData();
+    formData.append("ajax_method", "1");
+    formData.append("module", "etapresult");
+    formData.append("action", "team_roster");
+    formData.append("team_id", teamId);
+    formData.append("turnir_id", turnirId);
+    formData.append("return_content_bool", "1");
+
+    fetch("", {
+        method: "POST",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("HTTP error! status: " + response.status);
+        }
+        return response.text();
+    })
+    .then(text => {
+        if (requestId !== window.__teamRosterRequestId) {
+            return;
+        }
+        try {
+            var data = JSON.parse(text);
+            var rosterData = data;
+            if (data.content && typeof data.content === "string") {
+                rosterData = JSON.parse(data.content);
+            }
+
+            if (rosterData.error || !rosterData.success) {
+                alert("Помилка: " + (rosterData.error || "не вдалося отримати склад команди"));
+                return;
+            }
+
+            window.showTeamRosterModal(rosterData);
+        } catch (e) {
+            alert("Помилка при обробці відповіді сервера: " + e.message);
+        }
+    })
+    .catch(function() {
+        alert("Помилка при завантаженні складу команди");
+    });
+};
+
+window.showTeamRosterModal = function(data) {
+    var playersHtml = "";
+    if (data.players && data.players.length > 0) {
+        data.players.forEach(function(player, index) {
+            playersHtml += "<tr>" +
+                "<td class=\"text-center\" style=\"width:60px;\">" + (index + 1) + "</td>" +
+                "<td>" + player.name + "</td>" +
+                "<td class=\"text-center\" style=\"width:120px;\">" + (player.reiting || "") + "</td>" +
+                "<td class=\"text-center\" style=\"width:120px;\">" + (player.reiting_ukraine || "") + "</td>" +
+                "</tr>";
+        });
+    } else {
+        playersHtml = "<tr><td colspan=\"4\" class=\"text-center text-muted\" style=\"padding:18px;\">У команди поки немає активних гравців</td></tr>";
+    }
+
+    var modalElement = document.getElementById("teamRosterModal");
+    if (!modalElement) {
+        var modalHtml = "<div class=\"modal fade\" id=\"teamRosterModal\" tabindex=\"-1\" aria-hidden=\"true\">" +
+            "<div class=\"modal-dialog modal-dialog-centered\" style=\"max-width:700px;\">" +
+            "<div class=\"modal-content\">" +
+            "<div class=\"modal-header\">" +
+            "<h5 class=\"modal-title team-roster-title\" style=\"flex:1; text-align:center;\"></h5>" +
+            "<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Закрити\"></button>" +
+            "</div>" +
+            "<div class=\"modal-body\" style=\"padding:0;\">" +
+            "<table class=\"table table-sm mb-0\">" +
+            "<thead class=\"table-light\"><tr><th class=\"text-center\" style=\"width:60px;\">№</th><th>Гравець</th><th class=\"text-center\" style=\"width:120px;\">Рейт. клубу</th><th class=\"text-center\" style=\"width:120px;\">Рейт. ФНТУ</th></tr></thead>" +
+            "<tbody class=\"team-roster-body\"></tbody>" +
+            "</table>" +
+            "</div>" +
+            "<div class=\"modal-footer\" style=\"justify-content:center;\">" +
+            "<button type=\"button\" class=\"btn btn-primary\" data-bs-dismiss=\"modal\">ОК</button>" +
+            "</div>" +
+            "</div></div></div>";
+        document.body.insertAdjacentHTML("beforeend", modalHtml);
+        modalElement = document.getElementById("teamRosterModal");
+        modalElement.addEventListener("hidden.bs.modal", function() {
+            var modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.dispose();
+            }
+        });
+    }
+
+    var titleElement = modalElement.querySelector(".team-roster-title");
+    var bodyElement = modalElement.querySelector(".team-roster-body");
+    if (titleElement) {
+        titleElement.textContent = "Склад команди: " + (data.team_name || "");
+    }
+    if (bodyElement) {
+        bodyElement.innerHTML = playersHtml;
+    }
+
+    var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+    modal.show();
+};
+}
+';
+
         $content = '<div class="container" style="max-width:1200px; margin:0 auto;">'
             .'<style>'
             .'.teamleaguetable{font-size:0.95rem;}'
             .'.teamleaguetable td,.teamleaguetable th{padding:6px 8px; white-space:nowrap;}'
+            .'.teamleaguetable .team-roster-link{cursor:pointer; text-decoration:underline dotted;}'
             .'@media (max-width: 768px){'
             .'.teamleaguetable{font-size:0.8rem;}'
             .'.teamleaguetable td{padding:8px 6px !important; line-height:1.35 !important; height:auto !important; vertical-align:middle !important;}'
@@ -139,15 +267,20 @@ class list_showAction extends ActionModule
             if (!empty($groups[$g])) {
                 foreach ($groups[$g] as $row) {
                     $team_name = !empty($row['team_name']) ? $row['team_name'] : '';
+                    $team_id = !empty($row['team_id']) ? (int)$row['team_id'] : 0;
                     $wins = isset($row['wins']) ? (int)$row['wins'] : 0;
                     $losses = isset($row['losses']) ? (int)$row['losses'] : 0;
                     $sets_win = isset($row['sets_win']) ? (int)$row['sets_win'] : 0;
                     $sets_lose = isset($row['sets_lose']) ? (int)$row['sets_lose'] : 0;
                     $points = isset($row['points_total']) ? (int)$row['points_total'] : 0;
                     $sets_ratio = $sets_win.':'.$sets_lose;
+                    $team_name_html = htmlspecialchars((string)$team_name, ENT_QUOTES, 'UTF-8');
+                    if ($team_id > 0) {
+                        $team_name_html = '<span class="team-roster-link" data-team-id="'.$team_id.'" data-turnir-id="0" onclick="showTeamRoster(this, event)">'.$team_name_html.'</span>';
+                    }
                     $content .= '<tr>';
                     $content .= '<td>'.$num.'</td>';
-                    $content .= '<td class="text-start team-name">'.$team_name.'</td>';
+                    $content .= '<td class="text-start team-name">'.$team_name_html.'</td>';
                     $content .= '<td class="td_align_center">'.$wins.'</td>';
                     $content .= '<td class="td_align_center">'.$losses.'</td>';
                     $content .= '<td class="td_align_center">'.$sets_ratio.'</td>';

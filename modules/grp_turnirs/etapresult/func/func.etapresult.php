@@ -123,6 +123,26 @@ function etapresult_mark_duplicate_places($players)
     return $players;
 }
 
+function etapresult_get_match_points($raw_set_for, $raw_set_against)
+{
+    $set_for = tie_set_to_int($raw_set_for);
+    $set_against = tie_set_to_int($raw_set_against);
+
+    if ($raw_set_for === 'W') {
+        return 2;
+    }
+
+    if ($raw_set_for === 'L') {
+        return 0;
+    }
+
+    if ($set_for === 0 && $set_against === 0) {
+        return '';
+    }
+
+    return ($set_for > $set_against) ? 2 : 1;
+}
+
 
 
  function all_results_2xminuska ($etap_id,$turnir_id)
@@ -240,29 +260,28 @@ function etapresult_mark_duplicate_places($players)
 
         $aResultsNEW[$aRec['group_num']][$pl_num_grp1][$pl_num_grp2]['first_res'] = $aRec['set_1'];
         $aResultsNEW[$aRec['group_num']][$pl_num_grp1][$pl_num_grp2]['second_res'] = $aRec['set_2'];
-       $set_1 =  $aRec['set_1']=='W' ? 3 : $aRec['set_1'];
-       $set_2 =  $aRec['set_2']=='W' ? 3 : $aRec['set_2'];
+       $set_1 = tie_set_to_int($aRec['set_1']);
+       $set_2 = tie_set_to_int($aRec['set_2']);
        $table_active = $aRec['table_game']>0 ? '<div class="t-grid-team_table1">T'.$aRec['table_game'].'</div>' : '';
         if (isset($aRec['set_1']) && ($aRec['set_1']>0 || $aRec['set_2']>0 || $aRec['set_1']=='L' || $aRec['set_2']=='L')){
-           
-            if ($set_1>0 && $set_1>$set_2 ){
-                $ochko = 1 ;
-                $ochko2 = 0 ;
+            if ($set_1 > $set_2 ){
+                $ochko = 2 ;
+                $ochko2 = 1 ;
                 $colorClass='green_color';
             }else
             {
-              $ochko = 0 ;
-              $ochko2 = 1 ;
+              $ochko = 1 ;
+              $ochko2 = 2 ;
                 $colorClass='coral_color';
             }
             if ($aRec['set_1']=='W' ){
-                $ochko = 1 ;
+                $ochko = 2 ;
                 $ochko2 = 0 ;
                 $colorClass='green_color';
             }else if ($aRec['set_1']=='L' )
             {
               $ochko = 0;
-              $ochko2 = 1;
+              $ochko2 = 2;
                 $colorClass='coral_color';
             }
             
@@ -298,10 +317,10 @@ function etapresult_mark_duplicate_places($players)
             // $ochko = 1 означает победу для pl_num_grp1, $ochko2 = 0 означает поражение для pl_num_grp2
             // Но для командных турниров нужно: победа = 2 очка, поражение = 1 очко
             $team_ochko = '';
-            if (($set_1 > 0 && $set_1 > $set_2) || $aRec['set_1'] == 'W') {
+            if (($set_1 > $set_2) || $aRec['set_1'] == 'W') {
                 // pl_num_grp1 (строка) выиграл - 2 очка
                 $team_ochko = 2;
-            } elseif (($set_2 > 0 && $set_2 > $set_1) || $aRec['set_2'] == 'W' || $aRec['set_1'] == 'L') {
+            } elseif (($set_2 > $set_1) || $aRec['set_2'] == 'W' || $aRec['set_1'] == 'L') {
                 // pl_num_grp1 (строка) проиграл: обычное поражение = 1 очко, техническое (L) = 0
                 $team_ochko = ($aRec['set_1'] == 'L') ? 0 : 1;
             }
@@ -339,28 +358,28 @@ function etapresult_mark_duplicate_places($players)
     // теперь перевоачиваем для нижней части таблицы
         $aResultsNEW[$aRec['group_num']][$pl_num_grp2][$pl_num_grp1]['first_res'] = $aRec['set_2'];
         $aResultsNEW[$aRec['group_num']][$pl_num_grp2][$pl_num_grp1]['second_res'] = $aRec['set_1'];
-        $set_1_rev =  $aRec['set_1']=='W' ? 3 : $aRec['set_1'];
-        $set_2_rev =  $aRec['set_2']=='W' ? 3 : $aRec['set_2'];
+        $set_1_rev = tie_set_to_int($aRec['set_1']);
+        $set_2_rev = tie_set_to_int($aRec['set_2']);
         if (isset($aRec['set_1']) && ($aRec['set_1']>0 || $aRec['set_2']>0 || $aRec['set_1']=='L' || $aRec['set_2']=='L')){
            
-            if ($set_2_rev>0 && $set_2_rev>$set_1_rev ){
-                $ochko_rev = 1 ;
-                $ochko2_rev = 0 ;
+            if ($set_2_rev > $set_1_rev ){
+                $ochko_rev = 2 ;
+                $ochko2_rev = 1 ;
                 $colorClass_rev='green_color';
             }else
             {
-              $ochko_rev = 0 ;
-              $ochko2_rev = 1 ;
+              $ochko_rev = 1 ;
+              $ochko2_rev = 2 ;
                 $colorClass_rev='coral_color';
             }
             if ($aRec['set_2']=='W' ){
-                $ochko_rev = 1 ;
+                $ochko_rev = 2 ;
                 $ochko2_rev = 0 ;
                 $colorClass_rev='green_color';
             }else if ($aRec['set_2']=='L' )
             {
               $ochko_rev = 0;
-              $ochko2_rev = 1;
+              $ochko2_rev = 2;
                 $colorClass_rev='coral_color';
             }
             
@@ -393,10 +412,10 @@ function etapresult_mark_duplicate_places($players)
             // Если set_2 > set_1, то pl_num_grp2 (строка) выиграл - 2 очка
             // Если set_2 < set_1, то pl_num_grp2 (строка) проиграл - 1 очко
             $team_ochko_rev = '';
-            if (($set_2_rev > 0 && $set_2_rev > $set_1_rev) || $aRec['set_2'] == 'W') {
+            if (($set_2_rev > $set_1_rev) || $aRec['set_2'] == 'W') {
                 // pl_num_grp2 (строка) выиграл - 2 очка
                 $team_ochko_rev = 2;
-            } elseif (($set_1_rev > 0 && $set_1_rev > $set_2_rev) || $aRec['set_2'] == 'L' || $aRec['set_1'] == 'W') {
+            } elseif (($set_1_rev > $set_2_rev) || $aRec['set_2'] == 'L' || $aRec['set_1'] == 'W') {
                 // pl_num_grp2 (строка) проиграл: обычное поражение = 1 очко, техническое (L) = 0
                 $team_ochko_rev = ($aRec['set_2'] == 'L') ? 0 : 1;
             }
@@ -464,12 +483,12 @@ FROM '.T_REITING.' r where turnir_id='.$turnir_id.' and etap_id='.$etap_id.' and
 
         $aResultsNEW[$aRec['group_num']][$pl_num_grp1][$pl_num_grp2]['first_res'] = $aRec['set_1'];
         $aResultsNEW[$aRec['group_num']][$pl_num_grp1][$pl_num_grp2]['second_res'] = $aRec['set_2'];
-       $set_1 =  $aRec['set_1']=='W' ? 3 : $aRec['set_1'];
-       $set_2 =  $aRec['set_2']=='W' ? 3 : $aRec['set_2'];
+       $set_1 = tie_set_to_int($aRec['set_1']);
+       $set_2 = tie_set_to_int($aRec['set_2']);
        $table_active = $aRec['table_game']>0 ? '<div class="t-grid-team_table1">T'.$aRec['table_game'].'</div>' : '';
         if (isset($aRec['set_1']) && ($aRec['set_1']>0 || $aRec['set_2']>0 || $aRec['set_1']=='L' || $aRec['set_2']=='L')){
 
-            if ($set_1>0 && $set_1>$set_2 ){
+            if ($set_1 > $set_2 ){
                 $ochko = 2 ;
                 $colorClass='green_color';
             }else
@@ -502,12 +521,12 @@ FROM '.T_REITING.' r where turnir_id='.$turnir_id.' and etap_id='.$etap_id.' and
     // теперь перевоачиваем для нижней части таблицы
         $aResultsNEW[$aRec['group_num']][$pl_num_grp2][$pl_num_grp1]['first_res'] = $aRec['set_2'];
         $aResultsNEW[$aRec['group_num']][$pl_num_grp2][$pl_num_grp1]['second_res'] = $aRec['set_1'];
-         $set_1 =  $aRec['set_1']=='W' ? 3 : $aRec['set_1'];
-           $set_2 =  $aRec['set_2']=='W' ? 3 : $aRec['set_2'];
+         $set_1 = tie_set_to_int($aRec['set_1']);
+           $set_2 = tie_set_to_int($aRec['set_2']);
     if (isset($aRec['set_1']) && ($aRec['set_1']>0 || $aRec['set_2']>0 || $aRec['set_1']=='L' || $aRec['set_2']=='L')){
 
 
-         if ($set_1>0 && $set_1>$set_2 ){
+         if ($set_1 > $set_2 ){
                 $ochko = 1 ;
                 $colorClass='coral_color';
             }else
@@ -567,6 +586,7 @@ ORDER BY tp.is_command_num,tp.grp_num';
 
 $aPlayers = db_list($sql);
 $display_place_map = etapresult_get_display_place_map($turnir_id, $etap_id, $aPlayers);
+$group_label = etap_group_label($turnir_id, poste('league_id'));
 //s($sql);
 if (!empty($aPlayers)){
 $aGroups = array();
@@ -577,7 +597,6 @@ $aComm2=[];
 $whoCommand=0;
 foreach ($aPlayers  as $k=> $player) 
 {
-   $group_label = etap_group_label($turnir_id, poste('league_id'));
    $player['grp_mesto_internal'] = (int)$player['grp_mesto'];
    $player['name'] = $player['grp_mesto']==0 && $player['player_id']==0 ? $group_label.' '.$player['groups_pred']. ' місце '.$player['grp_num_pred'] : $player['name'];
    $player['beg_reit'] = $player['grp_mesto']==0 && $player['player_id']==0 ? '' :round($player['beg_reit'],0);
@@ -632,8 +651,11 @@ count(*) as cnt
 $Cnt_new = db_field($sql,'cnt');
 $minGrp=0;
  // здесь определимся какие группы меньше всего
-  foreach ($aGroups as $grp => $aPlay)
- {
+   $group_label = etap_group_label($turnir_id, poste('league_id'));
+   $table_class = $group_label === 'Ліга' ? ' league-results-table' : '';
+
+   foreach ($aGroups as $grp => $aPlay)
+  {
     $cnGrp =count($aPlay);
     if ($minGrp==0 || $cnGrp<$minGrp) $minGrp=$cnGrp;
  }  
@@ -1146,7 +1168,7 @@ $minGrp=0;
    
    $Tables_content .=' <div class="row">
   <div class="col">
-   '.table($aPlay,$aResultsTransformed,'  <div class="zagolovokGrp"> '.etap_group_label($turnir_id, poste('league_id')).' '.$grp.'</div>'.$str_add_player, $turnir_id ) .'
+   '.table($aPlay,$aResultsTransformed,'  <div class="zagolovokGrp"> '.$group_label.' '.$grp.'</div>'.$str_add_player, $turnir_id, ($group_label === 'Ліга' ? ' league-results-table' : '') ) .'
 
   </div>
   </div>
@@ -1806,7 +1828,7 @@ function table_comm($aComm1,$aComm2, $aResults,$zagl,$turnir_id,$etap_id)
     // Возвращаем только HTML контент таблицы
     return $content;
 }
-function table($aPlay,$aResults,$zagl, $turnir_id = 0)
+function table($aPlay,$aResults,$zagl, $turnir_id = 0, $table_class = '')
  {
   //  s($aPlay);
  //   s($aResults);
@@ -1831,7 +1853,7 @@ function table($aPlay,$aResults,$zagl, $turnir_id = 0)
 <div class="big-table_left">  
 <div class="obertka_table">
 '.$zagl.'
-<table class="table  bordered2 table-hover table-bordered  rounded-pill  border-light-subtle">
+<table class="table bordered2 table-hover table-bordered rounded-pill border-light-subtle'.htmlspecialchars((string)$table_class, ENT_QUOTES, 'UTF-8').'">
   <thead class="th_color_rose">
   <tr>
   <th class="num1 ft14 fw700">№</th>

@@ -1064,6 +1064,15 @@ td.zach{
 }
 th.fio{min-width:175px;max-width: 175px; text-align: left}
 td.fio{ text-align: left}
+.league-results-table th.fio,
+.league-results-table td.fio{
+    min-width: 220px;
+    max-width: 220px;
+    width: 220px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
 th.num{min-width:60px;max-width: 60px}
 th.num1{min-width:38px;max-width: 38px}
 .obertka_table{
