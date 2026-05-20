@@ -12,10 +12,10 @@ FROM '.T_TURNIR_PLAYERS.' tpp
         }
     }
 }
-// добавим в турнир командных лиг просто игроков чтобы вывести по ним статистику и в рейтинг добавить
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 function add_players_to_command_turnirs($turnir_id=0)
 {
-    // возьмем всех уникальных игроков которые играли хоть 1 игру и выведем в массив
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ 1 пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     $sql ='SELECT pl_id_1 AS player_id
 FROM bs_reiting
 WHERE turnir_id = '.$turnir_id.'
@@ -32,7 +32,7 @@ WHERE turnir_id = '.$turnir_id.'
     $aPlayers = db_list($sql);
  //   s($aPlayers);
     $values = [];
-// вставляем уникальных игроков IGNORE защита от дублей
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ IGNORE пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     foreach ($aPlayers as $playerId) {
         $values[] = '(' . (int)$playerId['player_id'] . ', ' . (int)$turnir_id . ')';
     }
@@ -68,11 +68,11 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
     $allPlayers =array();
  //   s('dooooooo');
   //  s($allPlayers_);
-    // этот прогон чтобы в масссиве id сооьевтовал игроку
+    // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ id пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     foreach ($allPlayers_ as  $k => $aPlayer)
     {
         $reiting = $aPlayer['reit'];
-        if (empty($reiting)) // если эигрок играл 2 турнира в 1 день
+        if (empty($reiting)) // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ 2 пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 1 пїЅпїЅпїЅпїЅ
         {
             $sql='SELECT end_reiting FROM '.T_TURNIR_PLAYERS.' tp2
          WHERE tp2.player_id='.$aPlayer['id'].' AND tp2.turnir_id<'.$turnir_id.' order by  tp2.turnir_id DESC  limit 1';
@@ -82,7 +82,7 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
         }
         $start_reiting = $is_first==1 ? 0 : $aPlayer['start_reiting'];
         $reiting_ukraine = $is_first==1 && !empty($aPlayer['reiting_ukraine']) && $aPlayer['reiting_ukraine']>0  ? $aPlayer['reiting_ukraine']*10 : 0;
-        // если есть рейтинг украины то применяем его и расчет ведем от него умножанный на 10, если нет то стартовый рейтинг 50
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ 10, пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ 50
         if (empty($reiting)) {
             $is_new_player=1;
             //   s($PlayId.' new _play');
@@ -95,21 +95,21 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
         $aPlayer['start_reiting'] = $start_reiting;
         $allPlayers[$aPlayer['id']]= $aPlayer;
     }
-   // запустим проверку по туриниру и всех играх и запишем разницы рейтингов по играх дельты
+   // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     proverkaTurnirs($allPlayers,$turnir_id,$is_team_league);
   //  s('posle proverkaTurnirs');
 
     foreach ($allPlayers as  $PlayId => $aPlayer)
-    {// получим все результаты игр по данному турниру и игороку
+    {// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         $sqlR = 'select * from '.T_REITING.' where (pl_id_1='.$PlayId.' or pl_id_2='.$PlayId.') and COALESCE(win_player,0)>0 and perenos_etap=0 and turnir_id='.$turnir_id;
     //  s($sqlR);
         $allGames = db_list($sqlR);
     //    s($allGames);
         $is_new=0;
-        if (!empty($allGames)) // если массив не пустой и игрок играл на данном турнире тогда естьсмысл продолжать
+        if (!empty($allGames)) // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         {
-//пройдем по массиву игр найдем всю статистику
-            $diff=0; // дельта
+//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+            $diff=0; // пїЅпїЅпїЅпїЅпїЅпїЅ
             $cntGames=0;
             $cntWins=0;
             $cntLose=0;
@@ -121,7 +121,7 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
 
             $start_reiting = $is_first==1 ? 0 : $aPlayer['start_reiting'];
             $reiting_ukraine = $is_first==1 && !empty($aPlayer['reiting_ukraine']) && $aPlayer['reiting_ukraine']>0  ? $aPlayer['reiting_ukraine']*10 : 0;
-            // если есть рейтинг украины то применяем его и расчет ведем от него умножанный на 10, если нет то стартовый рейтинг 50
+            // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ 10, пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ 50
             if (empty($reiting)) {
                 $is_new_player=1;
                 //   s($PlayId.' new _play');
@@ -130,7 +130,7 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
                 $reiting = !empty($reiting_ukraine) && $reiting_ukraine>0 ? $reiting_ukraine : $start_reiting;
                 //   s('$reiting='.$reiting);
             }
-            // $reiting = (!empty($reiting) && $reiting>0) ? $reiting : $start_reiting; // если еще нет рейтинга берем стартовый
+            // $reiting = (!empty($reiting) && $reiting>0) ? $reiting : $start_reiting; // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             foreach($allGames as $g => $aGame)
             { $reiting_2=0;
                 $set1 = 0;
@@ -138,7 +138,7 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
                 $Play2_id=0;
                 $cntGames++;
                 $diff=0;
-                // определяем игрок в записе 1 или 2
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 1 пїЅпїЅпїЅ 2
                 if ($aGame['pl_id_1']== $PlayId)
                 {   $set1 = $aGame['set_1'];
                     $set2 = $aGame['set_2'];
@@ -146,7 +146,7 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
                     $set2 = $set2=='W' ? 3 : $set2;
                     $set1 = $set1=='L' ? 0 : $set1;
                     $set2 = $set2=='L' ? 0 : $set2;
-                    //подсчет сыграных сетов
+                    //пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
                     $smSets1 = $set1=='W' ? 0 : $set1;
                     $smSets2 = $set2=='W' ? 0 : $set2;
                     $sumSet=$sumSet+($smSets1+$smSets2);
@@ -157,7 +157,7 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
                     $diff=$aGame['diff_1'];
                     //   $reiting_2 = $allPlayers[$aGame['pl_id_2']]['reit'];
                 }
-                // определяем игрок в записе 1 или 2
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 1 пїЅпїЅпїЅ 2
                 if ($aGame['pl_id_2']== $PlayId)
                 {
                     $set1 = $aGame['set_2'];
@@ -166,7 +166,7 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
                     $set2 = $set2=='W' ? 3 : $set2;
                     $set1 = $set1=='L' ? 0 : $set1;
                     $set2 = $set2=='L' ? 0 : $set2;
-                    //подсчет сыграных сетов
+                    //пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
                     $smSets1 = $set1=='W' ? 0 : $set1;
                     $smSets2 = $set2=='W' ? 0 : $set2;
                     $sumSet=$sumSet+($smSets1+$smSets2);
@@ -181,7 +181,7 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
                 if ($set1-$set2>0) $cntWins++; else $cntLose++;
                 $smDiff=$smDiff+$diff;
 
-                // функция перерасчитает рейтинги и обновит таблицу ретинга по 2 игрокам
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ 2 пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 //   list($diff1,$diff2) = $this->add_reiting_rec($PlayId,$Play2_id,$reiting,$reiting_2,$set1,$set2,$aGame['id']);
 
 
@@ -200,7 +200,7 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
             else  $sql= 'insert INTO '.T_TURNIR_PLAYERS.' SET '.$where ;
             //     s($sql);
             db_query($sql);
-            // также обновим текущий рейтинг игрока и его статистику общую
+            // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
             updateStatisticPlayer($PlayId,$turnir_id);
         } // end if $allGames
     } // end for $allPlayers
@@ -246,7 +246,7 @@ function proverkaTurnirs($allPlayers,$turnir_id,$is_team_league=0)
     // s($aTurnirs);
     $sql_='';
     if ($is_team_league>0) $sql_ = ' and pair_number>0 ';
-    // получим все результаты игр по данному турниру
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     $sqlR = 'select * from '.T_REITING.' where  perenos_etap=0 and COALESCE(win_player,0)>0 and turnir_id='.$turnir_id.' '.$sql_;
     $allGames = db_list($sqlR);
     //  s($allPlayers);
@@ -271,8 +271,8 @@ function proverkaTurnirs($allPlayers,$turnir_id,$is_team_league=0)
             $reiting1 = (!empty($reiting1) && $reiting1>0) ? $reiting1 :(!empty($reiting_ukraine1) && $reiting_ukraine1>0 ? $reiting_ukraine1 : $start1);
             $reiting2 = (!empty($reiting2) && $reiting2>0) ? $reiting2 :(!empty($reiting_ukraine2) && $reiting_ukraine2>0 ? $reiting_ukraine2 : $start2);
 
-            //    $reiting1 = (!empty($reiting1) && $reiting1>0) ? $reiting1 : $start1; // если еще нет рейтинга берем стартовый
-            //    $reiting2 = (!empty($reiting2) && $reiting2>0) ? $reiting2 : $start2; // если еще нет рейтинга берем стартовый
+            //    $reiting1 = (!empty($reiting1) && $reiting1>0) ? $reiting1 : $start1; // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+            //    $reiting2 = (!empty($reiting2) && $reiting2>0) ? $reiting2 : $start2; // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
             $set1 = $aGame['set_1'];
             $set2 = $aGame['set_2'];
@@ -284,7 +284,7 @@ function proverkaTurnirs($allPlayers,$turnir_id,$is_team_league=0)
             $diff1=0;
             $diff2=0;
             if ($set_1_otkas && $set1>$set2) {
-                //делаем расчет дельты
+                //пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
                 if (($reiting1-$reiting2)<100) {
                     $diff1 = (100-($reiting1-$reiting2))/WIN_KOEF;
                     if (strtotime($aTurnirs['dat'])>=strtotime('01.06.2024')){
@@ -300,9 +300,9 @@ function proverkaTurnirs($allPlayers,$turnir_id,$is_team_league=0)
                 }
             }
 
-            // если победил 2 игрок
+            // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ 2 пїЅпїЅпїЅпїЅпїЅ
             if ($set_1_otkas && $set2>$set1) {
-                // проверяем не больше ли ретинг 100
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 100
                 if ($reiting2-$reiting1<100) {
                     $diff2 = (100-($reiting2-$reiting1))/WIN_KOEF;
                     if (strtotime($aTurnirs['dat'])>=strtotime('01.06.2024')){
@@ -316,7 +316,7 @@ function proverkaTurnirs($allPlayers,$turnir_id,$is_team_league=0)
                 }
             }
 
-            // сравниваем показатели
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             if (($diff1<>$aGame['diff_1']) or ($diff2<>$aGame['diff_2']) or ($reiting1<>$aGame['rt_id_1_beg'])
                 or ($reiting2<>$aGame['rt_id_2_beg']))
             {
@@ -328,9 +328,9 @@ function proverkaTurnirs($allPlayers,$turnir_id,$is_team_league=0)
         }
     }
 }
-// расччитвваем очки за места турнира для топ лиг topplayersLeagueObject
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ topplayersLeagueObject
 function set_points_turnir ($league_id=0,$is_team_league=0){
-    global $ochki_top_ligs; // глобальный массив по правилам начисление очков по местам
+    global $ochki_top_ligs; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     $sql_='';
     if ($is_team_league>0) $sql_= 'AND EXISTS(SELECT * from  bs_players p where p.id=tp.player_id AND p.is_team=1) ';
     $sql = 'SELECT player_id, (SELECT NAME FROM bs_players WHERE player_id=id) AS NAME, SUM(tp.points) AS points,
@@ -365,34 +365,34 @@ GROUP BY player_id ORDER BY points desc';
 ';
 
  //   s($upsertSql);
-            // Вызови свою обёртку. Если у тебя есть метод insertOrUpdate — можно им.
+            // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ insertOrUpdate пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ.
             db_query($upsertSql);
         }
 
     }
 }
-// берет по массиву определенных правил за какие места сколько балов и возвращает количесвто балов
+// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 function getPointsForPlace(int $place, array $rules): int
 {
     foreach ($rules as $key => $points) {
         if (strpos($key, '-') !== false) {
-            // диапазон
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             [$start, $end] = explode('-', $key);
             if ($place >= (int)$start && $place <= (int)$end) {
                 return $points;
             }
         } else {
-            // конкретное место
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
             if ($place === (int)$key) {
                 return $points;
             }
         }
     }
 
-    // если ничего не найдено
+    // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     return 0;
 }
-// расчитывааем места для турира
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 function set_mesta_turnir ($turnir_id=0)
 {
     $sql = 'SELECT * FROM bs_etaps_work WHERE turnir_id='.$turnir_id.' AND istochnik_posev=0';
@@ -402,17 +402,99 @@ function set_mesta_turnir ($turnir_id=0)
     {
         foreach ($aMesta as $userMesto)
         {
-            // входим в рекурсию чтобы проверять если там связаные етапы
+            // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
            setRecurMesta($userMesto['id'],$turnir_id,1);
         }
     }
 
 }
+
+function recalculate_team_turnir_stats($turnir_id=0)
+{
+    $turnir_id = (int)$turnir_id;
+    if ($turnir_id <= 0) {
+        return;
+    }
+
+    $sql = 'SELECT DISTINCT tp.player_id
+            FROM '.T_TURNIR_PLAYERS.' tp
+            INNER JOIN '.T_PLAYERS.' p ON p.id=tp.player_id
+            WHERE tp.turnir_id='.$turnir_id.' AND p.is_team=1';
+    $teams = db_list($sql);
+    if (empty($teams)) {
+        return;
+    }
+
+    foreach ($teams as $team) {
+        $team_id = !empty($team['player_id']) ? (int)$team['player_id'] : 0;
+        if ($team_id <= 0) {
+            continue;
+        }
+
+        $sql = 'SELECT pl_id_1, pl_id_2, set_1, set_2, win_player, lose_player
+                FROM '.T_REITING.'
+                WHERE turnir_id='.$turnir_id.'
+                  AND COALESCE(win_player,0)>0
+                  AND (pair_number=0 OR pair_number IS NULL OR pair_number="")
+                  AND (pl_id_1='.$team_id.' OR pl_id_2='.$team_id.')';
+        $games = db_list($sql);
+
+        $cnt_games = 0;
+        $cnt_wins = 0;
+        $cnt_lose = 0;
+        $cnt_sets_win = 0;
+        $cnt_sets_lose = 0;
+
+        if (!empty($games)) {
+            foreach ($games as $game) {
+                $raw_set_1 = isset($game['set_1']) ? trim((string)$game['set_1']) : '';
+                $raw_set_2 = isset($game['set_2']) ? trim((string)$game['set_2']) : '';
+
+                $set_1 = ($raw_set_1 === 'W') ? 3 : (($raw_set_1 === 'L') ? 0 : (int)$raw_set_1);
+                $set_2 = ($raw_set_2 === 'W') ? 3 : (($raw_set_2 === 'L') ? 0 : (int)$raw_set_2);
+
+                if ($set_1 === $set_2) {
+                    continue;
+                }
+
+                $cnt_games++;
+
+                if ((int)$game['pl_id_1'] === $team_id) {
+                    $team_sets_win = $set_1;
+                    $team_sets_lose = $set_2;
+                } else {
+                    $team_sets_win = $set_2;
+                    $team_sets_lose = $set_1;
+                }
+
+                $cnt_sets_win += $team_sets_win;
+                $cnt_sets_lose += $team_sets_lose;
+
+                if (!empty($game['win_player']) && (int)$game['win_player'] === $team_id) {
+                    $cnt_wins++;
+                } else {
+                    $cnt_lose++;
+                }
+            }
+        }
+
+        $sql = 'UPDATE '.T_TURNIR_PLAYERS.' SET
+                cnt_games='.$cnt_games.',
+                cnt_wins='.$cnt_wins.',
+                cnt_lose='.$cnt_lose.',
+                cnt_sets_win='.$cnt_sets_win.',
+                cnt_sets_lose='.$cnt_sets_lose.',
+                cnt_sets='.($cnt_sets_win + $cnt_sets_lose).'
+                WHERE turnir_id='.$turnir_id.' AND player_id='.$team_id;
+        db_query($sql);
+    }
+}
+
 function setRecurMesta ($etap_id,$turnir_id,$mestaFrom=1)
 {
     if (!empty($etap_id))
     {
-        // запишем места для предущего этапа
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         setMesta($etap_id,$turnir_id,$mestaFrom);
         $sql = 'SELECT * FROM bs_etaps_work WHERE turnir_id='.$turnir_id.' AND istochnik_posev='.$etap_id.' ORDER BY mesto_from';
         $aEtaps = db_list($sql);
@@ -430,7 +512,7 @@ function setRecurMesta ($etap_id,$turnir_id,$mestaFrom=1)
 }
 function setMesta ($etap_id,$turnir_id,$mestaFrom=1)
 {
-    global $ochki_top_ligs; // глобальный массив по правилам начисление очков по местам
+    global $ochki_top_ligs; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     $sql = 'select * from bs_etaps_players_mesta where etap_id='.$etap_id;
     //  s($sql);
     $UserMesta = db_list($sql);

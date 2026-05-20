@@ -91,6 +91,9 @@ class RaschetAction extends ActionModule
                 db_query($sql);
                 // расчитать места
                 set_mesta_turnir($turnir['id']);
+                if ($turnir['is_team_league']>0) {
+                    recalculate_team_turnir_stats($turnir['id']);
+                }
                 // рассчитаем очки для лиги
                 if (!empty($turnir['league_id'])) set_points_turnir($turnir['league_id'],$turnir['is_team_league']);
 

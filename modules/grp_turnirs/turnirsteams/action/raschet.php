@@ -6,6 +6,7 @@ class RaschetAction extends ActionModule
   protected  $is_new_player = 0; // если новые игроки на туринре
   protected  $is_new = 0; // первый раз на турнире для измен стартового рейтинга
   protected  $is_first = 1; // первый раз на турнире для измен стартового рейтинга
+  protected  $league_id = 0;
   protected  $subMenu = array();
   protected  $Java_script = ''; // джаваскрипт функции для данного действия например иницлизация функции календаря, или редактора контента
    
@@ -91,6 +92,7 @@ class RaschetAction extends ActionModule
                 db_query($sql);
                 // расчитать места
                 set_mesta_turnir($turnir['id']);
+                recalculate_team_turnir_stats($turnir['id']);
                 // рассчитаем очки для лиги
                 if (!empty($turnir['league_id'])) set_points_turnir($turnir['league_id']);
 
