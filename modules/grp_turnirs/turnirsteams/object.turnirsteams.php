@@ -185,6 +185,7 @@ if ($_SESSION['gt']['user_rule']<10 && empty($virt))
     $turnir_id_param = !empty(poste('turnir_id')) ? '&turnir_id='.poste('turnir_id') : 'id='.poste('turnir_id');
     $league_id_param = !empty($league_id) ? '&league_id='.$league_id : '';
     self::$submenu_list =array( 
+       'teamstats' => array('menu_name'=>'Перерахувати статистику команд','module' => 'turnirsteams', 'action' => 'teamstats', 'post' => $turnir_id_param.$league_id_param),
        'report_ok' => array('menu_name'=>'Перерахувати рейтинг по даному турніру','module' => 'turnirsteams', 'action' => 'raschet', 'post' => $turnir_id_param.$league_id_param),
     );
 
