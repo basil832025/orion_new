@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__, 2) . '/modules/teamplayers/func/func.teamplayers.php';
 // класс возвращает и обрабатывает для вывода поля формы
 class ListTable extends ActionModule
 {
@@ -493,7 +494,15 @@ class ListTable extends ActionModule
                                 // Проверяем, есть ли игроки в команде (только если team_id валидный)
                                 $cnt_players = 0;
                                 if (!empty($team_id) && is_numeric($team_id)) {
-                                    $cnt_players = db_field('SELECT COUNT(*) as cnt FROM `'.T_PLAYERS.'` WHERE team_id='.$team_id.' AND is_team=0 AND not_use=0', 'cnt');
+                                    $league_id_context = 0;
+                                    if ($this->module == 'turnirsteams') {
+                                        $turnir_id_context = (int)poste('turnir_id');
+                                        if ($turnir_id_context <= 0 && !empty($vData['turnir_id'])) {
+                                            $turnir_id_context = (int)$vData['turnir_id'];
+                                        }
+                                        $league_id_context = teamplayers_resolve_league_id(poste('league_id'), $turnir_id_context);
+                                    }
+                                    $cnt_players = teamplayers_count($team_id, $league_id_context);
                                 }
                                 $cnt_players = !empty($cnt_players) ? (int)$cnt_players : 0;
                                 
@@ -516,7 +525,16 @@ class ListTable extends ActionModule
                                     // Добавляем кнопку перехода к списку игроков только если пользователь авторизован (user_rule < 10) и team_id валидный
                                     if (!empty($_SESSION['gt']['user_rule']) && $_SESSION['gt']['user_rule'] < 10 && !empty($team_id) && is_numeric($team_id)) {
                                         // Переходим на список игроков команды (list), а не на форму добавления (add)
-                                        $this->content .= '<a href="#teamplayers-list-team_id='.$team_id.'" class="ajax_send" title="Перейти до списку гравців команди" style="font-size:14px; color:#28a745;">+</a>';
+                                        $turnir_id_context = (int)poste('turnir_id');
+                                        $league_id_context = teamplayers_resolve_league_id(poste('league_id'), $turnir_id_context);
+                                        $return_params = '';
+                                        if (!empty($turnir_id_context)) {
+                                            $return_params .= '&turnir_id='.$turnir_id_context;
+                                        }
+                                        if (!empty($league_id_context)) {
+                                            $return_params .= '&league_id='.$league_id_context;
+                                        }
+                                        $this->content .= '<a href="#teamplayers-list-team_id='.$team_id.$return_params.'" class="ajax_send" title="Перейти до списку гравців команди" style="font-size:14px; color:#28a745;">+</a>';
                                     } else {
                                         $this->content .= '<span style="font-size:14px; color:#ccc;">-</span>';
                                     }
@@ -630,6 +648,10 @@ class ListTable extends ActionModule
                                 } else {
                                     $team_id = $vData['id'];
                                     $return_params = '';
+                                    $league_id = poste('league_id');
+                                    if (!empty($league_id)) {
+                                        $return_params .= '&league_id='.(int)$league_id;
+                                    }
                                 }
                                 $this->content .= '<td align="center">';
                                 // Показываем кнопку только если пользователь авторизован (user_rule < 10) и team_id валидный
@@ -1067,7 +1089,15 @@ id="news_name_id_' . $vData["id"] . '">' . $rounded_value. '</span>' ;
                         
                         // Рендерим строки игроков только если team_id валидный
                         if (!empty($team_id) && is_numeric($team_id)) {
-                        $players = db_list('SELECT id, id_reiting, name, phone, city, reiting_ukraine, is_opl_reiting FROM `'.T_PLAYERS.'` WHERE team_id='.$team_id.' AND is_team=0 AND not_use=0 ORDER BY name');
+                        $league_id_context = 0;
+                        if ($is_turnirsteams_module) {
+                            $turnir_id_context = (int)poste('turnir_id');
+                            if ($turnir_id_context <= 0 && !empty($vData['turnir_id'])) {
+                                $turnir_id_context = (int)$vData['turnir_id'];
+                            }
+                            $league_id_context = teamplayers_resolve_league_id(poste('league_id'), $turnir_id_context);
+                        }
+                        $players = teamplayers_list($team_id, $league_id_context);
                         
                         if (!empty($players)) {
                             $col_count = count($this->aColList);
@@ -1182,9 +1212,17 @@ id="news_name_id_' . $vData["id"] . '">' . $rounded_value. '</span>' ;
                             if ($this->getNameATable($key)) {
                                  /*   $this->name_list_parent = db_field('select '.($lang ? 'name_'.$lang .' as name' : 'name').'  from `' . $this->getNameATable($key) .
                                     '` where id=' . $this->id_aParent, 'name');*/
-                            $where .= ' and ' . $this->getNameAperent($key) . '=' . $this->id_aParent;
+                            $parent_name = $this->getNameAperent($key);
+                            $skip_teamplayers_team_parent = (
+                                $this->module == 'teamplayers'
+                                && $parent_name == 'team_id'
+                                && (!empty(poste('league_id')) || !empty($_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID']))
+                            );
+                            if (!$skip_teamplayers_team_parent) {
+                                $where .= ' and ' . $parent_name . '=' . $this->id_aParent;
+                            }
 
-                            $this->sql .= ',' . $this->getNameAperent($key);
+                            $this->sql .= ',' . $parent_name;
                             }
                         } 
                 }        

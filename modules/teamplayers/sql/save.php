@@ -1,7 +1,9 @@
 <?php
- $team_id = poste('team_id');
- $turnir_id = poste('turnir_id');
- $league_id = poste('league_id');
+ require_once __DIR__ . '/../func/func.teamplayers.php';
+ $team_id = teamplayers_request_param('team_id', 'TEAMPLAYERS_SAVE_TEAM_ID');
+ $turnir_id = teamplayers_request_param('turnir_id', 'TEAMPLAYERS_SAVE_TURNIR_ID');
+ $league_id = teamplayers_request_param('league_id', 'TEAMPLAYERS_SAVE_LEAGUE_ID');
+ $league_id = teamplayers_resolve_league_id($league_id, $turnir_id);
   $id = poste('id');
   $form = SystemClass::getAFormPost();
   
@@ -21,16 +23,29 @@
     
     // Проверка: игрок не должен уже быть в другой команде (если это новая запись)
     if (empty($id) || $id == 0) {
-        $existing_team = db_field('SELECT team_id FROM `'.T_PLAYERS.'` WHERE id='.$player_id.' AND team_id IS NOT NULL', 'team_id');
-        if (!empty($existing_team) && $existing_team != $team_id) {
+        if (!empty($league_id)) {
+            $turnir_team_filter = !empty($turnir_id)
+                ? ' AND EXISTS(SELECT * FROM `'.T_TURNIR_PLAYERS.'` ttp WHERE ttp.turnir_id='.(int)$turnir_id.' AND ttp.player_id=tpl.team_id) '
+                : '';
+            $existing_team = db_field('SELECT team_id FROM `'.T_TEAM_PLAYERS_LEAGUE.'` tpl WHERE tpl.league_id='.(int)$league_id.' AND tpl.player_id='.(int)$player_id.' AND tpl.team_id<>'.(int)$team_id.$turnir_team_filter.' LIMIT 1', 'team_id');
+        } else {
+            $existing_team = db_field('SELECT team_id FROM `'.T_PLAYERS.'` WHERE id='.$player_id.' AND team_id IS NOT NULL', 'team_id');
+        }
+        if (!empty($existing_team)) {
             window_mess('Цей гравець вже є в іншій команді!');
             return;
         }
     }
     
-    // Устанавливаем team_id для игрока
-    // Обновляем team_id у игрока
-    db_query('UPDATE `'.T_PLAYERS.'` SET team_id='.$team_id.' WHERE id='.$player_id);
+    if (!empty($league_id)) {
+        $now = date('Y-m-d H:i:s');
+        db_query('INSERT INTO `'.T_TEAM_PLAYERS_LEAGUE.'`
+            (league_id, team_id, player_id, created_at, updated_at)
+            VALUES ('.(int)$league_id.', '.(int)$team_id.', '.(int)$player_id.', "'.$now.'", "'.$now.'")
+            ON DUPLICATE KEY UPDATE team_id=VALUES(team_id), updated_at=VALUES(updated_at)');
+    } else {
+        db_query('UPDATE `'.T_PLAYERS.'` SET team_id='.$team_id.' WHERE id='.$player_id);
+    }
 
     if (function_exists('get_ligs_player')) {
         $id_reiting = db_field('SELECT id_reiting FROM `'.T_PLAYERS.'` WHERE id='.$player_id, 'id_reiting');

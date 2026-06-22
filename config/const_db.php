@@ -48,6 +48,7 @@ define('T_TURNIRS', PREF .'turnirs');
 define('T_REITING', PREF .'reiting');
 define('T_PLAYERS', PREF .'players');
 define('T_TURNIR_PLAYERS', PREF .'turnirplayers');
+define('T_TEAM_PLAYERS_LEAGUE', PREF .'team_players_league');
 define('T_TURNIR_VARIANTS', PREF .'turnirs_variants');
 define('T_GROUP_PORYADOK', PREF .'group_poryadok');
 define('T_ETAPS', PREF .'etaps_work');

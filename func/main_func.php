@@ -1131,7 +1131,7 @@ if (!empty($MenuAr)) {
       if ($_SESSION['gt']['user_rule']!=3 && $menu['module']=='visits')  continue;
       if ($_SESSION['gt']['user_rule']!=3 && $menu['module']=='sprtov')  continue;
       if ($_SESSION['gt']['user_rule']!=3 && $menu['module']=='shop')  continue;
-       if (!empty($menu['module']) && ($thisActiveModule==$menu['module']) && empty($league_id)) $active='active';
+       if (!empty($menu['module']) && ($thisActiveModule==$menu['module'])) $active='active';
        if (!empty($menu['module']) && $menu['module'] == 'turnirs' && empty($league_id)
 		   && (($thisActiveModule=='turnirs') ||($thisActiveModule=='etaps') ||($thisActiveModule=='etapresult') || ($thisActiveModule=='turnirsplayers') || ($thisActiveModule=='reiting') || ($thisActiveModule=='tables'))
 	   ) $active='active';

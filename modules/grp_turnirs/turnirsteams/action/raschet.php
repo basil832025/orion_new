@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../../teamplayers/func/func.teamplayers.php';
 
 // класс для расчета рейтинга командных турниров
 class RaschetAction extends ActionModule 
@@ -27,7 +28,25 @@ class RaschetAction extends ActionModule
         }
         
         // Получаем league_id из параметров (передается через POST или GET)
-        $this->league_id = poste('league_id');
+        $turnir_id = teamplayers_request_param('turnir_id');
+        if ($turnir_id <= 0) {
+            $turnir_id = teamplayers_request_param('id');
+        }
+        if ($turnir_id > 0) {
+            $this->id = $turnir_id;
+        } else {
+            $this->id = (int)$this->id;
+        }
+        $this->league_id = teamplayers_request_param('league_id', '');
+        if ($this->league_id <= 0) {
+            $this->league_id = teamplayers_resolve_league_id(0, $this->id);
+        }
+
+        if ($this->id <= 0) {
+            window_mess('Помилка: не вказано турнір для перерахунку');
+            $this->list_show_rs();
+            return;
+        }
         
         $sql = 'SELECT count(*) as cnt FROM `'.T_TURNIR_PLAYERS.'` where turnir_id='.$this->id;
         $cnt_players = db_field($sql,'cnt');
@@ -50,7 +69,6 @@ class RaschetAction extends ActionModule
             $sql = 'select id,date_create,dat,virt,league_id from ' . T_TURNIRS . ' r WHERE (r.date_raschet IS not null or id=' . $this->id . ')
         AND dat>=(SELECT dat FROM ' . T_TURNIRS . ' WHERE id =' . $this->id . ') 
         order by dat,id';
-             s($sql);
             $aTurnirs = db_list($sql);
             $_SESSION['RASSCHET']['TURNIRS'] = $aTurnirs;
          //   s($_SESSION['RASSCHET']['TURNIRS'] );
@@ -144,12 +162,27 @@ class RaschetAction extends ActionModule
         return $this->Java_script;
     }
 
-      function list_show_rs()
+    function list_show_rs()
     {   SystemClass::setAction('anyaction');
+        $this->id = (int)$this->id;
+        if ($this->id <= 0) {
+            $this->id = teamplayers_request_param('turnir_id');
+        }
+        if ($this->id <= 0) {
+            $this->id = teamplayers_request_param('id');
+        }
+
+        if ($this->id <= 0) {
+            SystemClass::setModule('turnirsteams');
+            SystemClass::setPost_return('turnirsteams-list');
+            parent::list_show();
+            return;
+        }
+
         $sql='SELECT virt FROM ' . T_TURNIRS . ' WHERE id =' . $this->id . '';
         $virt = db_field($sql,'virt');
-        $turnir_id = !empty($this->id) ? $this->id : poste('turnir_id');
-        $league_id = !empty($this->league_id) ? $this->league_id : poste('league_id');
+        $turnir_id = $this->id;
+        $league_id = !empty($this->league_id) ? (int)$this->league_id : teamplayers_request_param('league_id');
         
         // Если league_id не передан через POST, пытаемся получить из турнира
         if (empty($league_id) && !empty($turnir_id)) {

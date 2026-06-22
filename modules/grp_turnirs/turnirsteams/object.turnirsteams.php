@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../teamplayers/func/func.teamplayers.php';
 // класс описующий структуру модуля команд в турнире
 class TurnirsTeamsObject extends ObjectRT 
 {   
@@ -147,7 +148,11 @@ $this->addFF(array('name'=>'Назва нової команди','name_field'=>
 
 $_SESSION['turnirsteams']['where'] =$sWhere;
 if (!empty($_SESSION['turnirsteams']['sort']) && $_SESSION['turnirsteams']['sort'] == 'reiting_ukraine') {
-    $_SESSION['turnirsteams']['sort'] = '(SELECT COALESCE(SUM(pp.reiting_ukraine),0) FROM `'.T_PLAYERS.'` pp WHERE pp.team_id=p.player_id AND pp.is_team=0 AND pp.not_use=0)';
+    if (!empty($league_id)) {
+        $_SESSION['turnirsteams']['sort'] = '(SELECT COALESCE(SUM(pp.reiting_ukraine),0) FROM `'.T_TEAM_PLAYERS_LEAGUE.'` tpl INNER JOIN `'.T_PLAYERS.'` pp ON pp.id=tpl.player_id WHERE tpl.league_id='.(int)$league_id.' AND tpl.team_id=p.player_id AND (pp.is_team IS NULL OR pp.is_team=0) AND pp.not_use=0)';
+    } else {
+        $_SESSION['turnirsteams']['sort'] = '(SELECT COALESCE(SUM(pp.reiting_ukraine),0) FROM `'.T_PLAYERS.'` pp WHERE pp.team_id=p.player_id AND (pp.is_team IS NULL OR pp.is_team=0) AND pp.not_use=0)';
+    }
 }
 
   $this->setTableModule(T_TURNIR_PLAYERS);
@@ -182,7 +187,7 @@ if (!empty($_SESSION['turnirsteams']['sort']) && $_SESSION['turnirsteams']['sort
       }
 if ($_SESSION['gt']['user_rule']<10 && empty($virt))
 {
-    $turnir_id_param = !empty(poste('turnir_id')) ? '&turnir_id='.poste('turnir_id') : 'id='.poste('turnir_id');
+    $turnir_id_param = !empty($turnir_id) ? '&turnir_id='.(int)$turnir_id : '';
     $league_id_param = !empty($league_id) ? '&league_id='.$league_id : '';
     self::$submenu_list =array( 
        'teamstats' => array('menu_name'=>'Перерахувати статистику команд','module' => 'turnirsteams', 'action' => 'teamstats', 'post' => $turnir_id_param.$league_id_param),
@@ -289,8 +294,8 @@ function get_team_reiting_ukraine($field, $id, $data)
     }
 
     if ($team_id > 0) {
-        $total = db_field('SELECT COALESCE(SUM(reiting_ukraine),0) as total FROM `'.T_PLAYERS.'` WHERE team_id='.$team_id.' AND is_team=0 AND not_use=0', 'total');
-        $total = !is_null($total) ? (int)$total : 0;
+        $league_id = teamplayers_resolve_league_id(poste('league_id'), !empty($data['turnir_id']) ? $data['turnir_id'] : poste('turnir_id'));
+        $total = teamplayers_sum_reiting_ukraine($team_id, $league_id);
         return '<span style="font-weight:700; font-size:16px; color:#0b5ed7;">'.$total.'</span>';
     }
 
@@ -321,13 +326,9 @@ function get_team_opl_summary_turnir($field, $id, $data)
     }
 
     if ($team_id > 0) {
-        $sql = 'SELECT COUNT(*) as total, SUM(CASE WHEN is_opl_reiting=1 THEN 1 ELSE 0 END) as paid FROM `'.T_PLAYERS.'` WHERE team_id='.$team_id.' AND is_team=0 AND not_use=0';
-        $result = db_row($sql);
-        if ($result !== false && is_array($result) && array_key_exists('total', $result)) {
-            $total = (int)$result['total'];
-            $paid = !empty($result['paid']) ? (int)$result['paid'] : 0;
-            return $paid.'/'.$total;
-        }
+        $league_id = teamplayers_resolve_league_id(poste('league_id'), !empty($data['turnir_id']) ? $data['turnir_id'] : poste('turnir_id'));
+        $result = teamplayers_opl_summary($team_id, $league_id);
+        return $result['paid'].'/'.$result['total'];
     }
 
     return '0/0';

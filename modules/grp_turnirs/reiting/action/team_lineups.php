@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../../teamplayers/func/func.teamplayers.php';
 // Действие для управления составами команд для конкретного матча (командная лига)
 // Работает с конкретной записью из bs_reiting
 
@@ -451,14 +452,15 @@ class team_lineupsAction extends ActionModule {
         }
         
         // Если составы еще не сохранены, определяем игроков по team_id в таблице players
+        $league_id_fallback = teamplayers_resolve_league_id(!empty($game['league_id']) ? $game['league_id'] : poste('league_id'), !empty($game['turnir_id']) ? $game['turnir_id'] : poste('turnir_id'));
         if (empty($team_a_player_ids) && !empty($team_a_id)) {
-            $team_a_players = db_list('SELECT id FROM `'.T_PLAYERS.'` WHERE team_id='.$team_a_id.' AND is_team=0');
+            $team_a_players = teamplayers_list($team_a_id, $league_id_fallback, 'p.id');
             foreach ($team_a_players as $player) {
                 $team_a_player_ids[] = (int)$player['id'];
             }
         }
         if (empty($team_b_player_ids) && !empty($team_b_id)) {
-            $team_b_players = db_list('SELECT id FROM `'.T_PLAYERS.'` WHERE team_id='.$team_b_id.' AND is_team=0');
+            $team_b_players = teamplayers_list($team_b_id, $league_id_fallback, 'p.id');
             foreach ($team_b_players as $player) {
                 $team_b_player_ids[] = (int)$player['id'];
             }
@@ -1086,10 +1088,7 @@ class team_lineupsAction extends ActionModule {
         $content .= '<input type="hidden" name="team_id" value="'.$team_a_id.'">';
         
         // Получаем игроков команды A
-        $players_a = db_list('SELECT id, name, phone, city 
-            FROM `'.T_PLAYERS.'` 
-            WHERE team_id='.$team_a_id.' AND is_team=0 AND not_use=0 AND ispara=0
-            ORDER BY name');
+        $players_a = teamplayers_list($team_a_id, $league_id, 'p.id, p.name, p.phone, p.city');
         
         // Определяем текущих выбранных игроков для позиций A, B, C
         $player_a_selected = !empty($lineup_a[0]) ? $lineup_a[0] : '';
@@ -1171,10 +1170,7 @@ class team_lineupsAction extends ActionModule {
         $content .= '<input type="hidden" name="team_id" value="'.$team_b_id.'">';
         
         // Получаем игроков команды B
-        $players_b = db_list('SELECT id, name, phone, city 
-            FROM `'.T_PLAYERS.'` 
-            WHERE team_id='.$team_b_id.' AND is_team=0 AND not_use=0 AND ispara=0
-            ORDER BY name');
+        $players_b = teamplayers_list($team_b_id, $league_id, 'p.id, p.name, p.phone, p.city');
         
         // Определяем текущих выбранных игроков для позиций Y, X, Z
         // Y - первый в списке (индекс 0), X - второй (индекс 1), Z - третий (индекс 2)

@@ -63,7 +63,7 @@ FROM '.T_PLAYERS.' p,bs_turnirplayers tpp
             and p.is_team=0  
 				AND  exists(select * from `'.T_REITING.'` tp where (p.id=tp.pl_id_1 or p.id=tp.pl_id_2) and perenos_etap=0  and tp.turnir_id='.$turnir_id.' ) 
             order by 1 desc, start_reiting desc  ';
-    s($sql);
+    // debug: s($sql);
     $allPlayers_ = db_list($sql);
     $allPlayers =array();
  //   s('dooooooo');
@@ -255,6 +255,9 @@ function proverkaTurnirs($allPlayers,$turnir_id,$is_team_league=0)
     {
         if (!empty($aGame['pl_id_1']) && !empty($aGame['pl_id_2']))
         {
+            if (empty($allPlayers[$aGame['pl_id_1']]) || empty($allPlayers[$aGame['pl_id_2']])) {
+                continue;
+            }
             $aPlayer1 = $allPlayers[$aGame['pl_id_1']];
             $aPlayer2 = $allPlayers[$aGame['pl_id_2']];
             $play1 = $aGame['pl_id_1'];
@@ -340,7 +343,7 @@ SUM(tp.cnt_sets) AS cnt_sets,SUM(tp.cnt_sets_win) AS cnt_sets_win,SUM(tp.cnt_set
 
  FROM '.T_TURNIR_PLAYERS.' tp, '.T_TURNIRS.' t  WHERE t.league_id='.$league_id.' AND t.id=tp.turnir_id '.$sql_.' 
 GROUP BY player_id ORDER BY points desc';
-      s($sql);
+      // debug: s($sql);
     $UserMesta = db_list($sql);
   //  s($UserMesta);
     if (!empty($UserMesta))
@@ -396,7 +399,7 @@ function getPointsForPlace(int $place, array $rules): int
 function set_mesta_turnir ($turnir_id=0)
 {
     $sql = 'SELECT * FROM bs_etaps_work WHERE turnir_id='.$turnir_id.' AND istochnik_posev=0';
-    s($sql);
+    // debug: s($sql);
     $aMesta = db_list($sql);
     if (!empty($aMesta))
     {

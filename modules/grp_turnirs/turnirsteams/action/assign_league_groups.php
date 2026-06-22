@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../../teamplayers/func/func.teamplayers.php';
 
 class assign_league_groupsAction extends ActionModule
 {
@@ -14,7 +15,10 @@ class assign_league_groupsAction extends ActionModule
             return;
         }
 
-        $turnir_id = (int)poste('turnir_id');
+        $turnir_id = teamplayers_request_param('turnir_id');
+        if ($turnir_id <= 0) {
+            $turnir_id = teamplayers_request_param('id');
+        }
         if ($turnir_id <= 0 && !empty($this->id)) {
             $turnir_id = (int)$this->id;
         }
@@ -32,7 +36,7 @@ class assign_league_groupsAction extends ActionModule
             return;
         }
 
-        $league_id = (int)poste('league_id');
+        $league_id = teamplayers_request_param('league_id');
         if ($league_id <= 0 && !empty($turnir['league_id'])) {
             $league_id = (int)$turnir['league_id'];
         }

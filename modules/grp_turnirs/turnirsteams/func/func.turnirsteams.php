@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../../../teamplayers/func/func.teamplayers.php';
+
 function setPlayersLigasInfo($turnir_id,$team){
     $turnir_id = (int)$turnir_id;
     $team_id = (int)$team;
@@ -16,7 +18,8 @@ function setPlayersLigasInfo($turnir_id,$team){
         }
     }
 
-    $players = db_list('SELECT id, id_reiting FROM `'.T_PLAYERS.'` WHERE team_id='.$team_id.' AND is_team=0 AND not_use=0');
+    $league_id = teamplayers_resolve_league_id(0, $turnir_id);
+    $players = teamplayers_list($team_id, $league_id, 'p.id, p.id_reiting');
     if (empty($players)) {
         return;
     }

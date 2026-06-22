@@ -1,6 +1,9 @@
 <?php
+require_once __DIR__ . '/../func/func.teamplayers.php';
 // Триггер для проверок перед сохранением игрока в команду
-$team_id = poste('team_id');
+$team_id = teamplayers_request_param('team_id', 'TEAMPLAYERS_SAVE_TEAM_ID');
+$turnir_id = teamplayers_request_param('turnir_id', 'TEAMPLAYERS_SAVE_TURNIR_ID');
+$league_id = teamplayers_resolve_league_id(teamplayers_request_param('league_id', 'TEAMPLAYERS_SAVE_LEAGUE_ID'), $turnir_id);
 $form = poste('form');
 $id = poste('id');
 $id = !empty($id) ? $id : 0;
@@ -19,7 +22,11 @@ if (!empty($form['player_id'])) {
     
     // Проверка дубликатов: игрок не должен уже быть в этой команде (если это новая запись)
     if (empty($id) || $id == 0) {
-        $existing_team = db_field('SELECT team_id FROM `'.T_PLAYERS.'` WHERE id='.$form['player_id'].' AND team_id='.$team_id, 'team_id');
+        if (!empty($league_id)) {
+            $existing_team = db_field('SELECT team_id FROM `'.T_TEAM_PLAYERS_LEAGUE.'` WHERE league_id='.(int)$league_id.' AND player_id='.(int)$form['player_id'].' AND team_id='.(int)$team_id, 'team_id');
+        } else {
+            $existing_team = db_field('SELECT team_id FROM `'.T_PLAYERS.'` WHERE id='.$form['player_id'].' AND team_id='.$team_id, 'team_id');
+        }
         if (!empty($existing_team)) {
             window_mess('Цей гравець вже є в даній команді!');
         }

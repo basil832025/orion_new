@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../../teamplayers/func/func.teamplayers.php';
 // Действие для управления составами команд на этапе (командная лига)
 // Используем класс ActionModule для совместимости с существующей системой
 
@@ -247,10 +248,7 @@ if (count($teams) >= 2) {
     $content .= '<input type="hidden" name="team_type" value="team_a">';
     
     // Получаем игроков команды A
-    $players_a = db_list('SELECT id, name, phone, city 
-        FROM `'.T_PLAYERS.'` 
-        WHERE team_id='.$team_a_id.' AND is_team=0 AND not_use=0 AND ispara=0
-        ORDER BY name');
+    $players_a = teamplayers_list($team_a_id, $league_id, 'p.id, p.name, p.phone, p.city');
     
     $content .= '<div class="mb-3">';
     $content .= '<label class="form-label">Виберіть гравців:</label>';
@@ -302,10 +300,7 @@ if (count($teams) >= 2) {
     $content .= '<input type="hidden" name="team_type" value="team_b">';
     
     // Получаем игроков команды B
-    $players_b = db_list('SELECT id, name, phone, city 
-        FROM `'.T_PLAYERS.'` 
-        WHERE team_id='.$team_b_id.' AND is_team=0 AND not_use=0 AND ispara=0
-        ORDER BY name');
+    $players_b = teamplayers_list($team_b_id, $league_id, 'p.id, p.name, p.phone, p.city');
     
     $content .= '<div class="mb-3">';
     $content .= '<label class="form-label">Виберіть гравців:</label>';
@@ -507,6 +502,7 @@ $this->content = $content . $js;
 $this->subMenu = array(
     'back' => array('module' => 'etaps', 'action' => 'list', 'post' => 'turnir_id='.$turnir_id.'&league_id='.$league_id)
 );
+    }
 
     function getContent() {
         return $this->content;
@@ -521,5 +517,3 @@ $this->subMenu = array(
     }
 }
 ?>
-
-

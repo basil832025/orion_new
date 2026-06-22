@@ -4,10 +4,21 @@ class TeamPlayersObject extends ObjectRT
 {   
   function init ()
   {
-$team_id = poste('team_id');
-$turnir_id = poste('turnir_id');
-$league_id = poste('league_id');
+require_once __DIR__ . '/func/func.teamplayers.php';
+$team_id = teamplayers_request_param('team_id', 'TEAMPLAYERS_SAVE_TEAM_ID');
+$turnir_id = teamplayers_request_param('turnir_id', 'TEAMPLAYERS_SAVE_TURNIR_ID');
+$league_id = teamplayers_request_param('league_id', 'TEAMPLAYERS_SAVE_LEAGUE_ID');
+$league_id = teamplayers_resolve_league_id($league_id, $turnir_id);
 $menu_team = !empty($team_id) ? '&team_id='.$team_id : '';
+if (!empty($team_id)) {
+    $_SESSION['TEAMPLAYERS_SAVE_TEAM_ID'] = $team_id;
+}
+if (!empty($turnir_id)) {
+    $_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'] = $turnir_id;
+}
+if (!empty($league_id)) {
+    $_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'] = $league_id;
+}
 
       self::$table_class='table_mob_turn';
 if (!empty($team_id))
@@ -66,24 +77,34 @@ $this->addFTL(array('name'=>'Опл.<br />внес.','type'=>'text',
 
 //================================================================================================
 // описание полей формы модуля при редактировании или добавления
-     $this->addFF(array('name'=>'Команда','name_field'=>'team_id','type'=>'hidden'));
+     $this->addFF(array('name'=>'Команда','name_field'=>'team_id','type'=>'hidden','def'=>$team_id));
 // Всегда добавляем скрытые поля для турнира и лиги, чтобы они передавались при сохранении
 // Значения будут заполнены из POST или сессии при открытии формы
-$this->addFF(array('name'=>'Турнір','name_field'=>'turnir_id','type'=>'hidden'));
-$this->addFF(array('name'=>'Ліга','name_field'=>'league_id','type'=>'hidden'));
+$this->addFF(array('name'=>'Турнір','name_field'=>'turnir_id','type'=>'hidden','def'=>$turnir_id));
+$this->addFF(array('name'=>'Ліга','name_field'=>'league_id','type'=>'hidden','def'=>$league_id));
+$player_where = ' and (p.is_team IS NULL OR p.is_team=0) and p.not_use=0 and p.ispara=0 ';
+$speedsearch_where = ' (m.is_team IS NULL OR m.is_team=0) and m.not_use=0 and m.ispara=0 and ';
+if (!empty($league_id)) {
+    $turnir_team_filter = !empty($turnir_id)
+        ? ' and exists(select * from `'.T_TURNIR_PLAYERS.'` ttp where ttp.turnir_id='.(int)$turnir_id.' and ttp.player_id=tpl.team_id) '
+        : '';
+    $player_where .= ' and not exists(select * from `'.T_TEAM_PLAYERS_LEAGUE.'` tpl where tpl.league_id='.(int)$league_id.' and tpl.player_id=p.id and tpl.team_id<>'.(int)$team_id.$turnir_team_filter.') ';
+    $speedsearch_where .= ' not exists(select * from `'.T_TEAM_PLAYERS_LEAGUE.'` tpl where tpl.league_id='.(int)$league_id.' and tpl.player_id=m.id and tpl.team_id<>'.(int)$team_id.$turnir_team_filter.') and ';
+}
+
 $this->addFF(array('name'=>'Гравець','width'=>'250',
                     'type'=>'out_key',
                     'name_field'=>'player_id',
                     'out_result_field'=>'name',
                     'bd_field'=>'player_id',
                     'mess'=>'Виберіть гравця',
-                     'where'=>' and is_team=0 and not_use=0 and ispara=0 ',
+                     'where'=>$player_where,
                     'table'=>T_PLAYERS,
                      'no_vubor' => '',
                      'width'=> '980',
                     'required'=>'Гравець обов"язковий',
                     'speedsearch'=>array('min_letter'=>3,
-                        'result_fields_dop'=>array('id','city','phone'),'table'=>T_PLAYERS,'where'=>' is_team=0 and not_use=0 and ispara=0 and ' ),
+                        'result_fields_dop'=>array('id','city','phone'),'table'=>T_PLAYERS,'where'=>$speedsearch_where ),
                     'module'=>'players',
                     'descr_table'=>array(
                         array('name'=>'ПІБ гравця','return_id_val'=>'name', 'name_field'=>'name','width'=>'250','filter'=>'1'),
@@ -110,28 +131,41 @@ $this->addFF(array('name'=>'Гравець','width'=>'250',
 
 // Фильтр для получения игроков команды
 if (!empty($team_id)) {
-    if ($_SESSION['gt']['user_rule']<>1)   
-        $_SESSION['teamplayers']['where']=' and is_team=0 and team_id='.$team_id.' and not_use=0 ';
-    else 
-        $_SESSION['teamplayers']['where']=' and is_team=0 and team_id='.$team_id.' ';
+    if (!empty($league_id)) {
+        $_SESSION['teamplayers']['where']=' and (is_team IS NULL OR is_team=0) and exists(select * from `'.T_TEAM_PLAYERS_LEAGUE.'` tpl where tpl.league_id='.(int)$league_id.' and tpl.team_id='.(int)$team_id.' and tpl.player_id=p.id) '.($_SESSION['gt']['user_rule']<>1 ? ' and not_use=0 ' : ' ');
+    } elseif ($_SESSION['gt']['user_rule']<>1) {
+        $_SESSION['teamplayers']['where']=' and (is_team IS NULL OR is_team=0) and team_id='.$team_id.' and not_use=0 ';
+    } else {
+        $_SESSION['teamplayers']['where']=' and (is_team IS NULL OR is_team=0) and team_id='.$team_id.' ';
+    }
     $_SESSION['teamplayers']['sort_default']=' name asc';
 }
 
 if ($_SESSION['gt']['user_rule']<10 && empty($virt)) {
+    $submenu_list = array();
+    if (!empty($team_id) && !empty($league_id)) {
+        $fill_post = 'team_id='.$team_id.'&league_id='.$league_id;
+        if (!empty($turnir_id)) {
+            $fill_post .= '&turnir_id='.$turnir_id;
+        }
+        $submenu_list['truck'] = array(
+            'menu_name' => 'Заповнити гравців з попередньої ліги',
+            'module' => 'teamplayers',
+            'action' => 'fill_from_previous_league',
+            'post' => $fill_post
+        );
+    }
     // Если есть параметры турнира, возвращаемся на turnirsteams, иначе на teams
     if (!empty($turnir_id)) {
         $back_post = 'turnir_id='.$turnir_id;
         if (!empty($league_id)) {
             $back_post .= '&league_id='.$league_id;
         }
-        self::$submenu_list =array( 
-            'back' => array('module' => 'turnirsteams', 'action' => 'list', 'post' => $back_post),
-        );
+        $submenu_list['back'] = array('module' => 'turnirsteams', 'action' => 'list', 'post' => $back_post);
     } else {
-        self::$submenu_list =array( 
-            'back' => array('module' => 'teams', 'action' => 'list'),
-        );
+        $submenu_list['back'] = array('module' => 'teams', 'action' => 'list');
     }
+    self::$submenu_list = $submenu_list;
 }
 
 // НЕ вызываем InitMainMenu() для этого модуля, так как он устанавливает подменю турниров

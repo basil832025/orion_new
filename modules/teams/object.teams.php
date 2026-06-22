@@ -5,11 +5,26 @@ class TeamsObject extends ObjectRT
 
   function init ()
   {
+      require_once __DIR__ . '/../teamplayers/func/func.teamplayers.php';
+
       $fio_search = poste('fio_search');
       $action=SystemClass::getAction();
+      $league_id = teams_get_selected_league_id();
+      $team_leagues = teams_get_filter_leagues();
+      if ($league_id <= 0 && !empty($team_leagues[0]['id'])) {
+          $league_id = (int)$team_leagues[0]['id'];
+      }
+      if ($league_id > 0 && !teams_filter_league_exists($team_leagues, $league_id) && !empty($team_leagues[0]['id'])) {
+          $league_id = (int)$team_leagues[0]['id'];
+      }
+      $_SESSION['teams']['league_id'] = $league_id;
       self::$theed_tr_class='th_players_mob';
-      if (empty($fio_search) && $action=='list')
-      $_SESSION['MESSAGE_AJAX']='<div class="input__wrapper"><svg class="input__icon_player"><use xlink:href="#poisk"></use></svg><input type="text" class="form-control" placeholder="Пошук команди" id="search_field_teams" style="margin-left: 20px; width:425px;" speeds="0"    value="'.$fio_search.'"></div>';
+      if ($action=='list') {
+          $_SESSION['MESSAGE_AJAX'] = teams_get_list_filter_html($team_leagues, $league_id, $fio_search);
+          $teams_league_js = 'setTimeout(function(){var s=jQuery("#teams_league_filter");if(s.length&&jQuery.fn.chosen){var w=s.closest(".teams-list-filters").data("chosen-width")||"430px";if(s.data("chosen")){s.chosen("destroy");}s.chosen({width:w,no_results_text:"Співпадінь не знайдено",placeholder_text_single:s.attr("data-placeholder")||"Виберіть лігу"});s.off("change.teamsLeague").on("change.teamsLeague",function(){var leagueId=jQuery(this).val();if(leagueId){document.location.hash="#teams-list-league_id="+leagueId;send_ajax("","list","teams","&league_id="+leagueId);}});}},150);';
+          SystemClass::$Java_script_module .= $teams_league_js;
+          $_SESSION['JAVA_SCRIPT'] = (!empty($_SESSION['JAVA_SCRIPT']) ? $_SESSION['JAVA_SCRIPT'] : '').$teams_league_js;
+      }
       
       if ($_SESSION['is_mobile']) {
           self::$table_class='table_mob_player table_teams_mob';
@@ -117,15 +132,23 @@ if ($_SESSION['gt']['user_rule']<10) {
 $strSearch='';
 if (!empty($fio_search))
 {
-    $strSearch = ' AND name LIKE "%'.$fio_search.'%"';
+    $strSearch = ' AND p.name LIKE "%'.$fio_search.'%"';
 }
 
 // Фильтр только команды (is_team=1)
+$strLeague = '';
+if (!empty($league_id)) {
+    $strLeague = ' and exists(select * from `'.T_TEAM_PLAYERS_LEAGUE.'` tpl where tpl.league_id='.(int)$league_id.' and tpl.team_id=p.id) ';
+}
 if ($_SESSION['gt']['user_rule']<>1)   
-    $_SESSION['teams']['where']=' and is_team=1 and not_use=0 '.$strSearch;
+    $_SESSION['teams']['where']=' and p.is_team=1 and p.not_use=0 '.$strSearch.$strLeague;
 else 
-    $_SESSION['teams']['where']=' and is_team=1 '.$strSearch;
+    $_SESSION['teams']['where']=' and p.is_team=1 '.$strSearch.$strLeague;
 $_SESSION['teams']['sort_default']=' name asc';
+if (!empty($league_id)) {
+    $_SESSION['POST_RETURN'] = 'teams-list-league_id='.(int)$league_id;
+    SystemClass::setPost_return('teams-list-league_id='.(int)$league_id);
+}
 
 $this->setTableModule(T_PLAYERS);
     
@@ -203,6 +226,76 @@ if ($action == 'list') {
   }
 }
 
+function teams_get_selected_league_id()
+{
+    $league_id = (int)poste('league_id');
+    if ($league_id <= 0) {
+        $league_id = (int)get('league_id');
+    }
+    if ($league_id <= 0 && !empty($_SESSION['teams']['league_id'])) {
+        $league_id = (int)$_SESSION['teams']['league_id'];
+    }
+
+    return $league_id;
+}
+
+function teams_get_filter_leagues()
+{
+    return db_list('SELECT l.id, l.name, l.dat
+        FROM `bs_leagues` l
+        WHERE COALESCE(l.is_team_league,0)=1
+          AND EXISTS(
+              SELECT 1
+              FROM `'.T_SPRLIST_VALUES.'` sv
+              WHERE sv.id=l.status
+                AND sv.teg IN ("active","finish")
+          )
+        ORDER BY l.dat DESC, l.id DESC');
+}
+
+function teams_filter_league_exists($team_leagues, $league_id)
+{
+    foreach ($team_leagues as $league) {
+        if ((int)$league['id'] === (int)$league_id) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function teams_get_list_filter_html($team_leagues, $league_id, $fio_search)
+{
+    $search_value = htmlspecialchars((string)$fio_search, ENT_QUOTES, 'UTF-8');
+    $is_mobile = !empty($_SESSION['is_mobile']);
+    $wrap_style = $is_mobile
+        ? 'display:flex;align-items:flex-start;gap:8px;flex-direction:column;margin-left:0;text-shadow:none;max-width:100%;width:100%;'
+        : 'display:flex;align-items:center;gap:12px;flex-wrap:nowrap;margin-left:20px;text-shadow:none;max-width:100%;width:auto;';
+    $search_width = $is_mobile ? '100%' : '280px';
+    $search_min_width = $is_mobile ? '100%' : '280px';
+    $league_width = $is_mobile ? '100%' : '430px';
+    $chosen_width = $is_mobile ? '100%' : '430px';
+    $search_padding = $is_mobile ? '48px' : '54px';
+    $icon_left = $is_mobile ? '12px' : '14px';
+    $html = '<div class="teams-list-filters" data-chosen-width="'.$chosen_width.'" style="'.$wrap_style.'">';
+
+    $html .= '<div class="input__wrapper" style="margin-left:0;width:'.$search_width.'!important;min-width:'.$search_min_width.';max-width:'.$search_width.';flex:0 0 '.$search_width.';"><svg class="input__icon_player" style="left:'.$icon_left.';"><use xlink:href="#poisk"></use></svg><input type="text" class="form-control" placeholder="&#1055;&#1086;&#1096;&#1091;&#1082; &#1082;&#1086;&#1084;&#1072;&#1085;&#1076;&#1080;" id="search_field_teams" style="margin-left:0;width:100%!important;max-width:'.$search_width.';padding-left:'.$search_padding.';" speeds="0" value="'.$search_value.'"></div>';
+
+    if (!empty($team_leagues)) {
+        $html .= '<select class="chosen-select" id="teams_league_filter" data-placeholder="&#1042;&#1080;&#1073;&#1077;&#1088;&#1110;&#1090;&#1100; &#1083;&#1110;&#1075;&#1091;" style="width:'.$league_width.'!important;min-width:'.$league_width.';max-width:'.$league_width.';flex:0 0 '.$league_width.';">';
+        foreach ($team_leagues as $league) {
+            $id = (int)$league['id'];
+            $selected = ($id === (int)$league_id) ? ' selected="selected"' : '';
+            $name = htmlspecialchars($league['name'], ENT_QUOTES, 'UTF-8');
+            $html .= '<option value="'.$id.'"'.$selected.'>'.$name.'</option>';
+        }
+        $html .= '</select>';
+    }
+    $html .= '</div>';
+
+    return $html;
+}
+
 /**
  * Функция для подсчета количества игроков в команде
  * @param string $field - имя поля (не используется, но требуется для совместимости)
@@ -217,7 +310,8 @@ function get_cnt_players($field, $id, $data)
     
     if ($team_id > 0) {
         // Подсчитываем количество игроков в команде
-        $sql = 'SELECT COUNT(*) as cnt FROM `'.T_PLAYERS.'` WHERE team_id='.$team_id.' AND is_team=0 AND not_use=0';
+        $league_id = teams_get_selected_league_id();
+        $sql = teamplayers_get_players_sql($team_id, $league_id, 'COUNT(*) as cnt');
         $result = db_row($sql);
         
         // Проверяем результат запроса
@@ -243,7 +337,8 @@ function get_team_reiting_ukraine_sum($field, $id, $data)
     $team_id = !empty($id) ? (int)$id : (!empty($data['id']) ? (int)$data['id'] : 0);
 
     if ($team_id > 0) {
-        $sql = 'SELECT COALESCE(SUM(reiting_ukraine),0) as total FROM `'.T_PLAYERS.'` WHERE team_id='.$team_id.' AND is_team=0 AND not_use=0';
+        $league_id = teams_get_selected_league_id();
+        $sql = teamplayers_get_players_sql($team_id, $league_id, 'COALESCE(SUM(p.reiting_ukraine),0) as total');
         $result = db_row($sql);
         if ($result !== false && is_array($result) && array_key_exists('total', $result)) {
             $total = (int)$result['total'];
@@ -266,7 +361,8 @@ function get_team_opl_summary($field, $id, $data)
     $team_id = !empty($id) ? (int)$id : (!empty($data['id']) ? (int)$data['id'] : 0);
 
     if ($team_id > 0) {
-        $sql = 'SELECT COUNT(*) as total, SUM(CASE WHEN is_opl_reiting=1 THEN 1 ELSE 0 END) as paid FROM `'.T_PLAYERS.'` WHERE team_id='.$team_id.' AND is_team=0 AND not_use=0';
+        $league_id = teams_get_selected_league_id();
+        $sql = teamplayers_get_players_sql($team_id, $league_id, 'COUNT(*) as total, SUM(CASE WHEN p.is_opl_reiting=1 THEN 1 ELSE 0 END) as paid');
         $result = db_row($sql);
         if ($result !== false && is_array($result) && array_key_exists('total', $result)) {
             $total = (int)$result['total'];

@@ -461,7 +461,9 @@ $this->shablon_text .= '</div></td>
             $field_value = poste($this->thVdata['name_field']);
             // Если нет в POST, пытаемся получить из сессии (для teamplayers)
             if (empty($field_value) && $this->module == 'teamplayers') {
-                if ($this->thVdata['name_field'] == 'turnir_id' && !empty($_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'])) {
+                if ($this->thVdata['name_field'] == 'team_id' && !empty($_SESSION['TEAMPLAYERS_SAVE_TEAM_ID'])) {
+                    $field_value = $_SESSION['TEAMPLAYERS_SAVE_TEAM_ID'];
+                } elseif ($this->thVdata['name_field'] == 'turnir_id' && !empty($_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'])) {
                     $field_value = $_SESSION['TEAMPLAYERS_SAVE_TURNIR_ID'];
                 } elseif ($this->thVdata['name_field'] == 'league_id' && !empty($_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'])) {
                     $field_value = $_SESSION['TEAMPLAYERS_SAVE_LEAGUE_ID'];

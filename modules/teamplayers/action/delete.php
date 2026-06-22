@@ -1,9 +1,11 @@
 <?php
+require_once __DIR__ . '/../func/func.teamplayers.php';
 // Кастомное удаление для teamplayers - обнуляем team_id вместо физического удаления
 $id = poste('id');
-$team_id = poste('team_id');
-$turnir_id = poste('turnir_id');
-$league_id = poste('league_id');
+$team_id = teamplayers_request_param('team_id', 'TEAMPLAYERS_SAVE_TEAM_ID');
+$turnir_id = teamplayers_request_param('turnir_id', 'TEAMPLAYERS_SAVE_TURNIR_ID');
+$league_id = teamplayers_request_param('league_id', 'TEAMPLAYERS_SAVE_LEAGUE_ID');
+$league_id = teamplayers_resolve_league_id($league_id, $turnir_id);
 
 // Если team_id не в POST, пытаемся получить из URL или сессии
 if (empty($team_id)) {
@@ -24,8 +26,11 @@ if (empty($team_id)) {
 }
 
 if (!empty($id)) {
-    // Обнуляем team_id у игрока (удаляем его из команды)
-    db_query('UPDATE `'.T_PLAYERS.'` SET team_id=NULL WHERE id='.$id);
+    if (!empty($league_id)) {
+        db_query('DELETE FROM `'.T_TEAM_PLAYERS_LEAGUE.'` WHERE league_id='.(int)$league_id.' AND team_id='.(int)$team_id.' AND player_id='.(int)$id);
+    } else {
+        db_query('UPDATE `'.T_PLAYERS.'` SET team_id=NULL WHERE id='.$id);
+    }
     
     // Устанавливаем редирект на список игроков команды
     if (!empty($team_id)) {
@@ -135,4 +140,3 @@ if (!empty($_SESSION['TEAMPLAYERS_DELETE_TEAM_ID'])) {
 }
 
 ?>
-

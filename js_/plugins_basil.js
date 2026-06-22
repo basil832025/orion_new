@@ -165,12 +165,21 @@ $(function() {
                     where = $this.attr("where");
                     // alert(where)
                     $nameId = $this.attr("id");
-                    post_string ='&nameField='+$this.attr("name2")+'&NewvalField='+$this.val()+'&where='+where+'&result_fields_dop='+$this.attr("result_fields_dop")+'&table='+table;
+                    post_string ='&nameField='+encodeURIComponent($this.attr("name2") || '')+
+                        '&NewvalField='+encodeURIComponent($this.val() || '')+
+                        '&where='+encodeURIComponent(where || '')+
+                        '&result_fields_dop='+encodeURIComponent($this.attr("result_fields_dop") || '')+
+                        '&table='+encodeURIComponent(table || '');
                     //  alert (post_string)
                     //console.log(post_string)
                     data_json =  ajax_content('searchFirstLetter','',post_string)
                     if (data_json!='NO') {
-                        data_json = atob(data_json);
+                        try {
+                            data_json = atob(data_json);
+                        } catch (e) {
+                            response([]);
+                            return;
+                        }
                       //  console.log(data_json)
                        data = JSON.parse(data_json);
                         response($.map( data, function( item ) {
@@ -503,6 +512,7 @@ function chosen_vibor_filter_turnir(width='100%') {
     var clubSelect = $('#club-chosen-select');
     var etapSelect = $('#etap-chosen-select');
     var searchSelect = $('#search_field_games_select');
+    var teamsLeagueSelect = $('#teams_league_filter');
    
    if (citySelect.length > 0) {
        $('#city-chosen-select').chosen({
@@ -611,6 +621,44 @@ function chosen_vibor_filter_turnir(width='100%') {
         placeholder_text_single: $('#search_field_games_select').attr('data-placeholder')
     });
    }
+    if (teamsLeagueSelect.length > 0) {
+       $('#teams_league_filter').chosen({
+         width: '430px',
+         no_results_text: 'Співпадінь не знайдено',
+         placeholder_text_single: $('#teams_league_filter').attr('data-placeholder')
+     });
+       $('#teams_league_filter').off('change.teamsLeague').on('change.teamsLeague', function(){
+            var leagueId = $(this).val();
+            if (leagueId) {
+                document.location.hash = '#teams-list-league_id=' + leagueId;
+                send_ajax('', 'list', 'teams', '&league_id=' + leagueId);
+            }
+        });
+    }
+}
+function init_teams_league_filter() {
+    var $select = $('#teams_league_filter');
+    if (!$select.length || typeof $.fn.chosen !== 'function') {
+        return;
+    }
+
+    if ($select.data('chosen')) {
+        $select.chosen('destroy');
+    }
+
+    $select.chosen({
+        width: '430px',
+        no_results_text: 'Співпадінь не знайдено',
+        placeholder_text_single: $select.attr('data-placeholder') || 'Виберіть лігу'
+    });
+
+    $select.off('change.teamsLeague').on('change.teamsLeague', function(){
+        var leagueId = $(this).val();
+        if (leagueId) {
+            document.location.hash = '#teams-list-league_id=' + leagueId;
+            send_ajax('', 'list', 'teams', '&league_id=' + leagueId);
+        }
+    });
 }
 function formatRepoSelection (repo) {
     return repo.name || repo.text;
