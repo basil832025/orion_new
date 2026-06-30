@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__DIR__, 3).'/teamplayers/func/func.teamplayers.php';
+
 class team_rosterAction extends ActionModule
 {
     protected $content = '';
@@ -8,6 +10,7 @@ class team_rosterAction extends ActionModule
     {
         $team_id = (int)poste('team_id');
         $turnir_id = (int)poste('turnir_id');
+        $league_id = 0;
 
         if ($team_id <= 0) {
             $this->content = json_encode(array('error' => 'Не вказано команду'), JSON_UNESCAPED_UNICODE);
@@ -15,8 +18,14 @@ class team_rosterAction extends ActionModule
         }
 
         if ($turnir_id > 0) {
-            $is_team_league = (int)db_field('SELECT l.is_team_league FROM `'.T_TURNIRS.'` t LEFT JOIN `bs_leagues` l ON l.id=t.league_id WHERE t.id='.$turnir_id.' LIMIT 1', 'is_team_league');
-            if ($is_team_league !== 1) {
+            $turnir = db_row('SELECT t.league_id, l.is_team_league
+                FROM `'.T_TURNIRS.'` t
+                LEFT JOIN `bs_leagues` l ON l.id=t.league_id
+                WHERE t.id='.$turnir_id.'
+                LIMIT 1');
+            $league_id = !empty($turnir['league_id']) ? (int)$turnir['league_id'] : 0;
+
+            if (empty($turnir) || (int)$turnir['is_team_league'] !== 1) {
                 $this->content = json_encode(array('error' => 'Доступно лише для командних ліг'), JSON_UNESCAPED_UNICODE);
                 return;
             }
@@ -28,10 +37,11 @@ class team_rosterAction extends ActionModule
             return;
         }
 
-        $players = db_list('SELECT id, name, reiting, reiting_ukraine
-            FROM `'.T_PLAYERS.'`
-            WHERE team_id='.$team_id.' AND is_team=0 AND not_use=0
-            ORDER BY name ASC');
+        $players = teamplayers_list(
+            $team_id,
+            $league_id,
+            'p.id, p.name, p.reiting, p.reiting_ukraine'
+        );
 
         $players_result = array();
         if (!empty($players)) {

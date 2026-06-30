@@ -1567,7 +1567,7 @@ function setOchkiSetsForGrp($win,$lose,$etap_id,$turnir_id)
     if (!empty($is_team_win) && $is_team_win == 1 && !empty($is_team_lose) && $is_team_lose == 1) {
         // Командный турнир - обрабатываем командные игры
         $sql = 'SELECT r.* FROM '.T_REITING.' r 
-            WHERE ((r.pl_id_1='.$win.' AND r.pl_id_2='.$lose.') OR (r.pl_id_1='.$lose.' AND r.pl_id_2='.$win.'))
+            WHERE (r.pl_id_1='.$win.' OR r.pl_id_2='.$win.')
             AND etap_id='.$etap_id.' 
             AND turnir_id='.$turnir_id.'
             AND (r.pair_number = 0 OR r.pair_number IS NULL OR r.pair_number = "")';
