@@ -844,13 +844,15 @@ s($sql);
           //  s($user);
             $league_id = $user['tur_league_id']>0 ? '&league_id='.$user['tur_league_id'] : '';
             $league_points = ((int)$user['tur_league_id'] > 0) ? (string)$user['points'] : '';
+            $beg = round($user['beg_reiting']);
+            $end = round($user['end_reiting']);
             $content.='<tr class="f14">
       <th class="align-middle text-center" scope="row">'.$n.'</th>
       <td class="px_my-2 align-middle text-center">'.date_for_firebird_format($user['dat']).'</td>
       <td class="px_my-2 text-start"><a target="_blank" href="#etapresult-show-turnir_id='.$user['turnir_id'].$league_id.'">'.$user['name'].'</a></td>
-      <td class="align-middle text-center">'.round($user['beg_reiting']).'</td>
-      <td class="align-middle text-center">'.round($user['end_reiting']).'</td>
-      <td class="align-middle text-center "><span class="coral_color">'.round($user['end_reiting']-$user['beg_reiting']).'</span></td>
+      <td class="align-middle text-center">'.$beg.'</td>
+      <td class="align-middle text-center">'.$end.'</td>
+      <td class="align-middle text-center "><span class="coral_color">'.($end-$beg).'</span></td>
       <td class="align-middle text-center">'.$user['cnt_games'].'</td>
       <td class="align-middle text-center">'.$user['cnt_wins'].'</td>
       <td class="align-middle text-center">'.$user['cnt_lose'].'</td>
