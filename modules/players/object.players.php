@@ -59,10 +59,10 @@ class PlayersObject extends ObjectRT
 
    //   $this->addFTL(array('name' => 'ПІБ гравця', 'type'=>'anyaction', 'name_field' => 'name',          'action'=>'statistics','module'=>'players','name_field_child'=>'turnir_id','bd_field' => 'name', 'filter' => 1, 'classAlign' => 'td_align_left'));
 
-      if ($_SESSION['gt']['user_rule']<10) {
+      if ($_SESSION['gt']['user_rule']==1) {
 
           //   $this->addFTL(array('name' => 'ПІБ гравця', 'name_field' => 'name', 'oper' => 'edit','width'=>'200', 'bd_field' => 'name', 'filter' => 1, 'classAlign' => 'td_align_left'));
-          $this->addFTL(array('name' => 'Телефон','name_mob'=>'Теле-<br>фон', 'name_field' => 'phone', 'bd_field' => 'phone','width'=>'100','class'=>'perenos_word'));
+        //  $this->addFTL(array('name' => 'Телефон','name_mob'=>'Теле-<br>фон', 'name_field' => 'phone', 'bd_field' => 'phone','width'=>'100','class'=>'perenos_word'));
 
       }//else
 
@@ -109,7 +109,7 @@ $this->addFF(array('name'=>'ПІБ гравця','name_field'=>'name','bd_field'
 $this->addFF(array('name'=>'Фото гравця','name_field'=>'photo','bd_field'=>'photo', 'type'=>'img'));
 $this->addFF(array('name'=>'Група','name_field'=>'grp','type'=>'ProstSpr', 'id_spis'=>'2', 'bd_field'=>'grp'));
 $this->addFF(array('name'=>'День народження','name_field'=>'birthday','type'=>'date','bd_field'=>'birthday', 'width'=>'50'));
-$this->addFF(array('name'=>'Телефон','name_field'=>'phone','bd_field'=>'phone','required_custom'=>'onlyNumber'));
+  //    if ($_SESSION['gt']['user_rule']==1) $this->addFF(array('name'=>'Телефон','name_field'=>'phone','bd_field'=>'phone','required_custom'=>'onlyNumber'));
       $this->addFF(array('name'=>'ID гравця Ligas','name_field'=>'id_reiting','bd_field'=>'id_reiting'));
 $this->addFF(array('name'=>'ПІБ гравця Ligas','name_field'=>'name_ligas','bd_field'=>'name_ligas'));
 $this->addFF(array('name'=>'Рік народженння Ligas','name_field'=>'god_rogd','bd_field'=>'god_rogd','readonly'=>1 ));

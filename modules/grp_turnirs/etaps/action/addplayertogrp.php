@@ -34,10 +34,10 @@ class AddPlayerToGrpAction extends ActionModule
     }
     function raschet($turnir_id,$etap_id,$grp,$newplayer)
     {
-       $sql='select count(*) as cn FROM `'.T_ETAPS_PLAYER_MESTA.'` tp where etap_id='.$etap_id.' and groups='.$grp.' '; 
+       $sql='select count(*) as cn FROM `'.T_ETAPS_PLAYER_MESTA.'` tp where etap_id='.$etap_id.' and `groups`='.$grp.' ';
        $cn_v_grp = db_field($sql,'cn');
        $cn_v_grp++;
-       $sql = 'update  `'.T_ETAPS_PLAYER_MESTA.'` set groups='.$grp.', grp_num='.$cn_v_grp.' where id='.$newplayer;
+       $sql = 'update  `'.T_ETAPS_PLAYER_MESTA.'` set `groups`='.$grp.', grp_num='.$cn_v_grp.' where id='.$newplayer;
        db_query($sql);
        $sql = 'update  `'.T_ETAPS.'` set cnt_people=cnt_people+1 where id='.$etap_id;
        db_query($sql);

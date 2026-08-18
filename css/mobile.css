@@ -695,6 +695,8 @@
  }
     .big-table {
         overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
         position: relative;
         max-width: 100%;
         width: 100%;
@@ -703,6 +705,8 @@
         .big-table_left{
             text-align: left !important;
             margin-left: 0;
+            width: max-content;
+            min-width: 100%;
         }
 
     .menu_turnirs {
@@ -1046,7 +1050,9 @@ margin-right: -50px;
     th.num1{min-width:44px;max-width: 44px}
     th.num2{min-width:60px;}
     .obertka_table{
-        display: inline-grid;
+        display: inline-block;
+        width: max-content;
+        min-width: 100%;
         margin-bottom: 20px;
     }
     .col_flo_left{

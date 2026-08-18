@@ -8,7 +8,7 @@
 (select  reiting from  '.T_PLAYERS.' p where p.id=tp.player_id) as reiting,
 (select  name from '.T_PLAYERS.' p where p.id=tp.player_id) as name,
 (select  god_rogd from '.T_PLAYERS.' p where p.id=tp.player_id) as god_rogd
- FROM `'.T_ETAPS_PLAYER_MESTA.'` tp  where  groups=0 and etap_id='.$etap_id.' and turnir_id='.$turnir_id;
+ FROM `'.T_ETAPS_PLAYER_MESTA.'` tp  where  `groups`=0 and etap_id='.$etap_id.' and turnir_id='.$turnir_id;
 
 $Anew = db_list($sql);
 $cont=get_htmlTable($Anew,$turnir_id,$etap_id,$grp);

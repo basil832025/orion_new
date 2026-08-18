@@ -115,17 +115,17 @@ class Sort_etapAction extends ActionModule
                     } elseif ($row_id <= 0) {
                         // если ставим конкретного гравця - сначала очищаем его старую позицию(и)
                         if ($newPlayer > 0) {
-                            $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id=0 where player_id='.$newPlayer.' and (groups<>'.$grp.' or grp_num<>'.$grpnum.') and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                            $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id=0 where player_id='.$newPlayer.' and (`groups`<>'.$grp.' or grp_num<>'.$grpnum.') and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
                             db_query($sql);
                         }
 
                         // обновляем целевую ячейку группы (старый игрок автоматически становится несеяным)
-                        $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id='.$newPlayer.' where groups='.$grp.' and grp_num='.$grpnum.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                        $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id='.$newPlayer.' where `groups`='.$grp.' and grp_num='.$grpnum.' and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
                         db_query($sql);
 
                         // страховка от дублей по игроку в этапе
                         if ($newPlayer > 0) {
-                            $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id=0 where player_id='.$newPlayer.' and (groups<>'.$grp.' or grp_num<>'.$grpnum.') and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
+                            $sql = 'update `'.T_ETAPS_PLAYER_MESTA.'` set player_id=0 where player_id='.$newPlayer.' and (`groups`<>'.$grp.' or grp_num<>'.$grpnum.') and turnir_id='.$this->turnir_id.' and etap_id='.$this->etap_id;
                             db_query($sql);
                         }
                     }
