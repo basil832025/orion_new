@@ -340,11 +340,25 @@
       );
 
       if (!$is_team_league) {
-          self::$MenuLeagues['4'] = array(
-              'name'=>'Топ гравців ліги',
-              'href'=>'#topplayersleague-list-league_id='.poste('league_id'),
-              'module'=>'topplayersleague',
-          );
+          $league_id = (int)$league_id;
+          $has_players = (int)db_field('SELECT COUNT(*) AS cnt FROM bs_top_players tp INNER JOIN bs_players p ON p.id=tp.player_id WHERE tp.league_id='.$league_id.' AND COALESCE(p.ispara,0)=0 AND COALESCE(p.is_team,0)=0', 'cnt') > 0;
+          $has_pairs = (int)db_field('SELECT COUNT(*) AS cnt FROM bs_top_players tp INNER JOIN bs_players p ON p.id=tp.player_id WHERE tp.league_id='.$league_id.' AND p.ispara=1 AND COALESCE(p.is_team,0)=0', 'cnt') > 0;
+          if ($has_players) {
+              self::$MenuLeagues['4'] = array(
+                  'name'=>'Топ гравців ліги',
+                  'href'=>'#topplayersleague-list-league_id='.$league_id.'&top_type=players',
+                  'module'=>'topplayersleague',
+                  'top_type'=>'players',
+              );
+          }
+          if ($has_pairs) {
+              self::$MenuLeagues['5'] = array(
+                  'name'=>'Топ пар ліги',
+                  'href'=>'#topplayersleague-list-league_id='.$league_id.'&top_type=pairs',
+                  'module'=>'topplayersleague',
+                  'top_type'=>'pairs',
+              );
+          }
       } else {
           self::$MenuLeagues['4'] = array(
               'name'=>'Таблиця ліг',

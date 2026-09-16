@@ -8,10 +8,12 @@ class topplayersLeagueObject extends ObjectRT
 //s('tyt');
 // узнаем парный ли этот турнир
 //s($_POST);
-        $ispara=0;
-        $turnir_id = poste('turnir_id');
-        $league_id = poste('league_id');
-        $sWhere = ' and  league_id='.$league_id;
+        $turnir_id = (int)poste('turnir_id');
+        $league_id = (int)poste('league_id');
+        $top_type = poste('top_type') === 'pairs' ? 'pairs' : 'players';
+        $_POST['top_type'] = $top_type;
+        $ispara = $top_type === 'pairs' ? 1 : 0;
+        $sWhere = ' and league_id='.$league_id.' and exists (select 1 from '.T_PLAYERS.' tp_player where tp_player.id=p.player_id and tp_player.ispara='.$ispara.' and coalesce(tp_player.is_team,0)=0)';
         $_SESSION['topplayersleague']['where'] =$sWhere;
         $_SESSION['topplayersleague']['sort_default']=' points desc';
         if  (empty($_SESSION['topplayersleague']['sort']))  $_SESSION['topplayersleague']['sort']='points';
@@ -77,9 +79,9 @@ class topplayersLeagueObject extends ObjectRT
             $name_turnir = db_row('select name,dat  from `bs_leagues` where id=' . $league_id);
 
             if ($_SESSION['is_mobile'] )
-                $nameZ='<div class="compare_zagl">Топ гравців ліги "'.$name_turnir['name'].'"</div>';
+                $nameZ='<div class="compare_zagl">'.($ispara ? 'Топ пар ліги' : 'Топ гравців ліги').' "'.$name_turnir['name'].'"</div>';
             else
-                $nameZ='<div class="poriv_zag">Топ гравців ліги  "'.$name_turnir['name'].'" </div>';
+                $nameZ='<div class="poriv_zag">'.($ispara ? 'Топ пар ліги' : 'Топ гравців ліги').'  "'.$name_turnir['name'].'" </div>';
 
             self::$nameZList=$nameZ;
 
@@ -104,6 +106,7 @@ class topplayersLeagueObject extends ObjectRT
 
         self::$aParent[0]= ['name_field'=>'turnir_id', 'table'=>T_TURNIRS, 'type'=>'Hidden'];
         self::$aParent[1]= ['name_field'=>'league_id', 'type'=>'Hidden'];
+        self::$aParent[2]= ['name_field'=>'top_type', 'type'=>'Hidden'];
     }
 
 }

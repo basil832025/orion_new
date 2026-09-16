@@ -67,8 +67,12 @@ class TurnirsObject extends ObjectRT
               }
           }
           
-          if (!empty($_SESSION['turnit']['filter']['city'])) $sWhere .= ' and city=' . $_SESSION['turnit']['filter']['city'];
-          if (!empty($_SESSION['turnit']['filter']['club'])) $sWhere .= ' and club=' . $_SESSION['turnit']['filter']['club'];
+          // Фильтры города и клуба относятся только к общему списку турниров.
+          // В списке турниров конкретной лиги они скрыты и не должны влиять на результат.
+          if (empty($league_id)) {
+              if (!empty($_SESSION['turnit']['filter']['city'])) $sWhere .= ' and city=' . $_SESSION['turnit']['filter']['city'];
+              if (!empty($_SESSION['turnit']['filter']['club'])) $sWhere .= ' and club=' . $_SESSION['turnit']['filter']['club'];
+          }
 
 
             $post_return=!empty($city) || !empty($club) ?  '&club='.$club.'&city='.$city : '';
@@ -202,7 +206,7 @@ else
 if  (empty($_SESSION['turnirs']['sort_type']))  $_SESSION['turnirs']['sort_type']='desc';
   if ($action=='list' && !poste('page_items'))  $_SESSION['turnirs']['page_items']=50;
   $_SESSION['turnirs']['sort_default']='id desc';
-      if ($_SESSION['gt']['user_rule']<10 && !empty($_SESSION['gt']['club']))
+      if ($_SESSION['gt']['user_rule']>1 && $_SESSION['gt']['user_rule']<10 && !empty($_SESSION['gt']['club']))
       {
           $sWhere .=  ' and club= '. $_SESSION['gt']['club'];
       }

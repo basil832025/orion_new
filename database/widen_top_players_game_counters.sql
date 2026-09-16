@@ -1,0 +1,4 @@
+ALTER TABLE `bs_top_players`
+    MODIFY COLUMN `cnt_games` INT NOT NULL DEFAULT 0,
+    MODIFY COLUMN `cnt_wins` INT NOT NULL DEFAULT 0,
+    MODIFY COLUMN `cnt_lose` INT NOT NULL DEFAULT 0;

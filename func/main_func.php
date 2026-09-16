@@ -944,7 +944,12 @@ return $urlstr;
 		   foreach ($menuAll as $key => $menu) {
 			   $class = !empty($menu['class']) ? $menu['class'] : '';
 
-			   if ($menu['module']==$thisActiveModule)
+			   $is_active = $menu['module']==$thisActiveModule;
+			   if ($is_active && !empty($menu['top_type'])) {
+			       $active_top_type = poste('top_type') === 'pairs' ? 'pairs' : 'players';
+			       $is_active = $menu['top_type'] === $active_top_type;
+			   }
+			   if ($is_active)
 				   $s_return .= '<span class="active_menu_turnirs" ">'.$menu['name'].'</span> ';
 			   else
 				   $s_return .= '<a href="'.$menu['href'].'" class="ajax_send '.$class.'">'.$menu['name'].'</a> ';

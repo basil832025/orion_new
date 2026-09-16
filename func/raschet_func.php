@@ -334,22 +334,37 @@ function proverkaTurnirs($allPlayers,$turnir_id,$is_team_league=0)
 // ������������ ���� �� ����� ������� ��� ��� ��� topplayersLeagueObject
 function set_points_turnir ($league_id=0,$is_team_league=0){
     global $ochki_top_ligs; // ���������� ������ �� �������� ���������� ����� �� ������
-    $sql_='';
-    if ($is_team_league>0) $sql_= 'AND EXISTS(SELECT * from  bs_players p where p.id=tp.player_id AND p.is_team=1) ';
-    $sql = 'SELECT player_id, (SELECT NAME FROM bs_players WHERE player_id=id) AS NAME, SUM(tp.points) AS points,
+    $league_id = (int)$league_id;
+    $is_team_league = (int)$is_team_league;
+    if ($league_id <= 0) {
+        return;
+    }
+    if ($is_team_league <= 0) {
+        $is_team_league = (int)db_field('SELECT COALESCE(is_team_league,0) FROM bs_leagues WHERE id='.$league_id, 'is_team_league');
+    }
+    db_query('DELETE FROM bs_top_players WHERE league_id='.$league_id);
+    $player_types = $is_team_league > 0 ? array('team') : array('player', 'pair');
+    foreach ($player_types as $player_type) {
+        if ($player_type === 'team') {
+            $player_where = 'p.is_team=1';
+        } elseif ($player_type === 'pair') {
+            $player_where = 'p.ispara=1 AND COALESCE(p.is_team,0)=0';
+        } else {
+            $player_where = 'COALESCE(p.ispara,0)=0 AND COALESCE(p.is_team,0)=0';
+        }
+
+        $sql = 'SELECT tp.player_id, p.name, SUM(tp.points) AS points,
 COUNT(tp.turnir_id) AS turnirs,
 SUM(tp.cnt_games) AS cnt_games,SUM(tp.cnt_wins) AS cnt_wins,SUM(tp.cnt_lose) AS cnt_lose,
 SUM(tp.cnt_sets) AS cnt_sets,SUM(tp.cnt_sets_win) AS cnt_sets_win,SUM(tp.cnt_sets_lose) AS cnt_sets_lose
-
- FROM '.T_TURNIR_PLAYERS.' tp, '.T_TURNIRS.' t  WHERE t.league_id='.$league_id.' AND t.id=tp.turnir_id '.$sql_.' 
-GROUP BY player_id ORDER BY points desc';
-      // debug: s($sql);
-    $UserMesta = db_list($sql);
-  //  s($UserMesta);
-    if (!empty($UserMesta))
-    {
-
-        foreach ($UserMesta as $row) {
+FROM '.T_TURNIR_PLAYERS.' tp
+INNER JOIN '.T_TURNIRS.' t ON t.id=tp.turnir_id
+INNER JOIN '.T_PLAYERS.' p ON p.id=tp.player_id
+WHERE t.league_id='.$league_id.' AND t.virt=0 AND COALESCE(t.is_no_league_stat,0)=0
+AND '.$player_where.'
+GROUP BY tp.player_id, p.name ORDER BY points desc';
+        $UserMesta = db_list($sql);
+        if (!empty($UserMesta)) foreach ($UserMesta as $row) {
             $upsertSql = '
     INSERT INTO bs_top_players
         (league_id, player_id, turnirs, points, cnt_games, cnt_wins, cnt_lose, cnt_sets, cnt_sets_win, cnt_sets_lose)
@@ -371,7 +386,6 @@ GROUP BY player_id ORDER BY points desc';
             // ������ ���� ������. ���� � ���� ���� ����� insertOrUpdate � ����� ��.
             db_query($upsertSql);
         }
-
     }
 }
 // ����� �� ������� ������������ ������ �� ����� ����� ������� ����� � ���������� ���������� �����
