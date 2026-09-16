@@ -17,7 +17,17 @@ class PairObject extends ObjectRT
     $this->addFTL(array('name'=>'&nbsp;&nbsp;№&nbsp;&nbsp;','type'=>'number','width'=>'5'));
    
     $this->addFTL(array('name'=>'Редагу-<br />вати','type'=>'edit','width'=>'40'));
-    $this->addFTL(array('name'=>'ПІБ пари','name_field'=>'name','bd_field'=>'name','filter'=>1,'classAlign' => 'text-start fw700'));
+    $this->addFTL(array(
+        'name'=>'ПІБ пари',
+        'name_field'=>'name',
+        'bd_field'=>'name',
+        'filter'=>1,
+        'classAlign'=>'text-start fw700',
+        'oper'=>'edit',
+        'action'=>'statistics',
+        'module'=>'players',
+        'target'=>true,
+    ));
  //   $this->addFTL(array('name'=>'Телефон','name_field'=>'phone','bd_field'=>'phone','width'=>'100','filter'=>1,'speedsearch'=>5));
  //  $this->addFTL(array('name'=>'Пол','name_field'=>'sex','bd_field'=>'sex','width'=>'30'));
    $this->addFTL(array('name'=>'К-ть ігор','name_mob'=>'К-ть<br />ігор','name_field'=>'cnt_games','bd_field'=>'cnt_games','width'=>'85'));
@@ -61,8 +71,9 @@ if  (empty($_SESSION['pair']['sort_type']))  $_SESSION['pair']['sort_type']='des
           $strSearch = ' AND name LIKE "%'.$fio_search.'%"';
           // $dop_where = $strSearch;
       }
-       if ($_SESSION['gt']['user_rule']<>1)   $_SESSION['pair']['where']=' and ispara=1 and not_use=0 '.$strSearch;
-      else $_SESSION['pair']['where']=' and ispara=1 '.$strSearch;
+      $has_turnir = ' and exists(select 1 from '.T_TURNIR_PLAYERS.' tp where tp.player_id=p.id) ';
+      if ($_SESSION['gt']['user_rule']<>1)   $_SESSION['pair']['where']=' and ispara=1 and not_use=0 '.$has_turnir.$strSearch;
+      else $_SESSION['pair']['where']=' and ispara=1 '.$has_turnir.$strSearch;
 
   $this->setTableModule(T_PLAYERS);
     

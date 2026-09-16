@@ -385,7 +385,8 @@ a.active_grp
     border-radius: 16px;
     width: 464px;
     min-width: 464px;
-    height: 470px;
+    min-height: 500px;
+    height: auto;
     padding: 32px;
 }
 .player-card .info-value  .name
@@ -698,6 +699,51 @@ section {
     margin-top: 30px;
 
 }
+.player-card-wrapper_compare .player-card {
+    align-items: stretch;
+}
+.player-card-wrapper_compare .comparing_player {
+    height: auto;
+}
+.player-card-wrapper_compare .compare-player-column {
+    width: 464px;
+    min-width: 464px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+.player-card-wrapper_compare .compare-player-column .comparing_player {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+.player-card-wrapper_compare .compare-player-column .comparing_player_megdu {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0;
+}
+@media (max-width: 1100px) {
+    .player-card-wrapper_compare .player-card.player-card-compare-desktop {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+    .player-card-wrapper_compare .player-card-compare-desktop .compare-player-column {
+        width: min(464px, calc(100vw - 32px));
+        min-width: 0;
+    }
+    .player-card-wrapper_compare .player-card-compare-desktop .vs_vertalighn {
+        width: auto !important;
+        min-width: 0;
+        margin: 0;
+        display: block;
+    }
+}
 .badge-wrapper {
     font-size: 18px;
     font-weight: 500;
@@ -725,7 +771,7 @@ max-width: 1071px;
 }
 .otst_nameTabl
 {
-    margin-top: 150px;
+    margin-top: 30px;
 }
 .editTd{
 

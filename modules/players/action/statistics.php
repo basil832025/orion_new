@@ -14,8 +14,17 @@ class StatisticsAction extends ActionModule
     function init ()
     {
         //    s('ststa');
-        $id=poste('id');
-        $compare_id=poste('compare_id');
+        $id=(int)poste('id');
+        $compare_id=(int)poste('compare_id');
+        $ispara = (int)db_field('SELECT COALESCE(ispara,0) AS ispara FROM '.T_PLAYERS.' WHERE id='.$id, 'ispara');
+        if (!empty($compare_id)) {
+            $compare_ispara = (int)db_field('SELECT COALESCE(ispara,0) AS ispara FROM '.T_PLAYERS.' WHERE id='.$compare_id, 'ispara');
+            if ($compare_ispara !== $ispara) {
+                $compare_id = 0;
+            }
+        }
+        $compare_placeholder = $ispara ? 'Пара для порівняння' : 'Гравець для порівняння';
+        $back_module = $ispara ? 'pair' : 'players';
   //      s('$compare_id='.$compare_id.' $id='.$id);
         $page_number=poste('page_number');
     //    $page_count=poste('page_items');
@@ -43,12 +52,12 @@ class StatisticsAction extends ActionModule
         //   s($aPlayer);
 
         if ($_SESSION['is_mobile'] ){
-            $show_zag_left='show_zag_left("#players-list");';
+            $show_zag_left='show_zag_left("#'.$back_module.'-list");';
             $width = '100%';
         }else{
             $width = '425px';
             $show_zag_left='show_zag_center();';
-            $show_zag_left = !empty($compare_id) ? $show_zag_left.'show_zag_left_big("#players-list");' : $show_zag_left;
+            $show_zag_left = !empty($compare_id) ? $show_zag_left.'show_zag_left_big("#'.$back_module.'-list");' : $show_zag_left;
         }
         if (empty($compare_id))
         {
@@ -66,9 +75,9 @@ class StatisticsAction extends ActionModule
 
               // s($jsonData);
             if (!empty($aTurnirs))
-            $this->Java_script.='jsonData='.$jsonData.'; player_graphik();chosen_vibor("'.$width.'","Гравець для порівняння");'.$show_zag_left;
+            $this->Java_script.='jsonData='.$jsonData.'; player_graphik();chosen_vibor("'.$width.'","'.$compare_placeholder.'");'.$show_zag_left;
             else
-                    $this->Java_script.='chosen_vibor("'.$width.'","Гравець для порівняння");'.$show_zag_left;
+                    $this->Java_script.='chosen_vibor("'.$width.'","'.$compare_placeholder.'");'.$show_zag_left;
 
 
         }else       $this->Java_script.=$show_zag_left;
@@ -108,10 +117,13 @@ s($sql);
             $this->MainPlayer($aPlayer);
             $this->content .= $this->getTurnirs($aTurnirs);
             $this->content.='</div>';
+            $compare_where = $ispara
+                ? 'ispara=1 and exists(select 1 from '.T_TURNIR_PLAYERS.' tp where tp.player_id='.T_PLAYERS.'.id)'
+                : 'ispara=0 and COALESCE(is_team,0)=0';
             $sql = 'SELECT * FROM `' . T_PLAYERS .
-                '` where id<>'.$id.' and not_use=0 and ispara=0  ORDER by name';
+                '` where id<>'.$id.' and not_use=0 and '.$compare_where.' ORDER by name';
             $aPlayers = db_list($sql);
-            $left_zag =  (!$_SESSION['is_mobile'] )  ? '<div class="stat_zag_left ajax_send" href="#players-list"> <img src="img\left_zn_poisk.png" width="24px"></div>' : '';
+            $left_zag =  (!$_SESSION['is_mobile'] )  ? '<div class="stat_zag_left ajax_send" href="#'.$back_module.'-list"> <img src="img\left_zn_poisk.png" width="24px"></div>' : '';
             $sSpisPlayer = $left_zag.'  <select class="chosen-select " tabindex="5" name=fio_search" id="ComparePlayer">';
             foreach ($aPlayers as $player)
             {
@@ -143,7 +155,7 @@ s($sql);
                 $zagl2= '<div class="compare_zagl">'.$aPlayer['name'].' VS<br>'.$aCompare['name'].'</div>';
 
             }else{
-                $zagl2 ='<div class="poriv_zag"> Порівняння статистики гравців :: '.$aPlayer['name'].' VS '.$aCompare['name'].'</div>';
+                $zagl2 ='<div class="poriv_zag"> Порівняння статистики '.($ispara ? 'пар' : 'гравців').' :: '.$aPlayer['name'].' VS '.$aCompare['name'].'</div>';
             }
             SystemClass::setZaglModule($zagl2);
         }
@@ -208,6 +220,7 @@ s($sql);
         $proc_wins = !empty($aPlayer['proc_wins']) ? $aPlayer['proc_wins'] :'0';
 
         $content= '
+<div class="compare-player-column">
 <div class="container comparing_player">
                 <div class="row">
                     <div class="col-4">
@@ -287,10 +300,10 @@ s($sql);
          </div>
                     </div>
                 </div>
+</div>
             ';
         if (!$_SESSION['is_mobile'] )
         $content.= '
-<div class="row">
 <div class="container comparing_player_megdu">
                 <div class="row">
                     <div class="col">
@@ -316,7 +329,6 @@ s($sql);
              </div>
              </div>
             ';
-        $content.= '</div>';
         return $content;
     }
     function ComparePlayer ($aPlayer=[],$aCompare=[])
@@ -442,9 +454,10 @@ s($sql);
     }
     function ComparePlayerHtml($aPlayer,$aCompare){
         $this->content.='
+ <section class="player-card-wrapper_compare">
  <div class="row justify-content-center">
         <div class="col">
-    <div class="player-card">
+    <div class="player-card player-card-compare-desktop">
    
             '.$this->ComparePlayer1($aPlayer).'
       
@@ -455,7 +468,8 @@ s($sql);
         </div>
         </div>
      </div>
-    
+ </section>
+
         ';
     }
 
