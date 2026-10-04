@@ -262,6 +262,8 @@ function etapresult_get_match_points($raw_set_for, $raw_set_against)
             $aRec['pl_num_grp1']=$aTempRec['pl_num_grp2'];
             $aRec['pl_id_1']=$aTempRec['pl_id_2'];
             $aRec['pl_id_2']=$aTempRec['pl_id_1'];
+            $aRec['mesto1']=$aTempRec['mesto2'];
+            $aRec['mesto2']=$aTempRec['mesto1'];
             $aRec['set_1']=$aTempRec['set_2'];
             $aRec['set_2']=$aTempRec['set_1'];
             $aRec['win_player']=$aTempRec['lose_player'];

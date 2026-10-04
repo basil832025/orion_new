@@ -114,6 +114,13 @@
           </advancedOptions>
         </fileTransfer>
       </webServer>
+      <webServer id="7570c6d0-8d7b-41db-93d6-1d7eb7342098" name="sevio" url="http://88.218.29.201">
+        <fileTransfer host="88.218.29.201" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
     </option>
   </component>
 </project>

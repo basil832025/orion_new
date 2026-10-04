@@ -100,6 +100,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="sevio">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="tenesse">
         <serverdata>
           <mappings>
