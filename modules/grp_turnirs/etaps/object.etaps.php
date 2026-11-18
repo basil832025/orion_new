@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/../etapresult/func/func.multi_round_standings.php';
 // класс описующий струткру модуля, таблицы, формы, и как и что выводить
 class EtapsObject extends ObjectRT 
 {   
@@ -76,7 +77,11 @@ $this->addFTL(array('name'=>'Видалити','type'=>'delete','width'=>'40','n
       'type'=>'ProstSprEdit','id_spis'=>'6'));
     //  $this->addFF(array('name'=>'Список етапів','name_field_virt'=>'spisetap','type'=>'ProstSpr', 'id_spis'=>'6'));
     // Поле "Варіанти для команд" показываем для командных турниров
-    if ($is_command)
+    if (multi_round_enabled(multi_round_tournament((int)$turnir_id))) {
+        $this->addFF(['name' => 'Варіанти', 'name_field' => 'type_etap', 'type' => 'ProstSpr',
+            'out_result_field' => 'name', 'table' => T_ETAPS_NAME, 'where' => 'id=1',
+            'def' => 1, 'disabled' => 1]);
+    } elseif ($is_command)
         $this->addFF(array('name'=>'Варіанти для команд','name_field'=>'type_etap','type'=>'ProstSpr', 'id_spis'=>'5', 'bd_field'=>'type_etap'));
 
    else

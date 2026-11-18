@@ -86,8 +86,8 @@
           </advancedOptions>
         </fileTransfer>
       </webServer>
-      <webServer id="e6368da6-6fb4-475c-b11e-de82300962f3" name="3pirogu" url="http://a3piroga.ftp.tools">
-        <fileTransfer host="a3piroga.ftp.tools" port="21">
+      <webServer id="e6368da6-6fb4-475c-b11e-de82300962f3" name="3pirogu" url="http://3piroga.ua">
+        <fileTransfer host="3piroga.ua" port="21">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
@@ -116,6 +116,13 @@
       </webServer>
       <webServer id="7570c6d0-8d7b-41db-93d6-1d7eb7342098" name="sevio" url="http://88.218.29.201">
         <fileTransfer host="88.218.29.201" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="a16a0298-aa0e-4b49-b7b5-076b0366cc0b" name="sevio_school" url="http://sevia.com.ua">
+        <fileTransfer host="sevia.com.ua" port="21">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>

@@ -13,15 +13,14 @@ class ShowAction extends ActionModule
     function init ()
     {
 
-        $this->turnir_id = poste('turnir_id');
-        $this->etap_id = poste('etap_id');
+        $this->turnir_id = (int)poste('turnir_id');
+        $this->etap_id = (int)poste('etap_id');
         $ob = new ObjectRT(); // иницилизируем объект
      $ob->LoadObject(); // загружаем описание конкретного модуля (какие колонки табл будут отображаться, какие поля формы....)
       $this->subMenu= $ob->getSubmenuList(); 
       $this->subMenu2= $ob->getSubmenu2();
 
-        $name_turnir =db_row('select name,dat  from `' . T_TURNIRS .
-            '` where id=' . $this->turnir_id);
+        $name_turnir = multi_round_tournament($this->turnir_id);
         $turnir_name = htmlspecialchars(stripslashes((string)$name_turnir['name']), ENT_QUOTES, 'UTF-8');
         $date = new DateTimeImmutable($name_turnir['dat']);
         $tdat = $date->format('d.m.Y');
@@ -57,6 +56,11 @@ class ShowAction extends ActionModule
         SystemClass::$submenu = $submenu_list;
 
       if (empty($this->etap_id)) {
+        if (multi_round_enabled($name_turnir)) {
+            $rounds = multi_round_group_stages($this->turnir_id);
+            $this->content = multi_round_render($this->turnir_id, $rounds, !empty($name_turnir['ispara']));
+            return;
+        }
         //если этапа еще нет ищем первый этап
         $sql = 'select id from '.T_ETAPS.' where turnir_id='.$this->turnir_id.' order by id limit 1';
       //  s($sql);

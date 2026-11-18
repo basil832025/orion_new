@@ -2,6 +2,12 @@
 $turnir_id=poste('turnir_id');
 $form=poste('form');
 $etap_id=poste('id');
+$stageTournamentId = !empty($etap_id)
+    ? (int)db_field('SELECT turnir_id FROM '.T_ETAPS.' WHERE id='.(int)$etap_id, 'turnir_id')
+    : (int)$turnir_id;
+if (multi_round_enabled(multi_round_tournament($stageTournamentId)) && (string)($form['type_etap'] ?? '') !== '1') {
+    window_mess('У круговому турнірі в кілька кіл доступні лише групові етапи.');
+}
 $sql = 'select * from '.T_TURNIRS.' t where t.id='.$turnir_id;
 $aTurnir= db_row($sql);
 $is_command = $aTurnir['is_command'];

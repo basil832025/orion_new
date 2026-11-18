@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/func/func.multi_round_standings.php';
 
 
 // класс описующий струткру модуля, таблицы, формы, и как и что выводить
@@ -64,14 +65,24 @@ if ($_SESSION['gt']['user_rule']<10)
   function getSubMenu2Data()
   { 
     $etap_id = poste('etap_id');
+    $turnirId = (int)poste('turnir_id');
     $league_id = poste('league_id');
     $menu_league = !empty($league_id) ? '&league_id='.$league_id : '';
     $submenu2 = array();
-    $sql = 'SELECT * FROM `'.T_ETAPS.'` where turnir_id='.poste('turnir_id');
+    $tournament = multi_round_tournament($turnirId);
+    $hasStandings = multi_round_enabled($tournament);
+    if ($hasStandings) {
+        $submenu2[] = [
+            'name' => 'Загальний залік',
+            'class' => empty($etap_id) ? 'black_color_active' : 'nonactive_menu',
+            'href' => '#etapresult-show-turnir_id='.$turnirId.$menu_league,
+        ];
+    }
+    $sql = 'SELECT * FROM `'.T_ETAPS.'` where turnir_id='.$turnirId.' ORDER BY id';
       $etapsArr = db_list($sql);
       if (!empty($etapsArr))
       {
-      $fir =1 ; 
+      $fir = !$hasStandings;
         foreach ($etapsArr as $val){
            $submenu2Temp['name'] = $val['name_etap']; 
            if (empty($etap_id) && $fir==1) 

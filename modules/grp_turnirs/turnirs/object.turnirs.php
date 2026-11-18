@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/../etapresult/func/func.multi_round_standings.php';
 // класс описующий струткру модуля, таблицы, формы, и как и что выводить
 class TurnirsObject extends ObjectRT 
 {   
@@ -156,6 +157,7 @@ else
       $this->addFF(array('name'=>'Місто','name_field'=>'city','type'=>'ProstSpr', 'id_spis'=>'4', 'bd_field'=>'city'));
 
       $this->addFF(array('name'=>'Парний турнір','type'=>'Checkbox','name_field'=>'ispara','bd_field'=>'ispara'));
+      $this->addFF(['name' => 'Круговий турнір у кілька кіл', 'type' => 'Checkbox', 'name_field' => 'is_multi_round']);
       $this->addFF(array('name'=>'Без обрахунку 0 рейтинга в LIGAS','type'=>'Checkbox','name_field'=>'is_no_send_ligas','bd_field'=>'is_no_send_ligas'));
   $this->addFF(array('name'=>'Шаблон до 3х перемог','type'=>'Checkbox','name_field'=>'is_shablon3','bd_field'=>'is_shablon3'));
   $this->addFF(array('name'=>'Шаблон до 2х перемог','type'=>'Checkbox','name_field'=>'is_shablon2','bd_field'=>'is_shablon2'));
@@ -354,6 +356,7 @@ function get_select_tables($field,$id,$data){
     $html='<select id="tableList" name="tableList[]" class="form-select" multiple><option value="0">первий</option></select>';
     return $html;
 }
+
 function get_dat_turn($field,$id,$data)
 {
     $class='f14';
