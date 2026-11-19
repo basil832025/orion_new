@@ -39,6 +39,7 @@ function multi_round_calculate(array $rounds, array $participants, array $matche
         $groups[$participant['etap_id']][$participant['group_num']][$id] = true;
         $rows[$id] = [
             'name' => $participant['name'] ?? '#'.$id,
+            'clubRating' => (float)($participant['club_rating'] ?? 0),
             'played' => 0, 'wins' => 0, 'points' => 0, 'setsFor' => 0, 'setsAgainst' => 0,
             'roundPoints' => [], 'opponentPoints' => [],
         ];
@@ -94,6 +95,7 @@ function multi_round_calculate(array $rounds, array $participants, array $matche
         $provisional = $provisional || $expectedMatches === 0 || count($pairs) !== $expectedMatches;
     }
 
+    $missingRatings = [];
     foreach ($rows as &$row) {
         $headToHead = 0;
         foreach ($row['opponentPoints'] as $opponent => $points) {
@@ -102,6 +104,15 @@ function multi_round_calculate(array $rounds, array $participants, array $matche
             }
         }
         $row['rank'] = [$row['points'], $headToHead, $row['setsFor'] - $row['setsAgainst']];
+        if ($row['clubRating'] <= 0) {
+            $missingRatings[implode(':', $row['rank'])] = true;
+        }
+    }
+    unset($row);
+
+    foreach ($rows as &$row) {
+        // Apply the rating only when every participant tied on match results has one.
+        $row['rank'][] = isset($missingRatings[implode(':', $row['rank'])]) ? 0.0 : $row['clubRating'];
     }
     unset($row);
 
@@ -121,7 +132,9 @@ function multi_round_render(int $turnirId, array $rounds, bool $isDoubles): stri
     }
 
     $ids = implode(',', array_map('intval', array_column($rounds, 'id')));
-    $participants = db_list('SELECT DISTINCT m.etap_id, m.groups AS group_num, m.player_id, p.name
+    $participants = db_list('SELECT DISTINCT m.etap_id, m.groups AS group_num, m.player_id, p.name,
+        (SELECT MAX(tp.beg_reiting) FROM '.T_TURNIR_PLAYERS.' tp
+            WHERE tp.turnir_id=m.turnir_id AND tp.player_id=m.player_id) AS club_rating
         FROM '.T_ETAPS_PLAYER_MESTA.' m LEFT JOIN '.T_PLAYERS.' p ON p.id=m.player_id
         WHERE m.turnir_id='.$turnirId.' AND m.etap_id IN ('.$ids.') AND m.player_id>0') ?: [];
     $matches = db_list('SELECT etap_id, pl_id_1, pl_id_2, set_1, set_2, perenos_etap FROM '.T_REITING.'
@@ -145,7 +158,7 @@ function multi_round_render(int $turnirId, array $rounds, bool $isDoubles): stri
         $html .= $heading.multi_round_escape($round['name_etap']).'</th>';
     }
     $html .= $heading.'Очки всього</th>'.$heading.'Особисті зустрічі</th>'
-        .$heading.'Сети (+/−)</th></tr></thead><tbody>';
+        .$heading.'Сети (+/−)</th>'.$heading.'Рейтинг клубу</th></tr></thead><tbody>';
     $previousRank = null;
     $place = 0;
     foreach ($rows as $index => $row) {
@@ -160,7 +173,9 @@ function multi_round_render(int $turnirId, array $rounds, bool $isDoubles): stri
             $html .= $cell.($row['roundPoints'][$round['id']] ?? '—').'</td>';
         }
         $html .= $cell.'<strong>'.$row['points'].'</strong></td>'.$cell.$row['rank'][1].'</td>'.$cell
-            .$row['setsFor'].'–'.$row['setsAgainst'].' ('.sprintf('%+d', $row['rank'][2]).')</td></tr>';
+            .$row['setsFor'].'–'.$row['setsAgainst'].' ('.sprintf('%+d', $row['rank'][2]).')</td>'
+            .$cell.($row['clubRating'] > 0 ? rtrim(rtrim(number_format($row['clubRating'], 2, '.', ''), '0'), '.') : '—')
+            .'</td></tr>';
     }
     return $html.'</tbody></table>'.$close;
 }
